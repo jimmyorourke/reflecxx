@@ -4,13 +4,32 @@ no runtime type information needed
 compilation database support - no need to specify flags, include dirs, all manually
 no template files or languages needed
 can be run in a single pass as part of the build - no need to run generation script first, add generated includes, then compile
-
+hard to integrate into build systems
 python or cppast depending on depencies
 
 no dependencies on boost, etc
+
+tell what's being reflected, don't reflect all by deafult
+Marking Primitives for Reflection
+By default, running clscan on your files will output no reflection information. Any primitives that you want to be reflected need to be marked in your source code
+
+nned to create empty files to satisfy build system
+not normal workflow
 
 compared to non libclang:
 unobtrusive
 
 
 examples with nlohmann json and rapidjson
+
+filter out msvc compile options?
+
+future:
+namespace scope reflection
+add meta data to types at compile time
+
+https://www.reddit.com/r/gamedev/comments/3lh0ba/using_clang_to_generate_c_reflection_data/
+https://www.reddit.com/r/cpp/comments/5lbbwf/reflang_c_reflection_using_libclang/
+https://github.com/Celtoys/clReflect
+
+Add something to your readme asking to let you know when people use it in their projects

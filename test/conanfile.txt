@@ -1,0 +1,6 @@
+[requires]
+# Conan Center doesn't use @user/channel anymore
+gtest/1.10.0
+
+[generators]
+cmake
