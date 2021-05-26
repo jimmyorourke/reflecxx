@@ -44,9 +44,10 @@ class Bar2 : public Base2 {
 //};
 }__attribute__((annotate("my annotation")));
 
-enum unscoped {val1, val2 = 3, val3=2};
-enum class scoped {sval1, sval2 = 3, sval3=2};
-enum class scopedu : uint8_t {sval1, sval2 = 3, sval3=2};
+enum unscopedE {val1, val2 = 3, val3=2, sval4}__attribute__((annotate("my annotation")));
+enum unscopedE2 {val5, val6};
+enum class scopedE {sval1, sval2 = 3, sval3=2, sval4}__attribute__((annotate("my annotation")));
+enum class scopedEu : uint8_t {sval1, sval2 = 3, sval3=2, sval4}__attribute__((annotate("my annotation")));
 
 int main() {
     uint32_t a = 1;

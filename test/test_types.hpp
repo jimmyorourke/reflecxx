@@ -1,6 +1,6 @@
 #pragma once
 
-#include <codegen/visitor.hpp>
+//#include <codegen/visitor.hpp>
 
 #include <array>
 #include <list>
@@ -8,12 +8,14 @@
 #include <string>
 #include <vector>
 
-enum Uscoped{First, Second, Third};
-enum class Scoped{Scoped::First, Scoped::Second, Scoped::Third};
+#define VISIT __attribute__((annotate("my annotation")))
+
+enum Uscoped{First=2, Second, Third}VISIT;
+enum class Scoped{First, Second, Third}VISIT;
 // underlying types, offsets
 
 struct Empty {
-};
+}VISIT;
 
 struct Basics {
     bool b;
@@ -22,7 +24,7 @@ struct Basics {
     double d;
     float f;
     char c;
-};
+}VISIT;
 
 struct Containers {
     int icarr[3];
@@ -30,7 +32,7 @@ struct Containers {
     std::set<float> fset;
     std::vector<int> ivec;
     std::string s;
-};
+}VISIT;
 
 struct Wrapper {
     int i;
@@ -39,7 +41,7 @@ struct Wrapper {
     Containers c;
     Basics basicsArr[3];
     std::array<Containers, 2> containersStdarr;
-};
+}VISIT;
 
 
 class BasicClass {
@@ -47,7 +49,7 @@ public:
     bool b;
     int i;
     double d;
-};
+}VISIT;
 
 class ChildClass : public BasicClass {
 public:
@@ -56,7 +58,7 @@ protected:
     int protectedField;
 private:
     int privateField;
-};
+}VISIT;
 
 class UnreflectedBaseClass {
 public:
@@ -66,7 +68,7 @@ public:
 class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
 public:
     int chieldField;
-};
+}VISIT;
 
 // Set of functions to initialize the test types.
 // Default values could be defined in the structs/classes, but we do this separately instead to properly represent
@@ -81,15 +83,6 @@ inline Basics defaultBasics()
 inline Containers defaultContainers()
 {
     return {{3, 2, 1}, {1.0, 1.5, 2.0, 2.5, 3.0}, {1.f, -0.4f, 0.3f}, {1, 2, 3}, "hello world"};
-}
-
-struct Wrapper {
-    int i;
-    double d;
-    Basics b;
-    Containers c;
-    Basics basicsArr[3];
-    std::array<Containers, 2> containersStdarr;
 }
 
 inline Wrapper defaulWrapper()
