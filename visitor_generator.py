@@ -47,24 +47,42 @@ class VisitorGenerator:
     def _generate_postamble(self):
         self._output(f"}} // namespace {self._namespace}")
 
+    def _generate_visitable_trait(self, t):
+        self._output("template<>")
+        self._output(f"struct is_proto_visitable<{t.typename}> : std::true_type {{}};")
+        self._output("")
+
+    def _generate_tuple_alias(self, t):
+        typestr = ", ".join([field_struct.typename for _, field_struct in t.public_fields.items()])
+        self._output("template<>")
+        self._output(f"struct TupleType<{t.typename}> {{")
+        with IndentBlock(self):
+            self._output(f"using type = std::tuple<{typestr}>;")
+        self._output("};")
+
     def generate_struct_visitors(self, structures):
         for s in structures:
             self._generate_struct_visitor(s, structures)
 
     def _generate_struct_visitor(self, s, structures):
+        self._generate_visitable_trait(s)
+        self._generate_tuple_alias(s)
         # instance visitor
         # Use SFINAE template to generate const and non-const ref "overloads"
         self._output(
-            f"template <typename VisitorType, typename T, std::enable_if_t<std::is_same_v<{s.typename}, std::remove_const_t<T>>, bool> = true>"
+            f"template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<{s.typename}, std::remove_const_t<T>>, bool> = true>"
         )
-        self._output(f"constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor) {{")
+        self._output(f"constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {{")
         with IndentBlock(self):
             for base in s.base_classes:
                 # don't force the base class to have been annotated for visitation
                 # TODO: hash table
                 for p in structures:
                     if p.typename == base:
-                        self._output(f"visit(static_cast<{base}&>(toVisit), visitor);")
+                        self._output("if (visitBaseClasses) {")
+                        with IndentBlock(self):
+                            self._output(f"visit(static_cast<{base}&>(toVisit), visitor);")
+                        self._output("}")
                         break
                 else:
                     self._output(f"// not visiting unannotated base class {base}")
@@ -74,17 +92,22 @@ class VisitorGenerator:
         self._output("")
 
         # type visitor
+        # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
+        self._output("namespace detail {")
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visit([[maybe_unused]] Visitor&& visitor) {")
+            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {")
             # TODO: is this right?
             for base in s.base_classes:
                 # don't force the base class to have been annotated for visitation
                 # TODO: hash table
                 for p in structures:
                     if p.typename == base:
-                        self._output(f"visit<{base}>(visitor);")
+                        self._output("if (visitBaseClasses) {")
+                        with IndentBlock(self):
+                            self._output(f"visit<{base}>(visitor);")
+                        self._output("}")
                         break
                 else:
                     self._output(f"// not visiting unannotated base class {base}")
@@ -92,6 +115,7 @@ class VisitorGenerator:
                 self._output(f'visitor("{field_name}", type_tag<{field_struct.typename}>{{}});')
             self._output("}")
         self._output("};")
+        self._output("} // namespace detail")
         self._output("")
 
     def generate_enum_visitors(self, enumerations):
@@ -99,16 +123,19 @@ class VisitorGenerator:
             self._generate_enum_visitor(e)
 
     def _generate_enum_visitor(self, e):
+        # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
+        self._output("namespace detail {")
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{e.name}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visit([[maybe_unused]] Visitor&& visitor) {")
+            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor, bool) {")
             with IndentBlock(self):
                 for p in e.enumerators:
                     # scoped names work for accessing unscoped enum elements too
                     self._output(f'visitor({e.name}::{p[0]}, "{p[0]}", std::underlying_type_t<{e.name}>{{{p[1]}}});')
             self._output("}")
         self._output("};")
+        self._output("} // namespace detail")
         self._output("")
 
 

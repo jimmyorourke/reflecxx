@@ -7,12 +7,20 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <stdbool.h>
+#include <stdarg.h>
+//#include <features.h>
 
+#ifdef PROTO_GENERATION
 #define VISIT __attribute__((annotate("my annotation")))
+#else
+#define VISIT
+#endif
 
-enum Uscoped{First=2, Second, Third}VISIT;
+//#define VISIT
+
+enum Unscoped{First=2, Second, Third, Fourth}VISIT;
 enum class Scoped{First, Second, Third}VISIT;
-// underlying types, offsets
 
 struct Empty {
 }VISIT;
@@ -20,27 +28,15 @@ struct Empty {
 struct Basics {
     bool b;
     int i;
-    unsigned int u;
     double d;
-    float f;
-    char c;
-}VISIT;
-
-struct Containers {
-    int icarr[3];
-    std::array<double, 5> dstdarr;
-    std::set<float> fset;
-    std::vector<int> ivec;
-    std::string s;
 }VISIT;
 
 struct Wrapper {
     int i;
     double d;
     Basics b;
-    Containers c;
     Basics basicsArr[3];
-    std::array<Containers, 2> containersStdarr;
+    std::array<Basics, 2> basicsStdarr;
 }VISIT;
 
 
@@ -53,21 +49,24 @@ public:
 
 class ChildClass : public BasicClass {
 public:
-    int publicField;
+    int publicField{};
+    int avoidUnreachable() {
+        return privateField;
+    }
 protected:
-    int protectedField;
+    int protectedField{};
 private:
-    int privateField;
+    int privateField{};
 }VISIT;
 
 class UnreflectedBaseClass {
 public:
-    int baseField;
+    int baseField{};
 };
 
 class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
 public:
-    int chieldField;
+    int chieldField{};
 }VISIT;
 
 // Set of functions to initialize the test types.
@@ -77,17 +76,16 @@ public:
 
 inline Basics defaultBasics()
 {
-    return {true, -3, 4, 5.5, 0.4f, 'h'};
+    return {true, -3, 5.5};
 }
 
-inline Containers defaultContainers()
+inline Wrapper defaultWrapper()
 {
-    return {{3, 2, 1}, {1.0, 1.5, 2.0, 2.5, 3.0}, {1.f, -0.4f, 0.3f}, {1, 2, 3}, "hello world"};
-}
-
-inline Wrapper defaulWrapper()
-{
-    return {2, 5.1, defaultBasics(), defaultContainers(), {defaultBasics(), defaultBasics(), defaultBasics()}, {defaultContainers(), defaultContainers()}};
+    return {2,
+            5.1,
+            defaultBasics(),
+            {defaultBasics(), defaultBasics(), defaultBasics()},
+            {defaultBasics(), defaultBasics()}};
 }
 
 inline BasicClass defaultBasicClass()
