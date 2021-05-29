@@ -1,19 +1,24 @@
-#include <gtest/gtest.h>
+// Using an anonymous lambda doesn't work as the compiler won't allow the assignment from the generic lambda parameter
+template<typename T>
+struct Extractor {
+    constexpr Extractor(T** t, int target) : _t{t}, _target{target} {}
 
-#include <simple_math/simple_math.hpp>
+    // The !std::is_const_v<S> is not strictly required but helps avoid subtle bugs where the caller uses a const object
+    // resulting in this template resolving as S = const T or const T&, resulting in this function being called instead
+    // of the specialization on our target type T, without the compiler telling us.
+    template<typename S, typename=std::enable_if_t<!std::is_const_v<S>>>
+    constexpr void operator()(const char* name, S& member) {
+        _count++;
+    }
 
-TEST(Basic, Add) {
-    EXPECT_EQ(simple_math::add(3, 4), 7);
-}
-
-TEST(Basic, Mult) {
-    EXPECT_EQ(simple_math::multiply(3, 4), 12);
-}
-
-TEST(Complex, NestedAdd) {
-    EXPECT_EQ(simple_math::add(simple_math::add(3, 4), 4), 11);
-}
-
-TEST(Complex, NestedMult) {
-    EXPECT_EQ(simple_math::multiply(simple_math::multiply(3, 4), 4), 48);
-}
+    template<>
+    constexpr void operator()<T>(const char* name, T& member) {
+        if (_count == _target) {
+            *_t = &member;
+        }
+        _count++;
+    }
+    T** _t;
+    int _target{};
+    int _count{};
+};

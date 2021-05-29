@@ -25,7 +25,9 @@ struct type_tag : base_tag {
 };
 
 template<typename T>
-struct TupleType {};
+struct TupleType {
+    using type = std::tuple<>;
+};
 
 // Default
 template <typename T>
