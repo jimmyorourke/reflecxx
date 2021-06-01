@@ -1,6 +1,8 @@
 [requires]
 # Conan Center doesn't use @user/channel anymore
 gtest/1.10.0
+# for auto to/from json example
+nlohmann_json/3.9.1
 
 [generators]
 cmake

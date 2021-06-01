@@ -1,43 +1,26 @@
 #pragma once
-#ifndef NORTH_CODEGEN // If not inside code generator
-#include <codegen/attributes.h>
-#include <codegen/visitor.hpp>
+
 #include <nlohmann/json.hpp>
-#include <thalmic/ContextThrow.hpp>
 
-// Provides nlohmann::json serialization/deserialization using generated_visitor
-//
-// Expected Use of this header:
-// 1. Include some type T
-// 2. Include generated_visitor for visitor for T
-// 3. DEFINE_JSON(T) will generate nlohmann::json bindings for T automatically
 // Requires that all members of T are themselves nlohmann::json serializable
-// Current Version requires 1:1 field mapping, fields marked CODEGEN_REQUIRED will throw exceptions if they are not
-// found, other fields will be skipped.
+// Requires 1:1 field mapping
 
-namespace njson {
+namespace proto {
 
-/// Visitor for arbitrary JSON serialization
-/// For use within DEFINE_JSON/DEFINE_TO_JSON
-class ToJsonVisitor {
-public:
-    ToJsonVisitor(nlohmann::json& value)
-    : jsonValue(value)
+struct ToJsonVisitor {
+    ToJsonVisitor(nlohmann::json& value) : jsonValue(value)
     {
     }
     nlohmann::json& jsonValue;
 
     template <typename T>
-    void operator()(const T& value, std::string name, codegen::MetaData)
+    void operator()(const char* name, const T& member)
     {
-        jsonValue[name] = value;
+        jsonValue[name] = member;
     }
 };
 
-/// MetaStruct visitor for arbitrary JSON deserialization
-/// For use within DEFINE_JSON/DEFINE_FROM_JSON
-class FromJsonVisitor {
-public:
+struct FromJsonVisitor {
     FromJsonVisitor(const nlohmann::json& value)
     : jsonValue(value)
     {
@@ -45,14 +28,52 @@ public:
     const nlohmann::json& jsonValue;
 
     template <typename T>
-    void operator()(T& value, std::string name, codegen::MetaData metadata) const
+    void operator()(const char* name, T& member) const
     {
-        if (jsonValue.count(name)) {
-            // .at() is verbose but has better error handling than =
-            value = jsonValue.at(name).get<T>();
-        } else if (metadata.attributes.count("required")) {
-            CONTEXT_THROW(std::runtime_error, "Missing required field " << name);
+        fromJson(member, jsonValue.at(name));
+    }
+
+private:
+    template <typename T>
+    void fromJson(T& value, const nlohmann::json& jsonObj) const
+    {
+        value = jsonObj.get<T>();
+    }
+    // nlohmann::json.get() doesn't handle c-style arrays
+    template <typename T, size_t N>
+    void fromJson(T (&arr)[N], const nlohmann::json& jsonObj) const {
+        if (jsonObj.size() != N) {
+            throw std::runtime_error("JSON array size is different than expected");
+        }
+        size_t index = 0;
+        for (auto& item : jsonObj) {
+            arr[index++] = item.get<T>();
         }
     }
 };
-} // namespace njson
+}
+
+// The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
+// get compiled by the generator, don't define it during generation.
+#ifndef PROTO_GENERATION
+
+// Automatically create to/from nlohmann JSON functions for any proto visitable type.
+// Note that since this uses the adl_serializer, if specialization for any type is desired it must also be done by
+// specializing this adl_serializer struct rather than defining the to_json/from_json free functions (since ADL into the
+// argument namespace will no longer apply).
+namespace nlohmann {
+    template <typename T>
+    struct adl_serializer<T, std::enable_if_t<proto::is_proto_visitable_v<T>>> {
+        static void to_json(json& j, const T& t) {
+            proto::ToJsonVisitor v{j};
+            proto::visit(t, std::move(v));
+        }
+
+        static void from_json(const json& j, T& t) {
+            proto::FromJsonVisitor v{j};
+            proto::visit(t, std::move(v));
+        }
+    };
+}
+
+#endif // PROTO_GENERATION

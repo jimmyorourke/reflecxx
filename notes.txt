@@ -27,6 +27,7 @@ filter out msvc compile options?
 future:
 namespace scope reflection
 add meta data to types at compile time
+variadic template visitors to visit multiple instances at once. Way to implement comparison operators.
 
 https://www.reddit.com/r/gamedev/comments/3lh0ba/using_clang_to_generate_c_reflection_data/
 https://www.reddit.com/r/cpp/comments/5lbbwf/reflang_c_reflection_using_libclang/

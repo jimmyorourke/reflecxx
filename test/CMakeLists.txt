@@ -1,34 +1,24 @@
-
-
-
-add_executable(test_enum_visitor
-    test_enum_visitor.cpp
-)
-target_include_directories(test_enum_visitor PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
-)
-target_link_libraries(test_enum_visitor
-    PRIVATE
-        proto
-        CONAN_PKG::gtest
+set(TESTS
+    test_enum_visitor
+    test_struct_visitor
+    test_json_visitor
 )
 
-add_test(NAME test_enum_visitor
-    COMMAND test_enum_visitor
-)
+foreach(TEST ${TESTS})
+    add_executable(${TEST}
+        ${TEST}.cpp
+    )
+    target_include_directories(${TEST} PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
+    )
+    target_link_libraries(${TEST}
+        PRIVATE
+            proto
+            CONAN_PKG::gtest
+            CONAN_PKG::nlohmann_json
+    )
 
-add_executable(test_struct_visitor
-    test_struct_visitor.cpp
-)
-target_include_directories(test_struct_visitor PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
-)
-target_link_libraries(test_struct_visitor
-    PRIVATE
-        proto
-        CONAN_PKG::gtest
-)
-
-add_test(NAME test_struct_visitor
-    COMMAND test_struct_visitor
-)
+    add_test(NAME ${TEST}
+        COMMAND ${TEST}
+    )
+endforeach()
