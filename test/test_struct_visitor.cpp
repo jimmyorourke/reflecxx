@@ -6,8 +6,7 @@
 
 #include <proto/struct_visitor.hpp>
 
-
-//clean up
+// clean up
 #include "../out.hpp"
 
 struct InstanceTypeCounterVisitor {
@@ -26,9 +25,7 @@ struct InstanceTypeCounterVisitor {
         doubles++;
     }
 
-    int allTypes() {
-        return ints + doubles + otherTypes;
-    }
+    int allTypes() { return ints + doubles + otherTypes; }
 
     void clear() {
         otherTypes = 0;
@@ -42,9 +39,7 @@ struct InstanceTypeCounterVisitor {
 };
 
 struct TypeCounterVisitor {
-    constexpr void operator()(const char*, const proto::base_tag&) {
-        otherTypes++;
-    }
+    constexpr void operator()(const char*, const proto::base_tag&) { otherTypes++; }
 
     constexpr void operator()(const char*, const proto::type_tag<int>& tag) {
         // Example extracting type from tag type instance
@@ -58,21 +53,20 @@ struct TypeCounterVisitor {
 };
 
 template <typename T>
-constexpr int countInts(bool visitBaseClasses=true) {
+constexpr int countInts(bool visitBaseClasses = true) {
     TypeCounterVisitor t{};
     proto::visit<T>(t, visitBaseClasses);
     return t.ints;
 }
 
 template <typename T>
-constexpr int countAllTypes(bool visitBaseClasses=true) {
+constexpr int countAllTypes(bool visitBaseClasses = true) {
     TypeCounterVisitor t{};
     proto::visit<T>(t, visitBaseClasses);
     return t.ints + t.otherTypes;
 }
 
-TEST(struct_visitor, countTypesSimpleInstance)
-{
+TEST(struct_visitor, countTypesSimpleInstance) {
     // TODO: gtest parameterized test
     {
         static_assert(countAllTypes<Empty>() == 0);
@@ -116,8 +110,7 @@ TEST(struct_visitor, countTypesSimpleInstance)
     }
 }
 
-TEST(struct_visitor, countTypesInheritanceInstance)
-{
+TEST(struct_visitor, countTypesInheritanceInstance) {
     {
         static_assert(countAllTypes<ChildClass>() == 4);
         ChildClass c{};
@@ -132,7 +125,7 @@ TEST(struct_visitor, countTypesInheritanceInstance)
         static_assert(countAllTypes<ChildClass>(false) == 1);
         ChildClass c{};
         InstanceTypeCounterVisitor v{};
-        proto::visit(c, v, /*visitBaseClasses=*/ false);
+        proto::visit(c, v, /*visitBaseClasses=*/false);
 
         EXPECT_EQ(v.ints, 1);
         EXPECT_EQ(v.allTypes(), 1);
@@ -148,9 +141,8 @@ TEST(struct_visitor, countTypesInheritanceInstance)
     }
 }
 
-TEST(struct_visitor, tuplelikestuff)
-{
-    static_assert(proto::fieldCount< Basics>() == 3);
+TEST(struct_visitor, tuplelikestuff) {
+    static_assert(proto::fieldCount<Basics>() == 3);
     static_assert(proto::getName<2, Basics>() == "d");
 
     struct MyType {};
@@ -158,8 +150,10 @@ TEST(struct_visitor, tuplelikestuff)
     static_assert(!proto::is_proto_visitable_v<MyType>);
     static_assert(proto::is_proto_visitable_v<Basics>);
 
-    struct Basics b{true, 1, 1.5};
+    struct Basics b {
+        true, 1, 1.5
+    };
     auto& r = proto::get<2>(b);
-    r+=3;
+    r += 3;
     EXPECT_EQ(b.d, 4.5);
 }

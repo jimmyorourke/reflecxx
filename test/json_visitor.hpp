@@ -8,35 +8,29 @@
 namespace proto {
 
 struct ToJsonVisitor {
-    ToJsonVisitor(nlohmann::json& value) : jsonValue(value)
-    {
-    }
+    ToJsonVisitor(nlohmann::json& value)
+    : jsonValue(value) {}
     nlohmann::json& jsonValue;
 
     template <typename T>
-    void operator()(const char* name, const T& member)
-    {
+    void operator()(const char* name, const T& member) {
         jsonValue[name] = member;
     }
 };
 
 struct FromJsonVisitor {
     FromJsonVisitor(const nlohmann::json& value)
-    : jsonValue(value)
-    {
-    }
+    : jsonValue(value) {}
     const nlohmann::json& jsonValue;
 
     template <typename T>
-    void operator()(const char* name, T& member) const
-    {
+    void operator()(const char* name, T& member) const {
         fromJson(member, jsonValue.at(name));
     }
 
-private:
+ private:
     template <typename T>
-    void fromJson(T& value, const nlohmann::json& jsonObj) const
-    {
+    void fromJson(T& value, const nlohmann::json& jsonObj) const {
         value = jsonObj.get<T>();
     }
     // nlohmann::json.get() doesn't handle c-style arrays
@@ -51,7 +45,7 @@ private:
         }
     }
 };
-}
+} // namespace proto
 
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
@@ -62,18 +56,18 @@ private:
 // specializing this adl_serializer struct rather than defining the to_json/from_json free functions (since ADL into the
 // argument namespace will no longer apply).
 namespace nlohmann {
-    template <typename T>
-    struct adl_serializer<T, std::enable_if_t<proto::is_proto_visitable_v<T>>> {
-        static void to_json(json& j, const T& t) {
-            proto::ToJsonVisitor v{j};
-            proto::visit(t, std::move(v));
-        }
+template <typename T>
+struct adl_serializer<T, std::enable_if_t<proto::is_proto_visitable_v<T>>> {
+    static void to_json(json& j, const T& t) {
+        proto::ToJsonVisitor v{j};
+        proto::visit(t, std::move(v));
+    }
 
-        static void from_json(const json& j, T& t) {
-            proto::FromJsonVisitor v{j};
-            proto::visit(t, std::move(v));
-        }
-    };
-}
+    static void from_json(const json& j, T& t) {
+        proto::FromJsonVisitor v{j};
+        proto::visit(t, std::move(v));
+    }
+};
+} // namespace nlohmann
 
 #endif // PROTO_GENERATION

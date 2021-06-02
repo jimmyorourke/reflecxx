@@ -33,4 +33,6 @@ https://www.reddit.com/r/gamedev/comments/3lh0ba/using_clang_to_generate_c_refle
 https://www.reddit.com/r/cpp/comments/5lbbwf/reflang_c_reflection_using_libclang/
 https://github.com/Celtoys/clReflect
 
-Add something to your readme asking to let you know when people use it in their projects
+Add something to your readme asking to let you know when people use it in their
+
+$ find . -name "*.hpp" -o -iname "*.cpp" | xargs clang-format -i --style=file

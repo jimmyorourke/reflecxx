@@ -5,10 +5,10 @@
 #include <array>
 #include <list>
 #include <set>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <string>
 #include <vector>
-#include <stdbool.h>
-#include <stdarg.h>
 //#include <features.h>
 
 #ifdef PROTO_GENERATION
@@ -19,24 +19,20 @@
 
 //#define VISIT
 
-enum Unscoped{First=2, Second, Third, Fourth}VISIT;
-enum class Scoped{First, Second, Third}VISIT;
+enum Unscoped { First = 2, Second, Third, Fourth } VISIT;
+enum class Scoped { First, Second, Third } VISIT;
 
 struct Empty {
-}VISIT;
+} VISIT;
 
 struct Basics {
     bool b;
     int i;
     double d;
 
-    auto tied() const {
-        return std::tie(b, i, d);
-    }
-    bool operator==(const Basics& rhs) const {
-        return tied() == rhs.tied();
-    }
-}VISIT;
+    auto tied() const { return std::tie(b, i, d); }
+    bool operator==(const Basics& rhs) const { return tied() == rhs.tied(); }
+} VISIT;
 
 struct Wrapper {
     int i;
@@ -51,53 +47,46 @@ struct Wrapper {
         std::copy(std::begin(basicsArr), std::end(basicsArr), std::begin(arr));
         return std::tie(i, d, b, arr, basicsStdarr);
     }
-    bool operator==(const Wrapper& rhs) const {
-        return tied() == rhs.tied();
-    }
-}VISIT;
-
+    bool operator==(const Wrapper& rhs) const { return tied() == rhs.tied(); }
+} VISIT;
 
 class BasicClass {
-public:
+ public:
     bool b;
     int i;
     double d;
-}VISIT;
+} VISIT;
 
 class ChildClass : public BasicClass {
-public:
+ public:
     int publicField{};
-    int avoidUnreachable() {
-        return privateField;
-    }
-protected:
+    int avoidUnreachable() { return privateField; }
+
+ protected:
     int protectedField{};
-private:
+
+ private:
     int privateField{};
-}VISIT;
+} VISIT;
 
 class UnreflectedBaseClass {
-public:
+ public:
     int baseField{};
 };
 
 class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
-public:
+ public:
     int chieldField{};
-}VISIT;
+} VISIT;
 
 // Set of functions to initialize the test types.
 // Default values could be defined in the structs/classes, but we do this separately instead to properly represent
 // non-default instantiations, ensuring the test do not depend on the code generation relying on the default values in
 // any way.
 
-inline Basics defaultBasics()
-{
-    return {true, -3, 5.5};
-}
+inline Basics defaultBasics() { return {true, -3, 5.5}; }
 
-inline Wrapper defaultWrapper()
-{
+inline Wrapper defaultWrapper() {
     return {2,
             5.1,
             defaultBasics(),
@@ -105,7 +94,4 @@ inline Wrapper defaultWrapper()
             {defaultBasics(), defaultBasics()}};
 }
 
-inline BasicClass defaultBasicClass()
-{
-    return {false, -4, -10.1};
-}
+inline BasicClass defaultBasicClass() { return {false, -4, -10.1}; }

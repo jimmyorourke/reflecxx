@@ -14,17 +14,17 @@ struct Acceptor {
 };
 
 } // namespace detail
-}//namespace proto_generated
+} // namespace proto
 
 namespace proto {
 struct base_tag {};
 
-template<typename T>
+template <typename T>
 struct type_tag : base_tag {
     using type = T;
 };
 
-template<typename T>
+template <typename T>
 struct TupleType {
     using type = std::tuple<>;
 };
@@ -32,12 +32,12 @@ struct TupleType {
 // Default
 template <typename T>
 struct is_proto_visitable : std::false_type {};
-template<typename T>
+template <typename T>
 inline constexpr bool is_proto_visitable_v = is_proto_visitable<T>::value;
 
 // wrapper to support template type deduction for type visitors (ie no instance argument passed to visit())
 template <typename T, typename Visitor>
-constexpr void visit(Visitor&& visitor, bool visitBaseClasses=true) {
+constexpr void visit(Visitor&& visitor, bool visitBaseClasses = true) {
     detail::Acceptor<T, Visitor>::visitd(std::forward<Visitor>(visitor), visitBaseClasses);
 }
 

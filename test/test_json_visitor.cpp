@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-
 #include "test_types.hpp"
 
 #include <proto/proto_base.hpp>
@@ -8,8 +7,7 @@
 
 #include "json_visitor.hpp"
 
-
-//clean up
+// clean up
 #include "../out.hpp"
 
 namespace {
@@ -21,22 +19,19 @@ Wrapper buildDefaultWrapper() {
 
 nlohmann::json buildDefaultWrapperJson() {
     // build json representation by hand
-    return {
-        {"i", 9},
-        {"d", -2.2},
-        {"b", {{"b", true}, {"i", 1}, {"d", 2.5}}},
-        {"basicsArr", {{{"b", true}, {"i", 1}, {"d", 2.5}},
-                       {{"b", false}, {"i", -5}, {"d", 3.4}},
-                       {{"b", true}, {"i", 1}, {"d", 2.5}}}},
-        {"basicsStdarr", {{{"b", false}, {"i", -5}, {"d", 3.4}},
-                          {{"b", false}, {"i", -5}, {"d", 3.4}}}}
-    };
+    return {{"i", 9},
+            {"d", -2.2},
+            {"b", {{"b", true}, {"i", 1}, {"d", 2.5}}},
+            {"basicsArr",
+             {{{"b", true}, {"i", 1}, {"d", 2.5}},
+              {{"b", false}, {"i", -5}, {"d", 3.4}},
+              {{"b", true}, {"i", 1}, {"d", 2.5}}}},
+            {"basicsStdarr", {{{"b", false}, {"i", -5}, {"d", 3.4}}, {{"b", false}, {"i", -5}, {"d", 3.4}}}}};
 }
-}
+} // namespace
 
-TEST(json_visitor, toJson)
-{
-   Wrapper w = buildDefaultWrapper();
+TEST(json_visitor, toJson) {
+    Wrapper w = buildDefaultWrapper();
 
     // to json
     nlohmann::json j = w;
@@ -44,8 +39,7 @@ TEST(json_visitor, toJson)
     EXPECT_EQ(j.dump(), buildDefaultWrapperJson().dump());
 }
 
-TEST(json_visitor, fromJson)
-{
+TEST(json_visitor, fromJson) {
     nlohmann::json wJson = buildDefaultWrapperJson();
 
     // from json

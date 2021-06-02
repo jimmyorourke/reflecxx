@@ -7,34 +7,34 @@
 
 namespace proto {
 
-template<>
+template <>
 struct is_proto_visitable<Empty> : std::true_type {};
 
-template<>
+template <>
 struct TupleType<Empty> {
     using type = std::tuple<>;
 };
 template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<Empty, std::remove_const_t<T>>, bool> = true>
-constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
-}
+constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor,
+                     [[maybe_unused]] bool visitBaseClasses = true) {}
 
 namespace detail {
 template <typename Visitor>
 struct Acceptor<Empty, Visitor> {
-    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
-    }
+    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses = true) {}
 };
 } // namespace detail
 
-template<>
+template <>
 struct is_proto_visitable<Basics> : std::true_type {};
 
-template<>
+template <>
 struct TupleType<Basics> {
     using type = std::tuple<bool, int, double>;
 };
 template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<Basics, std::remove_const_t<T>>, bool> = true>
-constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
+constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor,
+                     [[maybe_unused]] bool visitBaseClasses = true) {
     visitor("b", toVisit.b);
     visitor("i", toVisit.i);
     visitor("d", toVisit.d);
@@ -43,23 +43,24 @@ constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& vis
 namespace detail {
 template <typename Visitor>
 struct Acceptor<Basics, Visitor> {
-    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
-    visitor("b", type_tag<bool>{});
-    visitor("i", type_tag<int>{});
-    visitor("d", type_tag<double>{});
+    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses = true) {
+        visitor("b", type_tag<bool>{});
+        visitor("i", type_tag<int>{});
+        visitor("d", type_tag<double>{});
     }
 };
 } // namespace detail
 
-template<>
+template <>
 struct is_proto_visitable<Wrapper> : std::true_type {};
 
-template<>
+template <>
 struct TupleType<Wrapper> {
-    using type = std::tuple<int, double, Basics, Basics [3], std::array<Basics, 2>>;
+    using type = std::tuple<int, double, Basics, Basics[3], std::array<Basics, 2>>;
 };
 template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<Wrapper, std::remove_const_t<T>>, bool> = true>
-constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
+constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor,
+                     [[maybe_unused]] bool visitBaseClasses = true) {
     visitor("i", toVisit.i);
     visitor("d", toVisit.d);
     visitor("b", toVisit.b);
@@ -70,25 +71,27 @@ constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& vis
 namespace detail {
 template <typename Visitor>
 struct Acceptor<Wrapper, Visitor> {
-    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
-    visitor("i", type_tag<int>{});
-    visitor("d", type_tag<double>{});
-    visitor("b", type_tag<Basics>{});
-    visitor("basicsArr", type_tag<Basics [3]>{});
-    visitor("basicsStdarr", type_tag<std::array<Basics, 2>>{});
+    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses = true) {
+        visitor("i", type_tag<int>{});
+        visitor("d", type_tag<double>{});
+        visitor("b", type_tag<Basics>{});
+        visitor("basicsArr", type_tag<Basics[3]>{});
+        visitor("basicsStdarr", type_tag<std::array<Basics, 2>>{});
     }
 };
 } // namespace detail
 
-template<>
+template <>
 struct is_proto_visitable<BasicClass> : std::true_type {};
 
-template<>
+template <>
 struct TupleType<BasicClass> {
     using type = std::tuple<bool, int, double>;
 };
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<BasicClass, std::remove_const_t<T>>, bool> = true>
-constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
+template <typename Visitor, typename T,
+          std::enable_if_t<std::is_same_v<BasicClass, std::remove_const_t<T>>, bool> = true>
+constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor,
+                     [[maybe_unused]] bool visitBaseClasses = true) {
     visitor("b", toVisit.b);
     visitor("i", toVisit.i);
     visitor("d", toVisit.d);
@@ -97,23 +100,25 @@ constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& vis
 namespace detail {
 template <typename Visitor>
 struct Acceptor<BasicClass, Visitor> {
-    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
-    visitor("b", type_tag<bool>{});
-    visitor("i", type_tag<int>{});
-    visitor("d", type_tag<double>{});
+    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses = true) {
+        visitor("b", type_tag<bool>{});
+        visitor("i", type_tag<int>{});
+        visitor("d", type_tag<double>{});
     }
 };
 } // namespace detail
 
-template<>
+template <>
 struct is_proto_visitable<ChildClass> : std::true_type {};
 
-template<>
+template <>
 struct TupleType<ChildClass> {
     using type = std::tuple<int>;
 };
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<ChildClass, std::remove_const_t<T>>, bool> = true>
-constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
+template <typename Visitor, typename T,
+          std::enable_if_t<std::is_same_v<ChildClass, std::remove_const_t<T>>, bool> = true>
+constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor,
+                     [[maybe_unused]] bool visitBaseClasses = true) {
     if (visitBaseClasses) {
         visit(static_cast<BasicClass&>(toVisit), visitor);
     }
@@ -123,24 +128,26 @@ constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& vis
 namespace detail {
 template <typename Visitor>
 struct Acceptor<ChildClass, Visitor> {
-    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
-    if (visitBaseClasses) {
-        visit<BasicClass>(visitor);
-    }
-    visitor("publicField", type_tag<int>{});
+    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses = true) {
+        if (visitBaseClasses) {
+            visit<BasicClass>(visitor);
+        }
+        visitor("publicField", type_tag<int>{});
     }
 };
 } // namespace detail
 
-template<>
+template <>
 struct is_proto_visitable<ChildOfUnreflectedBaseClass> : std::true_type {};
 
-template<>
+template <>
 struct TupleType<ChildOfUnreflectedBaseClass> {
     using type = std::tuple<int>;
 };
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<ChildOfUnreflectedBaseClass, std::remove_const_t<T>>, bool> = true>
-constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
+template <typename Visitor, typename T,
+          std::enable_if_t<std::is_same_v<ChildOfUnreflectedBaseClass, std::remove_const_t<T>>, bool> = true>
+constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor,
+                     [[maybe_unused]] bool visitBaseClasses = true) {
     // not visiting unannotated base class UnreflectedBaseClass
     visitor("chieldField", toVisit.chieldField);
 }
@@ -148,9 +155,9 @@ constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& vis
 namespace detail {
 template <typename Visitor>
 struct Acceptor<ChildOfUnreflectedBaseClass, Visitor> {
-    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {
-    // not visiting unannotated base class UnreflectedBaseClass
-    visitor("chieldField", type_tag<int>{});
+    static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses = true) {
+        // not visiting unannotated base class UnreflectedBaseClass
+        visitor("chieldField", type_tag<int>{});
     }
 };
 } // namespace detail
