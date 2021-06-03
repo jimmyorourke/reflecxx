@@ -74,4 +74,4 @@ class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
     int chieldField{};
 } VISIT;
 
-}
+} // namespace test_types

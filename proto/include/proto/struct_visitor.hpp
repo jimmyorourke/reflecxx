@@ -4,7 +4,7 @@
 
 namespace proto {
 namespace detail {
-// Using an anonymous lambda doesn't work as the compiler won't allow the assignment from the generic lambda parameter
+// Using a generic lambda doesn't work as the compiler won't allow the assignment to the capture arg
 template <typename T>
 struct Extractor {
     constexpr Extractor(T** t, int target)
@@ -26,6 +26,7 @@ struct Extractor {
         }
         _count++;
     }
+
     T** _t;
     int _target{};
     int _count{};
@@ -33,12 +34,14 @@ struct Extractor {
 
 } // namespace detail
 
-// TODO: base classes?
 template <size_t i, typename T>
 using type_at = typename std::tuple_element<i, typename TupleType<T>::type>::type;
 
 template <size_t i, typename T>
 constexpr auto& get(T& obj) {
+    // This gives a more obvious error than when type_at fails to compile
+    static_assert(i < fieldCount<T>(), "Index out of range!");
+
     type_at<i, T>* memberPtr = nullptr;
     detail::Extractor e{&memberPtr, i};
     visit(obj, std::move(e));
@@ -48,15 +51,17 @@ constexpr auto& get(T& obj) {
 }
 
 template <typename T>
-constexpr size_t fieldCount(bool visitBaseClasses = true) {
+constexpr size_t fieldCount() {
     size_t count = 0;
     auto v = [&count](const char*, const auto&) constexpr { count++; };
-    visit<T>(std::move(v), visitBaseClasses);
+    visit<T>(std::move(v));
     return count;
 }
 
 template <size_t i, typename T>
-constexpr const char* getName(bool visitBaseClasses = true) {
+constexpr const char* getName() {
+    static_assert(i < fieldCount<T>(), "Index out of range!");
+
     size_t count = 0;
     const char* out = nullptr;
     auto v = [&count, &out ](const char* name, const auto&) constexpr {
@@ -65,14 +70,10 @@ constexpr const char* getName(bool visitBaseClasses = true) {
         }
         count++;
     };
-    visit<T>(std::move(v), visitBaseClasses);
+    visit<T>(std::move(v));
 
-    // We can't static_assert on fieldCount because we don't necessarily know the value for visitBaseClasses at compile
-    // time
-    if (i >= count) {
-        // will cause compilation error in constexpr context
-        throw std::runtime_error{"Index out of range!"};
-    }
+    // should not be possible
+    assert(out != nullptr);
     return out;
 }
 

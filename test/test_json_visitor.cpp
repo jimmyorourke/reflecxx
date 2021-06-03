@@ -2,9 +2,7 @@
 
 #include "test_types.hpp"
 
-//#include <proto/proto_base.hpp>
-
-#include "json_visitor.hpp"
+#include <proto/json_visitor.hpp>
 
 // clean up
 #include "../out.hpp"

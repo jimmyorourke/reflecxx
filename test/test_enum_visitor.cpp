@@ -36,7 +36,8 @@ TEST(enum_visitor, contains) {
 }
 
 TEST(enum_visitor, iterators) {
-    std::array<test_types::Scoped, 3> scopedEs{test_types::Scoped::First,test_types:: Scoped::Second, test_types::Scoped::Third};
+    std::array<test_types::Scoped, 3> scopedEs{test_types::Scoped::First, test_types::Scoped::Second,
+                                               test_types::Scoped::Third};
     EXPECT_EQ(scopedEs, proto::enumerators<test_types::Scoped>());
     // or expected use case:
     size_t i = 0;

@@ -88,7 +88,7 @@ class VisitorGenerator:
         self._output(
             f"template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<{s.typename}, std::remove_const_t<T>>, bool> = true>"
         )
-        self._output(f"constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {{")
+        self._output(f"constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor) {{")
         with IndentBlock(self):
             for base in s.base_classes:
                 # don't force the base class to have been annotated for visitation
@@ -110,7 +110,7 @@ class VisitorGenerator:
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {")
+            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor) {")
             for base in s.base_classes:
                 # don't force the base class to have been annotated for visitation
                 # TODO: hash table
@@ -137,7 +137,7 @@ class VisitorGenerator:
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{e.name}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor, bool) {")
+            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor) {")
             with IndentBlock(self):
                 for p in e.enumerators:
                     # scoped names work for accessing unscoped enum elements too

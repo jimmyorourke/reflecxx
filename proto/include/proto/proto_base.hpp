@@ -37,8 +37,8 @@ inline constexpr bool is_proto_visitable_v = is_proto_visitable<T>::value;
 
 // wrapper to support template type deduction for type visitors (ie no instance argument passed to visit())
 template <typename T, typename Visitor>
-constexpr void visit(Visitor&& visitor, bool visitBaseClasses = true) {
-    detail::Acceptor<T, Visitor>::visitd(std::forward<Visitor>(visitor), visitBaseClasses);
+constexpr void visit(Visitor&& visitor) {
+    detail::Acceptor<T, Visitor>::visitd(std::forward<Visitor>(visitor));
 }
 
 } // namespace proto

@@ -61,50 +61,50 @@ constexpr int countAllTypes() {
 }
 
 TEST(struct_visitor, visitStructMembers) {
-        test_types::Wrapper w{};
-        InstanceTypeCounterVisitor v{};
-        proto::visit(w, v);
+    test_types::Wrapper w{};
+    InstanceTypeCounterVisitor v{};
+    proto::visit(w, v);
 
-        EXPECT_EQ(v.otherTypes, 3);
-        EXPECT_EQ(v.ints, 1);
-        EXPECT_EQ(v.doubles, 1);
+    EXPECT_EQ(v.otherTypes, 3);
+    EXPECT_EQ(v.ints, 1);
+    EXPECT_EQ(v.doubles, 1);
 
-        static_assert(countAllTypes<test_types::Wrapper>() == 5);
+    static_assert(countAllTypes<test_types::Wrapper>() == 5);
 }
 
 TEST(struct_visitor, visitClassMembers) {
-        test_types::BasicClass bc{};
-        InstanceTypeCounterVisitor v{};
-        proto::visit(bc, v);
+    test_types::BasicClass bc{};
+    InstanceTypeCounterVisitor v{};
+    proto::visit(bc, v);
 
-        EXPECT_EQ(v.otherTypes, 1);
-        EXPECT_EQ(v.ints, 1);
-        EXPECT_EQ(v.doubles, 1);
+    EXPECT_EQ(v.otherTypes, 1);
+    EXPECT_EQ(v.ints, 1);
+    EXPECT_EQ(v.doubles, 1);
 
     static_assert(countAllTypes<test_types::BasicClass>() == 3);
 }
 
 TEST(struct_visitor, visitDerivedClass) {
-        test_types::ChildClass c{};
-        InstanceTypeCounterVisitor v{};
-        // visit parent by default
-        proto::visit(c, v);
+    test_types::ChildClass c{};
+    InstanceTypeCounterVisitor v{};
+    // visit parent by default
+    proto::visit(c, v);
 
-        EXPECT_EQ(v.ints, 2);
-        EXPECT_EQ(v.allTypes(), 4);
+    EXPECT_EQ(v.ints, 2);
+    EXPECT_EQ(v.allTypes(), 4);
 
-        static_assert(countAllTypes<test_types::ChildClass>() == 4);
+    static_assert(countAllTypes<test_types::ChildClass>() == 4);
 }
 
 TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
-        test_types::ChildOfUnreflectedBaseClass cub{};
-        InstanceTypeCounterVisitor v{};
-        proto::visit(cub, v);
+    test_types::ChildOfUnreflectedBaseClass cub{};
+    InstanceTypeCounterVisitor v{};
+    proto::visit(cub, v);
 
-        EXPECT_EQ(v.ints, 1);
-        EXPECT_EQ(v.allTypes(), 1);
+    EXPECT_EQ(v.ints, 1);
+    EXPECT_EQ(v.allTypes(), 1);
 
-        static_assert(countAllTypes<test_types::ChildOfUnreflectedBaseClass>() == 1);
+    static_assert(countAllTypes<test_types::ChildOfUnreflectedBaseClass>() == 1);
 }
 
 TEST(struct_visitor, tupleCalls) {
