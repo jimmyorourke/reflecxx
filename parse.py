@@ -30,14 +30,21 @@ def check_annotated_struct(cursor, structures):
             for c in cursor.get_children():
                 if c.kind == CursorKind.FIELD_DECL:
                     if c.access_specifier == AccessSpecifier.PUBLIC:
-                        structure.public_fields[c.spelling] = Structure(c.type.spelling)
+                        # Use canonical type to handle things like:
+                        ## namespace ns {
+                        ## struct S{};
+                        ## std::array<S, 3> Arr;
+                        ## }
+                        # The canonical type for Arr will include namespace scoping, ie std::array<ns::S, 3>.
+                        # This way the generated code functions properly when it is not in namespace ns.
+                        structure.public_fields[c.spelling] = Structure(c.type.get_canonical().spelling)
                     elif c.access_specifier == AccessSpecifier.PROTECTED:
-                        structure.protected_fields[c.spelling] = Structure(c.type.spelling)
+                        structure.protected_fields[c.spelling] = Structure(c.type.get_canonical().spelling)
                     elif c.access_specifier == AccessSpecifier.PRIVATE:
-                        structure.private_fields[c.spelling] = Structure(c.type.spelling)
+                        structure.private_fields[c.spelling] = Structure(c.type.get_canonical().spelling)
                 if c.kind == CursorKind.CXX_BASE_SPECIFIER:
                     # class is derived
-                    structure.base_classes.append(c.type.spelling)
+                    structure.base_classes.append(c.type.get_canonical().spelling)
 
 
 def check_annotated_enum(cursor, enums):

@@ -8,46 +8,46 @@
 
 TEST(enum_visitor, enumSize) {
     // put static_asserts in a TEST because why not
-    static_assert(proto::enumSize<Unscoped>() == 4);
-    static_assert(proto::enumSize<Scoped>() == 3);
+    static_assert(proto::enumSize<test_types::Unscoped>() == 4);
+    static_assert(proto::enumSize<test_types::Scoped>() == 3);
 }
 
 TEST(enum_visitor, toName) {
-    static_assert(proto::toString(Fourth) == "Fourth");
-    static_assert(proto::toString(Scoped::Third) == "Third");
+    static_assert(proto::toString(test_types::Fourth) == "Fourth");
+    static_assert(proto::toString(test_types::Scoped::Third) == "Third");
 }
 
 TEST(enum_visitor, fromName) {
-    static_assert(proto::fromString<Unscoped>("Fourth") == Fourth);
-    static_assert(proto::fromString<Scoped>("Third") == Scoped::Third);
+    static_assert(proto::fromString<test_types::Unscoped>("Fourth") == test_types::Fourth);
+    static_assert(proto::fromString<test_types::Scoped>("Third") == test_types::Scoped::Third);
 
     // not expected to compile
-    // static_assert(proto::fromString<Scoped>("fifth") == Scoped::Third);
+    // static_assert(proto::fromString<test_types::Scoped>("fifth") == test_types::Scoped::Third);
 
-    EXPECT_ANY_THROW(proto::fromString<Scoped>("fifth"));
+    EXPECT_ANY_THROW(proto::fromString<test_types::Scoped>("fifth"));
 }
 
 TEST(enum_visitor, contains) {
     // unscoped has an offset of 2 in values
-    static_assert(proto::enumContains<Unscoped>(4));
-    static_assert(!proto::enumContains<Unscoped>(0));
-    static_assert(proto::enumContains<Scoped>(0));
-    static_assert(!proto::enumContains<Scoped>(3));
+    static_assert(proto::enumContains<test_types::Unscoped>(4));
+    static_assert(!proto::enumContains<test_types::Unscoped>(0));
+    static_assert(proto::enumContains<test_types::Scoped>(0));
+    static_assert(!proto::enumContains<test_types::Scoped>(3));
 }
 
 TEST(enum_visitor, iterators) {
-    std::array<Scoped, 3> scopedEs{Scoped::First, Scoped::Second, Scoped::Third};
-    EXPECT_EQ(scopedEs, proto::enumerators<Scoped>());
+    std::array<test_types::Scoped, 3> scopedEs{test_types::Scoped::First,test_types:: Scoped::Second, test_types::Scoped::Third};
+    EXPECT_EQ(scopedEs, proto::enumerators<test_types::Scoped>());
     // or expected use case:
     size_t i = 0;
-    for (const auto& e : proto::enumerators<Scoped>()) {
+    for (const auto& e : proto::enumerators<test_types::Scoped>()) {
         EXPECT_EQ(e, scopedEs[i]);
         ++i;
     }
 
     std::array<const char*, 3> names{"First", "Second", "Third"};
     i = 0;
-    for (const auto& e : proto::enumNames<Scoped>()) {
+    for (const auto& e : proto::enumNames<test_types::Scoped>()) {
         EXPECT_EQ(e, names[i]);
         ++i;
     }

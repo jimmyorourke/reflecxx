@@ -2,8 +2,7 @@
 
 #include "test_types.hpp"
 
-#include <proto/proto_base.hpp>
-#include <string>
+//#include <proto/proto_base.hpp>
 
 #include "json_visitor.hpp"
 
@@ -11,9 +10,9 @@
 #include "../out.hpp"
 
 namespace {
-Wrapper buildDefaultWrapper() {
-    Basics b1{true, 1, 2.5};
-    Basics b2{false, -5, 3.4};
+test_types::Wrapper buildDefaultWrapper() {
+    test_types::Basics b1{true, 1, 2.5};
+    test_types::Basics b2{false, -5, 3.4};
     return {9, -2.2, b1, {b1, b2, b1}, {b2, b2}};
 }
 
@@ -31,7 +30,7 @@ nlohmann::json buildDefaultWrapperJson() {
 } // namespace
 
 TEST(json_visitor, toJson) {
-    Wrapper w = buildDefaultWrapper();
+    test_types::Wrapper w = buildDefaultWrapper();
 
     // to json
     nlohmann::json j = w;
@@ -43,7 +42,7 @@ TEST(json_visitor, fromJson) {
     nlohmann::json wJson = buildDefaultWrapperJson();
 
     // from json
-    Wrapper wFromJson = wJson;
+    test_types::Wrapper wFromJson = wJson;
 
     EXPECT_EQ(wFromJson, buildDefaultWrapper());
 }

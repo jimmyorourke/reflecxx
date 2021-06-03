@@ -2,6 +2,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <proto/proto_base.hpp>
+
 // Requires that all members of T are themselves nlohmann::json serializable
 // Requires 1:1 field mapping
 

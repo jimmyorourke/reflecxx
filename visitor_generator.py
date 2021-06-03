@@ -41,6 +41,8 @@ class VisitorGenerator:
         self._output("// Do not edit, changes will be overwritten!\n")
         self._output("#include <type_traits>")
         self._output("")
+        self._output("#include <proto/proto_base.hpp>")
+        self._output("")
         self._output(f"namespace {self._namespace} {{")
         self._output("")
 
@@ -52,10 +54,24 @@ class VisitorGenerator:
         self._output(f"struct is_proto_visitable<{t.typename}> : std::true_type {{}};")
         self._output("")
 
-    def _generate_tuple_alias(self, t):
-        typestr = ", ".join([field_struct.typename for _, field_struct in t.public_fields.items()])
+    @staticmethod
+    def _get_all_public_fields(s, structures):
+        """Get all public fields, including inherited ones, recursively."""
+        field_list = {}
+        for b in s.base_classes:
+            # don't force the base class to have been annotated for visitation
+            # TODO: hash table
+            for p in structures:
+                if p.typename == b:
+                    field_list.update(VisitorGenerator._get_all_public_fields(p, structures))
+                    break
+        field_list.update(s.public_fields)
+        return field_list
+
+    def _generate_tuple_alias(self, s, structures):
+        typestr = ", ".join([field_struct.typename for _, field_struct in self._get_all_public_fields(s, structures).items()])
         self._output("template<>")
-        self._output(f"struct TupleType<{t.typename}> {{")
+        self._output(f"struct TupleType<{s.typename}> {{")
         with IndentBlock(self):
             self._output(f"using type = std::tuple<{typestr}>;")
         self._output("};")
@@ -66,7 +82,7 @@ class VisitorGenerator:
 
     def _generate_struct_visitor(self, s, structures):
         self._generate_visitable_trait(s)
-        self._generate_tuple_alias(s)
+        self._generate_tuple_alias(s, structures)
         # instance visitor
         # Use SFINAE template to generate const and non-const ref "overloads"
         self._output(
@@ -79,10 +95,7 @@ class VisitorGenerator:
                 # TODO: hash table
                 for p in structures:
                     if p.typename == base:
-                        self._output("if (visitBaseClasses) {")
-                        with IndentBlock(self):
-                            self._output(f"visit(static_cast<{base}&>(toVisit), visitor);")
-                        self._output("}")
+                        self._output(f"visit(static_cast<{base}&>(toVisit), visitor);")
                         break
                 else:
                     self._output(f"// not visiting unannotated base class {base}")
@@ -98,17 +111,13 @@ class VisitorGenerator:
         self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
         with IndentBlock(self):
             self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor, [[maybe_unused]] bool visitBaseClasses=true) {")
-            # TODO: is this right?
             for base in s.base_classes:
                 # don't force the base class to have been annotated for visitation
                 # TODO: hash table
                 for p in structures:
                     if p.typename == base:
-                        self._output("if (visitBaseClasses) {")
-                        with IndentBlock(self):
-                            self._output(f"visit<{base}>(visitor);")
-                        self._output("}")
-                        break
+                       self._output(f"visit<{base}>(visitor);")
+                       break
                 else:
                     self._output(f"// not visiting unannotated base class {base}")
             for field_name, field_struct in s.public_fields.items():

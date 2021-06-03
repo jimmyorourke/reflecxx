@@ -3,13 +3,7 @@
 //#include <codegen/visitor.hpp>
 
 #include <array>
-#include <list>
-#include <set>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string>
-#include <vector>
-//#include <features.h>
+#include <tuple>
 
 #ifdef PROTO_GENERATION
 #define VISIT __attribute__((annotate("my annotation")))
@@ -17,7 +11,8 @@
 #define VISIT
 #endif
 
-//#define VISIT
+// test types in their own namespace to ensure names get qualified properly
+namespace test_types {
 
 enum Unscoped { First = 2, Second, Third, Fourth } VISIT;
 enum class Scoped { First, Second, Third } VISIT;
@@ -79,19 +74,4 @@ class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
     int chieldField{};
 } VISIT;
 
-// Set of functions to initialize the test types.
-// Default values could be defined in the structs/classes, but we do this separately instead to properly represent
-// non-default instantiations, ensuring the test do not depend on the code generation relying on the default values in
-// any way.
-
-inline Basics defaultBasics() { return {true, -3, 5.5}; }
-
-inline Wrapper defaultWrapper() {
-    return {2,
-            5.1,
-            defaultBasics(),
-            {defaultBasics(), defaultBasics(), defaultBasics()},
-            {defaultBasics(), defaultBasics()}};
 }
-
-inline BasicClass defaultBasicClass() { return {false, -4, -10.1}; }

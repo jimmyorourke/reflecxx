@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
 #include "test_types.hpp"
+#include <type_traits>
 
 #include <proto/proto_base.hpp>
-
 #include <proto/struct_visitor.hpp>
 
 // clean up
@@ -27,12 +27,6 @@ struct InstanceTypeCounterVisitor {
 
     int allTypes() { return ints + doubles + otherTypes; }
 
-    void clear() {
-        otherTypes = 0;
-        ints = 0;
-        doubles = 0;
-    }
-
     int otherTypes{};
     int ints{};
     int doubles{};
@@ -53,107 +47,84 @@ struct TypeCounterVisitor {
 };
 
 template <typename T>
-constexpr int countInts(bool visitBaseClasses = true) {
+constexpr int countInts() {
     TypeCounterVisitor t{};
-    proto::visit<T>(t, visitBaseClasses);
+    proto::visit<T>(t);
     return t.ints;
 }
 
 template <typename T>
-constexpr int countAllTypes(bool visitBaseClasses = true) {
+constexpr int countAllTypes() {
     TypeCounterVisitor t{};
-    proto::visit<T>(t, visitBaseClasses);
+    proto::visit<T>(t);
     return t.ints + t.otherTypes;
 }
 
-TEST(struct_visitor, countTypesSimpleInstance) {
-    // TODO: gtest parameterized test
-    {
-        static_assert(countAllTypes<Empty>() == 0);
-        Empty e{};
-        InstanceTypeCounterVisitor v{};
-        proto::visit(e, v);
-
-        EXPECT_EQ(v.otherTypes, 0);
-        EXPECT_EQ(v.ints, 0);
-        EXPECT_EQ(v.doubles, 0);
-    }
-    {
-        static_assert(countAllTypes<Basics>() == 3);
-        Basics b{};
-        InstanceTypeCounterVisitor v{};
-        proto::visit(b, v);
-
-        EXPECT_EQ(v.otherTypes, 1);
-        EXPECT_EQ(v.ints, 1);
-        EXPECT_EQ(v.doubles, 1);
-    }
-    {
-        static_assert(countAllTypes<Wrapper>() == 5);
-        Wrapper w{};
+TEST(struct_visitor, visitStructMembers) {
+        test_types::Wrapper w{};
         InstanceTypeCounterVisitor v{};
         proto::visit(w, v);
 
         EXPECT_EQ(v.otherTypes, 3);
         EXPECT_EQ(v.ints, 1);
         EXPECT_EQ(v.doubles, 1);
-    }
-    {
-        static_assert(countAllTypes<BasicClass>() == 3);
-        BasicClass bc{};
+
+        static_assert(countAllTypes<test_types::Wrapper>() == 5);
+}
+
+TEST(struct_visitor, visitClassMembers) {
+        test_types::BasicClass bc{};
         InstanceTypeCounterVisitor v{};
         proto::visit(bc, v);
 
         EXPECT_EQ(v.otherTypes, 1);
         EXPECT_EQ(v.ints, 1);
         EXPECT_EQ(v.doubles, 1);
-    }
+
+    static_assert(countAllTypes<test_types::BasicClass>() == 3);
 }
 
-TEST(struct_visitor, countTypesInheritanceInstance) {
-    {
-        static_assert(countAllTypes<ChildClass>() == 4);
-        ChildClass c{};
+TEST(struct_visitor, visitDerivedClass) {
+        test_types::ChildClass c{};
         InstanceTypeCounterVisitor v{};
         // visit parent by default
         proto::visit(c, v);
 
         EXPECT_EQ(v.ints, 2);
         EXPECT_EQ(v.allTypes(), 4);
-    }
-    {
-        static_assert(countAllTypes<ChildClass>(false) == 1);
-        ChildClass c{};
-        InstanceTypeCounterVisitor v{};
-        proto::visit(c, v, /*visitBaseClasses=*/false);
 
-        EXPECT_EQ(v.ints, 1);
-        EXPECT_EQ(v.allTypes(), 1);
-    }
-    {
-        static_assert(countAllTypes<ChildOfUnreflectedBaseClass>() == 1);
-        ChildOfUnreflectedBaseClass cub{};
+        static_assert(countAllTypes<test_types::ChildClass>() == 4);
+}
+
+TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
+        test_types::ChildOfUnreflectedBaseClass cub{};
         InstanceTypeCounterVisitor v{};
         proto::visit(cub, v);
 
         EXPECT_EQ(v.ints, 1);
         EXPECT_EQ(v.allTypes(), 1);
-    }
+
+        static_assert(countAllTypes<test_types::ChildOfUnreflectedBaseClass>() == 1);
 }
 
-TEST(struct_visitor, tuplelikestuff) {
-    static_assert(proto::fieldCount<Basics>() == 3);
-    static_assert(proto::getName<2, Basics>() == "d");
+TEST(struct_visitor, tupleCalls) {
+    static_assert(proto::fieldCount<test_types::Basics>() == 3);
 
+    static_assert(proto::getName<2, test_types::Basics>() == "d");
+
+    test_types::Basics bs{/*b=*/true, /*i=*/1, /*d=*/1.5};
+    auto& dref = proto::get<2>(bs);
+
+    static_assert(std::is_same_v<std::remove_reference_t<decltype(dref)>, decltype(bs.d)>);
+
+    dref += 3;
+
+    EXPECT_EQ(bs.d, 4.5);
+}
+
+TEST(generation, type_traits) {
     struct MyType {};
 
     static_assert(!proto::is_proto_visitable_v<MyType>);
-    static_assert(proto::is_proto_visitable_v<Basics>);
-
-    struct Basics b {
-        true, 1, 1.5
-    };
-    auto& r = proto::get<2>(b);
-    r += 3;
-    EXPECT_EQ(b.d, 4.5);
+    static_assert(proto::is_proto_visitable_v<test_types::Basics>);
 }
