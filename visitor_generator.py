@@ -1,14 +1,20 @@
+import os
 import sys
 
 from datetime import datetime
-
+from typing import List
 from parse_types import Structure, Enumeration
 
 
-class VisitorGenerator:
+class CodeGenerator(object):
+    """Base code generator."""
     indent_size = 4
 
-    def __init__(self, output_file=None, namespace="generated"):
+
+class VisitorGenerator(CodeGenerator):
+    """Code generator to generate enum visitors, struct type visitors, struct instance visitors, and struct type tuples."""
+
+    def __init__(self, output_file: os.PathLike = None, namespace="generated"):
         self._output_file = output_file
         self._namespace = namespace
         self.indent_level = 0
@@ -49,40 +55,36 @@ class VisitorGenerator:
     def _generate_postamble(self):
         self._output(f"}} // namespace {self._namespace}")
 
-    def _generate_visitable_trait(self, t):
+    def _generate_visitable_trait(self, t: Structure):
         self._output("template<>")
         self._output(f"struct is_proto_visitable<{t.typename}> : std::true_type {{}};")
         self._output("")
 
     @staticmethod
-    def _get_all_public_fields(s, structures):
+    def _get_all_public_fields(s: Structure):
         """Get all public fields, including inherited ones, recursively."""
         field_list = {}
-        for b in s.base_classes:
-            # don't force the base class to have been annotated for visitation
-            # TODO: hash table
-            for p in structures:
-                if p.typename == b:
-                    field_list.update(VisitorGenerator._get_all_public_fields(p, structures))
-                    break
+        for b in s.base_classes.values():
+            if b is not None:
+                field_list.update(VisitorGenerator._get_all_public_fields(b))
         field_list.update(s.public_fields)
         return field_list
 
-    def _generate_tuple_alias(self, s, structures):
-        typestr = ", ".join([field_struct.typename for _, field_struct in self._get_all_public_fields(s, structures).items()])
+    def _generate_tuple_alias(self, s: Structure):
+        typestr = ", ".join([field_struct.typename for _, field_struct in self._get_all_public_fields(s).items()])
         self._output("template<>")
         self._output(f"struct TupleType<{s.typename}> {{")
         with IndentBlock(self):
             self._output(f"using type = std::tuple<{typestr}>;")
         self._output("};")
 
-    def generate_struct_visitors(self, structures):
+    def generate_struct_visitors(self, structures: List[Structure]):
         for s in structures:
-            self._generate_struct_visitor(s, structures)
+            self._generate_struct_visitor(s)
 
-    def _generate_struct_visitor(self, s, structures):
+    def _generate_struct_visitor(self, s: Structure):
         self._generate_visitable_trait(s)
-        self._generate_tuple_alias(s, structures)
+        self._generate_tuple_alias(s)
         # instance visitor
         # Use SFINAE template to generate const and non-const ref "overloads"
         self._output(
@@ -90,15 +92,12 @@ class VisitorGenerator:
         )
         self._output(f"constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor) {{")
         with IndentBlock(self):
-            for base in s.base_classes:
+            for name, base in s.base_classes.items():
                 # don't force the base class to have been annotated for visitation
-                # TODO: hash table
-                for p in structures:
-                    if p.typename == base:
-                        self._output(f"visit(static_cast<{base}&>(toVisit), visitor);")
-                        break
+                if base is not None:
+                    self._output(f"visit(static_cast<{base.typename}&>(toVisit), visitor);")
                 else:
-                    self._output(f"// not visiting unannotated base class {base}")
+                    self._output(f"// not visiting unannotated base class {name}")
             for field_name in s.public_fields:
                 self._output(f'visitor("{field_name}", toVisit.{field_name});')
         self._output("}")
@@ -111,15 +110,12 @@ class VisitorGenerator:
         self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
         with IndentBlock(self):
             self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor) {")
-            for base in s.base_classes:
+            for name, base in s.base_classes.items():
                 # don't force the base class to have been annotated for visitation
-                # TODO: hash table
-                for p in structures:
-                    if p.typename == base:
-                       self._output(f"visit<{base}>(visitor);")
-                       break
+                if base is not None:
+                    self._output(f"visit<{base.typename}>(visitor);")
                 else:
-                    self._output(f"// not visiting unannotated base class {base}")
+                    self._output(f"// not visiting unannotated base class {name}")
             for field_name, field_struct in s.public_fields.items():
                 self._output(f'visitor("{field_name}", type_tag<{field_struct.typename}>{{}});')
             self._output("}")
@@ -127,11 +123,11 @@ class VisitorGenerator:
         self._output("} // namespace detail")
         self._output("")
 
-    def generate_enum_visitors(self, enumerations):
+    def generate_enum_visitors(self, enumerations: List[Enumeration]):
         for e in enumerations:
             self._generate_enum_visitor(e)
 
-    def _generate_enum_visitor(self, e):
+    def _generate_enum_visitor(self, e: Enumeration):
         # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
         self._output("namespace detail {")
         self._output("template <typename Visitor>")
@@ -139,9 +135,9 @@ class VisitorGenerator:
         with IndentBlock(self):
             self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor) {")
             with IndentBlock(self):
-                for p in e.enumerators:
+                for name, val in e.enumerators.items():
                     # scoped names work for accessing unscoped enum elements too
-                    self._output(f'visitor({e.name}::{p[0]}, "{p[0]}", std::underlying_type_t<{e.name}>{{{p[1]}}});')
+                    self._output(f'visitor({e.name}::{name}, "{name}", std::underlying_type_t<{e.name}>{{{val}}});')
             self._output("}")
         self._output("};")
         self._output("} // namespace detail")
@@ -149,7 +145,9 @@ class VisitorGenerator:
 
 
 class IndentBlock:
-    def __init__(self, generator):
+    """Generates an indented block when used as a context manager within a CodeGenerator."""
+
+    def __init__(self, generator: CodeGenerator):
         self._generator = generator
 
     def __enter__(self):
