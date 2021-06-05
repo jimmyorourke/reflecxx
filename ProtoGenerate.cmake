@@ -18,18 +18,26 @@ macro(proto_generate INPUT_FILES TARGET)
 
     # Get flags from target
     # By using generator expressions we can get recursive results
-    set(FLAGS "-I$<JOIN:$<TARGET_PROPERTY:${TARGET},INCLUDE_DIRECTORIES>, -I>")
 
-    set(DEFS    "$<$<BOOL:$<TARGET_PROPERTY:${TARGET},COMPILE_DEFINITIONS>>:-D$<JOIN:$<TARGET_PROPERTY:${TARGET},COMPILE_DEFINITIONS>, -D>>")
+    set(FLAGS "-I$<JOIN:$<TARGET_PROPERTY:${TARGET},INCLUDE_DIRECTORIES>, -I>")
+    set(DD "$<TARGET_PROPERTY:${TARGET},COMPILE_DEFINITIONS>")
+    set(DEFS    "$<$<BOOL:${DD}>:-D$<JOIN:${DD}, -D>>")
 
     set(OPTS    "$<$<BOOL:$<TARGET_PROPERTY:${TARGET},COMPILE_OPTIONS>>:-D$<JOIN:$<TARGET_PROPERTY:${TARGET},COMPILE_OPTIONS>, -D>>")
         #$<TARGET_PROPERTY:${TARGET},COMPILE_OPTIONS>
     #)
     SET(SD $<TARGET_PROPERTY:${TARGET},CXX_STANDARD> $<TARGET_PROPERTY:${TARGET},CXX_STANDARD>)
 
-    SET(ALL_FLAGS "${FLAGS};${DEFS};${OPTS};${CMAKE_CXX_FLAGS}")
-    SET(ALL_FLAGS "${FLAGS};${SD}")
+    #SET(ALL_FLAGS "${FLAGS}";"${DEFS}";"${OPTS}";${CMAKE_CXX_FLAGS}")
+    SET(ALL_FLAGS "${FLAGS};${DEFS};${OPTS}")
+    #SET(ALL_FLAGS ${ALL_FLAGS};${CMAKE_CXX_FLAGS})
 
+    #convert cmake_cxx_flags into a list instead of a string
+    string (REPLACE " " ";" CFLAGS "${CMAKE_CXX_FLAGS}")
+
+    SET(ALL_FLAGS "${ALL_FLAGS};${CFLAGS}")
+
+#    list(REMOVE_DUPLICATES TARGET_FLAGS)
 
     get_target_property(STD ${TARGET} CXX_STANDARD)
     if (NOT ${STD} MATCHES "NOTFOUND")
@@ -51,6 +59,7 @@ macro(proto_generate INPUT_FILES TARGET)
         # Surprisingly, not using USES_TERMINAL gives better output because error messages show up at then end of the
         # output when generation fails.
         #USES_TERMINAL
+        #VERBATIM
     )
 
     add_custom_target(${TARGET}_PROTOGEN
