@@ -1,13 +1,16 @@
 cmake_minimum_required(VERSION 3.12)
 project(proto_test)
 
-# enable CTEST
-enable_testing()
+#set(CMAKE_CXX_STANDARD 17)
 
-include(test/cmake/ConanSetup.cmake)
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 add_subdirectory(proto)
-add_subdirectory(test)
+
+set(BUILD_PROTO_TESTS 1)
+
+if(${BUILD_PROTO_TESTS})
+    # requires Conan
+    add_subdirectory(test)
+endif()

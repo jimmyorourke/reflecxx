@@ -1,5 +1,7 @@
 #pragma once
 
+#include<tuple>
+
 namespace proto {
 namespace detail {
 template <typename T>

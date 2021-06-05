@@ -2,17 +2,19 @@ import os
 import sys
 
 from datetime import datetime
-from typing import List
 from parse_types import Structure, Enumeration
 
 
 class CodeGenerator(object):
     """Base code generator."""
-    indent_size = 4
+    INDENT_SIZE = 4
 
 
 class VisitorGenerator(CodeGenerator):
-    """Code generator to generate enum visitors, struct type visitors, struct instance visitors, and struct type tuples."""
+    """Code generator for the Reflection Visitor annotation.
+    Generates enum visitors, struct type visitors, struct instance visitors, and struct type tuples.
+    """
+    ANNOTATION = "PROTO_GEN: Reflection Visitor"
 
     def __init__(self, output_file: os.PathLike = None, namespace="generated"):
         self._output_file = output_file
@@ -38,7 +40,7 @@ class VisitorGenerator(CodeGenerator):
 
     def _output(self, text: str):
         """Outputs input text with a newline at current indent level"""
-        indent = " " * self.indent_size * self.indent_level
+        indent = " " * self.INDENT_SIZE * self.indent_level
         print(f"{indent}{text}", file=self._output_file_handle)
 
     def _generate_preamble(self):
@@ -78,11 +80,8 @@ class VisitorGenerator(CodeGenerator):
             self._output(f"using type = std::tuple<{typestr}>;")
         self._output("};")
 
-    def generate_struct_visitors(self, structures: List[Structure]):
-        for s in structures:
-            self._generate_struct_visitor(s)
 
-    def _generate_struct_visitor(self, s: Structure):
+    def generate_struct_visitor(self, s: Structure):
         self._generate_visitable_trait(s)
         self._generate_tuple_alias(s)
         # instance visitor
@@ -123,11 +122,8 @@ class VisitorGenerator(CodeGenerator):
         self._output("} // namespace detail")
         self._output("")
 
-    def generate_enum_visitors(self, enumerations: List[Enumeration]):
-        for e in enumerations:
-            self._generate_enum_visitor(e)
 
-    def _generate_enum_visitor(self, e: Enumeration):
+    def generate_enum_visitor(self, e: Enumeration):
         # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
         self._output("namespace detail {")
         self._output("template <typename Visitor>")

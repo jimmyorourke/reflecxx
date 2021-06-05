@@ -2,6 +2,10 @@
 
 #include <proto/proto_base.hpp>
 
+// The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
+// get compiled by the generator, don't define it during generation.
+#ifndef PROTO_GENERATION
+
 namespace proto {
 namespace detail {
 // Using a generic lambda doesn't work as the compiler won't allow the assignment to the capture arg
@@ -78,3 +82,5 @@ constexpr const char* getName() {
 }
 
 } // namespace proto
+
+#endif // PROTO_GENERATION

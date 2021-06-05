@@ -153,10 +153,10 @@ if __name__ == "__main__":
         help="Compiler flags (including include paths, compile definitions, c++ standard) to provide to libclang, space separated as would appear on the commandline. Needs to be specified as --flags=",
         default="",
     )
-    parser.add_argument("--namespace", "-n", help="Namespace for generated C++ code.", default="proto")
     args = parser.parse_args()
-
+    print(args)
     args.input_files = args.input_files or ["test/test_types.hpp"]
     args.output_file = args.output_file or "out.hpp"
-
-    main(args.libclang_directory, args.input_files, args.output_file, args.flags.split(), args.namespace)
+    # since we're going to be specializing some templates, we have to use the same namespace as the original declarations
+    namespace = "proto"
+    main(args.libclang_directory, args.input_files, args.output_file, args.flags.split(), namespace)

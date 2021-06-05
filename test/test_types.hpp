@@ -1,15 +1,9 @@
 #pragma once
 
-//#include <codegen/visitor.hpp>
-
 #include <array>
 #include <tuple>
 
-#ifdef PROTO_GENERATION
-#define VISIT __attribute__((annotate("my annotation")))
-#else
-#define VISIT
-#endif
+#include <proto/attributes.hpp>
 
 // test types in their own namespace to ensure names get qualified properly
 namespace test_types {
