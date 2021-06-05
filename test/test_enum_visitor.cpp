@@ -4,7 +4,7 @@
 #include <proto/enum_visitor.hpp>
 
 // clean up
-#include "../out.hpp"
+#include <generated/test_types_proto_generated.hpp>
 
 TEST(enum_visitor, enumSize) {
     // put static_asserts in a TEST because why not

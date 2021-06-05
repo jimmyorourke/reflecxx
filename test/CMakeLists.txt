@@ -21,7 +21,6 @@ target_include_directories(main
     PRIVATE
     cmake
 )
-target_compile_features(main PRIVATE cxx_std_17)
 proto_generate(test_types.hpp main)
 
 

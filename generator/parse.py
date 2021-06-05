@@ -1,7 +1,8 @@
 import argparse
 import sys
-
+import os
 from os import PathLike
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import clang.cindex
@@ -65,46 +66,19 @@ def check_annotated_enum(cursor: Cursor, enums: List[Enumeration]) -> None:
 
 
 def main(
-    libclang_directory: PathLike, input_files: List[PathLike], output_file: PathLike, flags: List[str], namespace: str
+    libclang_directory: PathLike, input_files: List[PathLike], output_folder: PathLike, flags: List[str], namespace: str
 ):
-
-    # clang.cindex.Config.set_library_path('/Library/Developer/CommandLineTools/usr/lib/')
-    # clang.cindex.Config.set_library_path("C:\\Program Files\\LLVM\\bin")
     clang.cindex.Config.set_library_path(libclang_directory)
     index = clang.cindex.Index.create()
 
-    # tu = index.parse('tmp.cpp', args=['-std=c++11'], unsaved_files=[('tmp.cpp', s)],  options=0)
-
-    # Dict of name to Structure. Use a dict so after parsing all annotated structures we can efficiently look up whether
-    # base classes were annotated or not.
-    structures = {}
-    enums = []
-
-    # do we need to be selective about flags?
-    # remove any duplicates
-    flags = set(flags)
-    for flag in flags:
-        if flag.startswith("/D"):
-            flags.discard(flag)
-            flags.add(flag.replace("/D", "-D"))
-
-    # Add flag indicating we are in the generator. This allows avoiding compilation of code that depends on generated
-    # code, such as includes of generated headers.
-    flags.add("-DPROTO_GENERATION")
-
-    # The only flags we really care about are for this compilation are include paths, compile definitions, and c++ standard. Luckily these flags don't differ much between compilers.
-    # clang_flags = set()
-    # for flag in flags:
-    #     if flag.startswith['-I'] or flag.startswith['-std'] or flag.startswith['-D']:
-    #         clang_flags.add(flag)
-    #     elif flag.startswith['/D']:
-    #         # Accept some MSVC style definitions.
-    #         # Even using Ninja generator on Windows produces flags in the compile_commands.json that start with /D, such as /DWIN32, while user specified definitions end up using -D.
-    #         clang_flags.add(flag.replace('/D', '-D'))
-
-    print(flags)
+    flags.append("-DPROTO_GENERATION")
 
     for file in input_files:
+        # Dict of name to Structure. Use a dict so after parsing all annotated structures we can efficiently look up whether
+        # base classes were annotated or not.
+        structures = {}
+        enums = []
+
         # compile
         # speed up parsing
         options = TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
@@ -115,27 +89,31 @@ def main(
             print("Parse diagostic", diag)
             print(diag.Warning)  # we can get warnings from unused commandline args
             if diag.severity > diag.Warning:
-                print("Code generation failed")
+                print("Code generation failed.")
+                print("Flags:", flags)
                 exit(1)
 
         for cursor in tu.cursor.walk_preorder():
             check_annotated_struct(cursor, structures)
             check_annotated_enum(cursor, enums)
 
-    # With all structures parsed, base classes can be pointed to if they were annotated.
-    for s in structures.values():
-        for base_class in s.base_classes:
-            if base_class in structures:
-                s.base_classes[base_class] = structures[base_class]
-
-    # Generate!
-    with VisitorGenerator(output_file=output_file, namespace=namespace) as v:
+        # With all structures parsed, base classes can be pointed to if they were annotated.
         for s in structures.values():
-            if s.annotation == v.ANNOTATION:
-                v.generate_struct_visitor(s)
-        for e in enums:
-            if e.annotation == v.ANNOTATION:
-                v.generate_enum_visitor(e)
+            for base_class in s.base_classes:
+                if base_class in structures:
+                    s.base_classes[base_class] = structures[base_class]
+
+        # Generate!
+        os.makedirs(output_folder, exist_ok=True)
+        output_file = Path(output_folder) / (Path(file).stem + "_proto_generated.hpp")
+
+        with VisitorGenerator(output_file=output_file, namespace=namespace) as v:
+            for s in structures.values():
+                if s.annotation == v.ANNOTATION:
+                    v.generate_struct_visitor(s)
+            for e in enums:
+                if e.annotation == v.ANNOTATION:
+                    v.generate_enum_visitor(e)
 
 
 if __name__ == "__main__":
@@ -144,7 +122,7 @@ if __name__ == "__main__":
         "--libclang-directory", "-c", help="libclang shared object directory", default="C:\\Program Files\\LLVM\\bin"
     )
     parser.add_argument("--input-files", "-i", nargs="*", help="Input source file(s) to process.")
-    parser.add_argument("--output-file", "-o", help="File name for generated output")
+    parser.add_argument("--output-folder", "-o", help="Folder for generated output", default=".")
     # Use a single string rather than a list to be able to support the leading dashes on the flags
     parser.add_argument(
         "--flags",
@@ -156,7 +134,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
     args.input_files = args.input_files or ["test/test_types.hpp"]
-    args.output_file = args.output_file or "out.hpp"
     # since we're going to be specializing some templates, we have to use the same namespace as the original declarations
     namespace = "proto"
-    main(args.libclang_directory, args.input_files, args.output_file, args.flags.split(), namespace)
+    main(args.libclang_directory, args.input_files, args.output_folder, args.flags.split(), namespace)
