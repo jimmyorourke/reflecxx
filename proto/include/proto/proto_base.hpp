@@ -26,6 +26,8 @@ template <typename T>
 struct TupleType {
     using type = std::tuple<>;
 };
+template <typename T>
+using TupleTypeT = typename TupleType<T>::type;
 
 // Wrapper to support template type deduction for type visitors (ie no instance argument passed to visit()).
 template <typename T, typename Visitor>

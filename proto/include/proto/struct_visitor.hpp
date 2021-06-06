@@ -41,16 +41,44 @@ struct Extractor {
 
 // Declares an alias to the type of the i'th visitable field of T.
 template <size_t i, typename T>
-using typeAt = typename std::tuple_element<i, typename TupleType<T>::type>::type;
+using typeAt = typename std::tuple_element<i, TupleTypeT<T>>::type;
 
+// template<typename T, typename S>
+// struct ConstMatch {
+//     using type = T;
+// };
+// template<typename T, typename S, std::enable_if_t<!std::is_const_v<S>,bool>=true>
+// struct ConstMatch {
+//     // if constexpr(std::is_const_v<S>) {
+//     //     using type = const std::remove_const_t<T>;
+//     // } else {
+//     //     using type = std::remove_const_t<T>;
+//     // }
+//     using type = std::remove_const_t<T>;
+// };
+template<typename T, typename S, bool=std::is_const_v<S>>
+struct ConstMatch;
+template<typename T, typename S>
+struct ConstMatch<T, S, false>
+ {
+    using type = std::remove_const_t<T>;
+};
+template<typename T, typename S>
+struct ConstMatch<T, S, true>
+ {
+    using type = const std::remove_const_t<T>;
+};
+
+template<typename T, typename S>
+using ConstMatchT = typename ConstMatch<T, S>::type;
 // Returns a reference to the i'th field in an instance of T.
 template <size_t i, typename T>
 constexpr auto& get(T& obj) {
     using rawT = std::decay_t<T>;
     // This gives a more obvious error than when typeAt fails to compile
     static_assert(i < fieldCount<rawT>(), "Index out of range!");
-    typeAt<i, rawT>* memberPtr = nullptr;
-
+    //typeAt<i, rawT>* memberPtr = nullptr;
+    ConstMatchT<typeAt<i, rawT>, T>*  memberPtr = nullptr;
     detail::Extractor e{&memberPtr, i};
     visit(obj, std::move(e));
     // this should be impossible
@@ -58,18 +86,18 @@ constexpr auto& get(T& obj) {
     return *memberPtr;
 }
 // Any way to not need this const overload and be able to declare membPtr properly?
-template <size_t i, typename T>
-constexpr const auto& get(const T& obj) {
-    // This gives a more obvious error than when typeAt fails to compile
-    static_assert(i < fieldCount<T>(), "Index out of range!");
-    const typeAt<i, T>* memberPtr = nullptr;
+// template <size_t i, typename T>
+// constexpr const auto& get(const T& obj) {
+//     // This gives a more obvious error than when typeAt fails to compile
+//     static_assert(i < fieldCount<T>(), "Index out of range!");
+//     const typeAt<i, T>* memberPtr = nullptr;
 
-    detail::Extractor e{&memberPtr, i};
-    visit(obj, std::move(e));
-    // this should be impossible
-    assert(memberPtr);
-    return *memberPtr;
-}
+//     detail::Extractor e{&memberPtr, i};
+//     visit(obj, std::move(e));
+//     // this should be impossible
+//     assert(memberPtr);
+//     return *memberPtr;
+// }
 
 // Returns the number of fields in T.
 template <typename T>
