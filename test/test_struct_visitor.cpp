@@ -6,8 +6,7 @@
 #include <proto/proto_base.hpp>
 #include <proto/struct_visitor.hpp>
 
-// clean up
-#include "../out.hpp"
+#include <generated/test_types_proto_generated.hpp>
 
 struct InstanceTypeCounterVisitor {
     template <typename T>
@@ -33,9 +32,9 @@ struct InstanceTypeCounterVisitor {
 };
 
 struct TypeCounterVisitor {
-    constexpr void operator()(const char*, const proto::base_tag&) { otherTypes++; }
+    constexpr void operator()(const char*, const proto::BaseTag&) { otherTypes++; }
 
-    constexpr void operator()(const char*, const proto::type_tag<int>& tag) {
+    constexpr void operator()(const char*, const proto::TagType<int>& tag) {
         // Example extracting type from tag type instance
         // C++20 remove_cvref would be better
         static_assert(std::is_same_v<typename std::decay_t<decltype(tag)>::type, int>);
@@ -56,14 +55,14 @@ constexpr int countInts() {
 template <typename T>
 constexpr int countAllTypes() {
     TypeCounterVisitor t{};
-    proto::visit<T>(t);
+    proto::forEachField<T>(t);
     return t.ints + t.otherTypes;
 }
 
 TEST(struct_visitor, visitStructMembers) {
     test_types::Wrapper w{};
     InstanceTypeCounterVisitor v{};
-    proto::visit(w, v);
+    proto::forEachField(w, v);
 
     EXPECT_EQ(v.otherTypes, 3);
     EXPECT_EQ(v.ints, 1);
@@ -125,6 +124,6 @@ TEST(struct_visitor, tupleCalls) {
 TEST(generation, type_traits) {
     struct MyType {};
 
-    static_assert(!proto::is_proto_visitable_v<MyType>);
-    static_assert(proto::is_proto_visitable_v<test_types::Basics>);
+    static_assert(!proto::IsProtoVisitableV<MyType>);
+    static_assert(proto::IsProtoVisitableV<test_types::Basics>);
 }

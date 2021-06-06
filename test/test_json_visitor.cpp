@@ -4,8 +4,7 @@
 
 #include <proto/json_visitor.hpp>
 
-// clean up
-#include "../out.hpp"
+#include <generated/test_types_proto_generated.hpp>
 
 namespace {
 test_types::Wrapper buildDefaultWrapper() {

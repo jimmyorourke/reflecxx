@@ -82,7 +82,7 @@ class VisitorGenerator(CodeGenerator):
 
 
     def generate_struct_visitor(self, s: Structure):
-        self._generate_visitable_trait(s)
+        #self._generate_visitable_trait(s)
         self._generate_tuple_alias(s)
         # instance visitor
         # Use SFINAE template to generate const and non-const ref "overloads"
@@ -116,7 +116,7 @@ class VisitorGenerator(CodeGenerator):
                 else:
                     self._output(f"// not visiting unannotated base class {name}")
             for field_name, field_struct in s.public_fields.items():
-                self._output(f'visitor("{field_name}", type_tag<{field_struct.typename}>{{}});')
+                self._output(f'visitor("{field_name}", TagType<{field_struct.typename}>{{}});')
             self._output("}")
         self._output("};")
         self._output("} // namespace detail")

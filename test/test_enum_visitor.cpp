@@ -3,7 +3,6 @@
 #include "test_types.hpp"
 #include <proto/enum_visitor.hpp>
 
-// clean up
 #include <generated/test_types_proto_generated.hpp>
 
 TEST(enum_visitor, enumSize) {
@@ -13,18 +12,18 @@ TEST(enum_visitor, enumSize) {
 }
 
 TEST(enum_visitor, toName) {
-    static_assert(proto::toString(test_types::Fourth) == "Fourth");
-    static_assert(proto::toString(test_types::Scoped::Third) == "Third");
+    static_assert(proto::enumName(test_types::Fourth) == "Fourth");
+    static_assert(proto::enumName(test_types::Scoped::Third) == "Third");
 }
 
 TEST(enum_visitor, fromName) {
-    static_assert(proto::fromString<test_types::Unscoped>("Fourth") == test_types::Fourth);
-    static_assert(proto::fromString<test_types::Scoped>("Third") == test_types::Scoped::Third);
+    static_assert(proto::fromName<test_types::Unscoped>("Fourth") == test_types::Fourth);
+    static_assert(proto::fromName<test_types::Scoped>("Third") == test_types::Scoped::Third);
 
     // not expected to compile
-    // static_assert(proto::fromString<test_types::Scoped>("fifth") == test_types::Scoped::Third);
+    // static_assert(proto::fromName<test_types::Scoped>("fifth") == test_types::Scoped::Third);
 
-    EXPECT_ANY_THROW(proto::fromString<test_types::Scoped>("fifth"));
+    EXPECT_ANY_THROW(proto::fromName<test_types::Scoped>("fifth"));
 }
 
 TEST(enum_visitor, contains) {

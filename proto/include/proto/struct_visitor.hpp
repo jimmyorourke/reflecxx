@@ -39,14 +39,14 @@ struct Extractor {
 } // namespace detail
 
 template <size_t i, typename T>
-using type_at = typename std::tuple_element<i, typename TupleType<T>::type>::type;
+using typeAt = typename std::tuple_element<i, typename TupleType<T>::type>::type;
 
 template <size_t i, typename T>
 constexpr auto& get(T& obj) {
-    // This gives a more obvious error than when type_at fails to compile
+    // This gives a more obvious error than when typeAt fails to compile
     static_assert(i < fieldCount<T>(), "Index out of range!");
 
-    type_at<i, T>* memberPtr = nullptr;
+    typeAt<i, T>* memberPtr = nullptr;
     detail::Extractor e{&memberPtr, i};
     visit(obj, std::move(e));
     // this should be impossible

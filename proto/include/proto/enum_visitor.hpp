@@ -17,7 +17,7 @@ constexpr int enumSize() {
 }
 
 template <typename EnumType>
-constexpr const char* toString(EnumType target) {
+constexpr const char* enumName(EnumType target) {
     const char* targetName = nullptr;
     auto v = [&targetName,
               target ](const EnumType& enumerator, const char* name, std::underlying_type_t<EnumType>) constexpr {
@@ -30,7 +30,7 @@ constexpr const char* toString(EnumType target) {
 }
 
 template <typename EnumType>
-constexpr EnumType fromString(const char* targetName) {
+constexpr EnumType fromName(const char* targetName) {
     EnumType e{};
     bool found = false;
     auto v = [&e, targetName, &
