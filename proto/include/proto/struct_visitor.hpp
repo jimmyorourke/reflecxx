@@ -19,7 +19,7 @@ struct Extractor {
     // The !std::is_const_v<S> is not strictly required but helps avoid subtle bugs where the caller uses a const object
     // resulting in this template resolving as S = const T or const T&, resulting in this function being called instead
     // of the specialization on our target type T, without the compiler telling us.
-    template <typename S, typename = std::enable_if_t<!std::is_const_v<S>>>
+    template <typename S>//, typename = std::enable_if_t<!std::is_const_v<S>>>
     constexpr void operator()(const char* name, S& member) {
         _count++;
     }
@@ -46,10 +46,24 @@ using typeAt = typename std::tuple_element<i, typename TupleType<T>::type>::type
 // Returns a reference to the i'th field in an instance of T.
 template <size_t i, typename T>
 constexpr auto& get(T& obj) {
+    using rawT = std::decay_t<T>;
+    // This gives a more obvious error than when typeAt fails to compile
+    static_assert(i < fieldCount<rawT>(), "Index out of range!");
+    typeAt<i, rawT>* memberPtr = nullptr;
+
+    detail::Extractor e{&memberPtr, i};
+    visit(obj, std::move(e));
+    // this should be impossible
+    assert(memberPtr);
+    return *memberPtr;
+}
+// Any way to not need this const overload and be able to declare membPtr properly?
+template <size_t i, typename T>
+constexpr const auto& get(const T& obj) {
     // This gives a more obvious error than when typeAt fails to compile
     static_assert(i < fieldCount<T>(), "Index out of range!");
+    const typeAt<i, T>* memberPtr = nullptr;
 
-    typeAt<i, T>* memberPtr = nullptr;
     detail::Extractor e{&memberPtr, i};
     visit(obj, std::move(e));
     // this should be impossible
@@ -60,7 +74,7 @@ constexpr auto& get(T& obj) {
 // Returns the number of fields in T.
 template <typename T>
 constexpr size_t fieldCount() {
-    // alternatively could use a tuple function.
+    // alternatively could use std::tuple_size.
     size_t count = 0;
     auto v = [&count](const char*, const auto&) constexpr { count++; };
     visit<T>(std::move(v));
@@ -85,6 +99,47 @@ constexpr const char* getName() {
     // should not be possible
     assert(out != nullptr);
     return out;
+}
+// Returns the name of the i'th field of T.
+// template <typename T>
+// constexpr auto eql(const T& t1) {
+//     typename TupleType<T>::type tup1;
+
+//     size_t count = 0;
+//     const char* out = nullptr;
+//     auto v = [&count, &tup1 ](const char*, const auto& val) constexpr {
+//         std::get<count>(tup1) = val;
+
+//     };
+//     visit<T>(std::move(v));
+
+//     return tup1;
+// }
+
+
+
+template<size_t I = 0, typename T, typename F>
+void for_each_apply(T& t1, T& t2, F&& f) {
+    f(get<I>(t1), get<I>(t2));
+    // if constexpr makes recursive templates so much easier!
+    if constexpr(I+1 < fieldCount<std::decay_t<T>>()) {
+        for_each_apply<I+1>(t1, t2, std::forward<F>(f));
+    }
+}
+
+template <typename T>
+constexpr auto eql1(const T& t1, const T& t2) {
+
+    // size_t count = 0;
+    bool eq = true;
+    auto v = [&eq](const auto& val1, const auto& val2) {
+        //static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
+        eq = (eq && (val1 == val2));
+    };
+    for_each_apply(t1, t2, std::move(v));
+   // auto eq =false;
+    //get<0>(t1);
+    return eq;
 }
 
 } // namespace proto

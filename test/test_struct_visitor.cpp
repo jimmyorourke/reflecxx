@@ -119,6 +119,15 @@ TEST(struct_visitor, tupleCalls) {
     dref += 3;
 
     EXPECT_EQ(bs.d, 4.5);
+
+    test_types::Basics bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
+    auto tup1 = proto::eql1(bs, bs2);
+    EXPECT_TRUE(tup1);
+    bs2.b=false;
+    EXPECT_FALSE(proto::eql1(bs, bs2));
+
+
+
 }
 
 TEST(generation, type_traits) {
