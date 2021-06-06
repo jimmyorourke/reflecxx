@@ -116,14 +116,12 @@ constexpr const char* getName() {
 //     return tup1;
 // }
 
-
-
-template<size_t I = 0, typename T, typename F>
-void for_each_apply(T& t1, T& t2, F&& f) {
-    f(get<I>(t1), get<I>(t2));
+template<size_t I = 0, typename T, typename... Ts, typename F, typename=std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
+void for_each_apply( F&& f, T&& t1, Ts &&... ts) {
+    f(get<I>(t1), get<I>(ts)...);
     // if constexpr makes recursive templates so much easier!
     if constexpr(I+1 < fieldCount<std::decay_t<T>>()) {
-        for_each_apply<I+1>(t1, t2, std::forward<F>(f));
+        for_each_apply<I+1>(std::forward<F>(f), std::forward<T>(t1), std::forward<T>(ts)...);
     }
 }
 
@@ -133,10 +131,12 @@ constexpr auto eql1(const T& t1, const T& t2) {
     // size_t count = 0;
     bool eq = true;
     auto v = [&eq](const auto& val1, const auto& val2) {
+    //auto v = [&eq](auto... param) {
         //static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
+        std::cout << val1 << " " << val2 << "\n";
         eq = (eq && (val1 == val2));
     };
-    for_each_apply(t1, t2, std::move(v));
+    for_each_apply(std::move(v), t1, t2);
    // auto eq =false;
     //get<0>(t1);
     return eq;

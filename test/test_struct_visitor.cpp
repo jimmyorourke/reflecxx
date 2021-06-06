@@ -121,10 +121,10 @@ TEST(struct_visitor, tupleCalls) {
     EXPECT_EQ(bs.d, 4.5);
 
     test_types::Basics bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    auto tup1 = proto::eql1(bs, bs2);
-    EXPECT_TRUE(tup1);
+    test_types::Basics bs3{/*b=*/true, /*i=*/1, /*d=*/1.5};
+    EXPECT_TRUE(proto::eql1(bs3, bs2));
     bs2.b=false;
-    EXPECT_FALSE(proto::eql1(bs, bs2));
+    EXPECT_FALSE(proto::eql1(bs3, bs2));
 
 
 
