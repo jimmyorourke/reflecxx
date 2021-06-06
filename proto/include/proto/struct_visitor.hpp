@@ -8,6 +8,7 @@
 
 namespace proto {
 namespace detail {
+// Functor that can extract a field of a specific type and index from an instance of T.
 // Using a generic lambda doesn't work as the compiler won't allow the assignment to the capture arg
 template <typename T>
 struct Extractor {
@@ -38,9 +39,11 @@ struct Extractor {
 
 } // namespace detail
 
+// Declares an alias to the type of the i'th visitable field of T.
 template <size_t i, typename T>
 using typeAt = typename std::tuple_element<i, typename TupleType<T>::type>::type;
 
+// Returns a reference to the i'th field in an instance of T.
 template <size_t i, typename T>
 constexpr auto& get(T& obj) {
     // This gives a more obvious error than when typeAt fails to compile
@@ -54,14 +57,17 @@ constexpr auto& get(T& obj) {
     return *memberPtr;
 }
 
+// Returns the number of fields in T.
 template <typename T>
 constexpr size_t fieldCount() {
+    // alternatively could use a tuple function.
     size_t count = 0;
     auto v = [&count](const char*, const auto&) constexpr { count++; };
     visit<T>(std::move(v));
     return count;
 }
 
+// Returns the name of the i'th field of T.
 template <size_t i, typename T>
 constexpr const char* getName() {
     static_assert(i < fieldCount<T>(), "Index out of range!");

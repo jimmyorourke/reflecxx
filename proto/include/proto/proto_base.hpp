@@ -14,19 +14,20 @@ struct Acceptor;
 
 } // namespace detail
 
-
+// Tag structs to be able to pass types around as objects.
 struct BaseTag {};
 template <typename T>
 struct TagType : BaseTag {
     using type = T;
 };
 
+// Tag struct containing a tuple type composed of the types of all public (ie visitable) members of T.
 template <typename T>
 struct TupleType {
     using type = std::tuple<>;
 };
 
-// wrapper to support template type deduction for type visitors (ie no instance argument passed to visit())
+// Wrapper to support template type deduction for type visitors (ie no instance argument passed to visit()).
 template <typename T, typename Visitor>
 constexpr void visit(Visitor&& visitor) {
     detail::Acceptor<T, Visitor>::visitd(std::forward<Visitor>(visitor));

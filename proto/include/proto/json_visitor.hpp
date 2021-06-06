@@ -5,11 +5,10 @@
 // This library does not link against/set include dirs for nlohmann json by default!
 #include <nlohmann/json.hpp>
 
-// Requires that all members of T are themselves nlohmann::json serializable
-// Requires 1:1 field mapping
-
 namespace proto {
 
+// Visitor functor for converting a named value (such as a class member) to JSON.
+// Requires that T is nlohmann::json serializable (possibly through the use of this visitor on T's fundamental type members)..
 struct ToJsonVisitor {
     ToJsonVisitor(nlohmann::json& value)
     : jsonValue(value) {}
@@ -21,6 +20,7 @@ struct ToJsonVisitor {
     }
 };
 
+// Visitor functor for converting from JSON to a named object (such as a class member).
 struct FromJsonVisitor {
     FromJsonVisitor(const nlohmann::json& value)
     : jsonValue(value) {}

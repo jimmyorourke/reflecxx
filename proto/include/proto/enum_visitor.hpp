@@ -8,14 +8,16 @@
 
 namespace proto {
 
+// Returns the number of enumerators in an enum.
 template <typename EnumType>
-constexpr int enumSize() {
-    auto count = 0;
+constexpr size_t enumSize() {
+    size_t count = 0;
     auto v = [&count](const EnumType& e, const char* name, std::underlying_type_t<EnumType>) constexpr { count++; };
     visit<EnumType>(std::move(v));
     return count;
 }
 
+// Converts the name of the enumerator as string.
 template <typename EnumType>
 constexpr const char* enumName(EnumType target) {
     const char* targetName = nullptr;
@@ -29,6 +31,7 @@ constexpr const char* enumName(EnumType target) {
     return targetName;
 }
 
+// Converts a name to a matching enumerator.
 template <typename EnumType>
 constexpr EnumType fromName(const char* targetName) {
     EnumType e{};
@@ -48,6 +51,7 @@ constexpr EnumType fromName(const char* targetName) {
     return e;
 }
 
+// Returns an array containing the names of all enumerators.
 template <typename EnumType>
 constexpr auto enumNames() {
     std::array<const char*, enumSize<EnumType>()> names{};
@@ -60,6 +64,7 @@ constexpr auto enumNames() {
     return names;
 }
 
+// Returns an array of all enumerators.
 template <typename EnumType>
 constexpr auto enumerators() {
     std::array<EnumType, enumSize<EnumType>()> arr{};
@@ -72,8 +77,8 @@ constexpr auto enumerators() {
     return arr;
 }
 
-// Contains an enumerator with matching underlying type value
-// Tells you if static_cast is safe
+// Returns true if there is an enumerator corresponding to the underlying type value provided.
+// Can be used to determine if a static_cast to the enum type is safe.
 template <typename EnumType>
 constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue) {
     bool contains = false;
