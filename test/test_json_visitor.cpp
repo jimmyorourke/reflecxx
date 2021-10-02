@@ -4,7 +4,7 @@
 
 #include <proto/json_visitor.hpp>
 
-#include <generated/test_types_proto_generated.hpp>
+#include <generated_headers/test_types_proto_generated.hpp>
 
 namespace {
 test_types::Wrapper buildDefaultWrapper() {

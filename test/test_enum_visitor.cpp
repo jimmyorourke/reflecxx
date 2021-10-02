@@ -3,7 +3,7 @@
 #include "test_types.hpp"
 #include <proto/enum_visitor.hpp>
 
-#include <generated/test_types_proto_generated.hpp>
+#include <generated_headers/test_types_proto_generated.hpp>
 
 TEST(enum_visitor, enumSize) {
     // put static_asserts in a TEST because why not

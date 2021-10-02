@@ -1,6 +1,7 @@
 #pragma once
+
 // Monolithic include header
-// Note: does not include json_visitor.hpp as this library doesn't link/include nlohmann::json by default
+// Note: does not include json_visitor.hpp as this library doesn't link/include nlohmann::json by default.
 
 #include <proto/attributes.hpp>
 #include <proto/enum_visitor.hpp>

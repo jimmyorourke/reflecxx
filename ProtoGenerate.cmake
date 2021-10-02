@@ -59,13 +59,13 @@ macro(proto_generate INPUT_FILES TARGET)
     get_compilation_flags(${TARGET} FLAGS)
 
     add_custom_command(
-        OUTPUT ${OUTPUT_DIR}/generated.txt
+        OUTPUT ${OUTPUT}
         COMMAND ${PYTHON_COMMAND} ${PROTO_GEN_BASE_DIR}/generator/parse.py
         --libclang-directory ${CLANG_SHARED_OBJECT_DIRECTORY}
         --input-files ${INPUT_FILES}
-        --output-folder ${CMAKE_CURRENT_BINARY_DIR}/generated
+        --output-folder ${OUTPUT_DIR}
         --flags="${FLAGS}"
-        COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT_DIR}/generated.txt
+        COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
         # so that source files can be provided with relative paths
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Running PROTOGEN. Generating into: ${OUTPUT_DIR}"

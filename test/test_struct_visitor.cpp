@@ -6,7 +6,7 @@
 #include <proto/proto_base.hpp>
 #include <proto/struct_visitor.hpp>
 
-#include <generated/test_types_proto_generated.hpp>
+#include <generated_headers/test_types_proto_generated.hpp>
 
 struct InstanceTypeCounterVisitor {
     template <typename T>

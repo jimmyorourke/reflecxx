@@ -11,6 +11,8 @@ add_subdirectory(proto)
 set(BUILD_PROTO_TESTS 1)
 
 if(${BUILD_PROTO_TESTS})
+    # enable CTEST
+    enable_testing()
     # requires Conan
     add_subdirectory(test)
 endif()

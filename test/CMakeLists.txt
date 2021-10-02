@@ -1,5 +1,4 @@
-# enable CTEST
-enable_testing()
+
 
 include(cmake/ConanSetup.cmake)
 include(../ProtoGenerate.cmake)
