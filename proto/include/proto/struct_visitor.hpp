@@ -25,8 +25,8 @@ template <size_t i, typename T>
 constexpr const char* getName();
 
 // The variadic template args need to be last or type deduction doesn't work properly.
-template<size_t, typename F, typename T, typename... Ts, typename=std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
-constexpr void applyForEach(F&& f, T&& t1, Ts &&... ts);
+template <size_t, typename F, typename T, typename... Ts, typename = std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
+constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts);
 
 template <typename T>
 constexpr auto eql1(const T& t1, const T& t2);

@@ -8,7 +8,8 @@
 namespace proto {
 
 // Visitor functor for converting a named value (such as a class member) to JSON.
-// Requires that T is nlohmann::json serializable (possibly through the use of this visitor on T's fundamental type members)..
+// Requires that T is nlohmann::json serializable (possibly through the use of this visitor on T's fundamental type
+// members)..
 struct ToJsonVisitor {
     ToJsonVisitor(nlohmann::json& value)
     : jsonValue(value) {}

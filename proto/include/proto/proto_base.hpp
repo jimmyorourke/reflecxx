@@ -1,6 +1,6 @@
 #pragma once
 
-#include<tuple>
+#include <tuple>
 
 namespace proto {
 namespace detail {
@@ -48,11 +48,13 @@ constexpr void forEachField(T&& toVisit, Visitor&& visitor) {
 // write something about what the visitor needs to look like
 
 // Determined by the existance of a type visitor.
-template <typename T, typename SFINAE=void>
+template <typename T, typename SFINAE = void>
 struct IsProtoVisitable : std::false_type {};
-template<typename T>
-// Interestingly, we can't just test on the existance of the wrapper visit function like std::void_t<decltype(visit<T, int>(int()))>>. Always valid for some reason.
-struct IsProtoVisitable<T, std::void_t<decltype(detail::Acceptor<T, int>::visitd(std::declval<int>()))>> : std::true_type {};
+template <typename T>
+// Interestingly, we can't just test on the existance of the wrapper visit function like std::void_t<decltype(visit<T,
+// int>(int()))>>. Always valid for some reason.
+struct IsProtoVisitable<T, std::void_t<decltype(detail::Acceptor<T, int>::visitd(std::declval<int>()))>>
+: std::true_type {};
 template <typename T>
 inline constexpr bool IsProtoVisitableV = IsProtoVisitable<T>::value;
 

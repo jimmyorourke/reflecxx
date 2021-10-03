@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <test_types.hpp>
 #include <proto/enum_visitor.hpp>
+#include <test_types.hpp>
 
 TEST(enum_visitor, enumSize) {
     // put static_asserts in a TEST because why not

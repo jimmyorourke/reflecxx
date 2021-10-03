@@ -22,3 +22,6 @@ KeepEmptyLinesAtTheStartOfBlocks: true
 SpacesBeforeTrailingComments: 1
 MaxEmptyLinesToKeep: 1
 KeepEmptyLinesAtTheStartOfBlocks: false
+SpacesInSquareBrackets: false
+# Important!
+WhitespaceSensitiveMacros: ['CODEGENENERATED_INCLUDE']

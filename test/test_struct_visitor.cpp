@@ -120,15 +120,12 @@ TEST(struct_visitor, tupleCalls) {
 
     const test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
     auto& dref2 = proto::get<2>(bs2);
-    //dref2 += 3;
-    std::cout << bs2.d << " " << dref2 <<"\n";
+    // dref2 += 3;
+    std::cout << bs2.d << " " << dref2 << "\n";
     test_types::BasicStruct bs3{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    //EXPECT_TRUE(proto::eql1(bs3, bs2));
-    //bs2.b=false;
-    //EXPECT_FALSE(proto::eql1(bs3, bs2));
-
-
-
+    // EXPECT_TRUE(proto::eql1(bs3, bs2));
+    // bs2.b=false;
+    // EXPECT_FALSE(proto::eql1(bs3, bs2));
 }
 
 TEST(generation, type_traits) {

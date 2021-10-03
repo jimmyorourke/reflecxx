@@ -15,7 +15,8 @@ constexpr size_t enumSize() {
 template <typename EnumType>
 constexpr const char* enumName(EnumType target) {
     const char* targetName = nullptr;
-    auto v = [&targetName, target ](const EnumType& enumerator, const char* name, std::underlying_type_t<EnumType>) constexpr {
+    auto v = [&targetName,
+              target ](const EnumType& enumerator, const char* name, std::underlying_type_t<EnumType>) constexpr {
         if (enumerator == target) {
             targetName = name;
         }
@@ -30,7 +31,8 @@ template <typename EnumType>
 constexpr EnumType fromName(const char* targetName) {
     EnumType e{};
     bool found = false;
-    auto v = [&e, targetName, &found](const EnumType& enumerator, const char* name, std::underlying_type_t<EnumType>) constexpr {
+    auto v = [&e, targetName, &
+              found ](const EnumType& enumerator, const char* name, std::underlying_type_t<EnumType>) constexpr {
         if (name == targetName) {
             e = enumerator;
             found = true;
@@ -48,7 +50,7 @@ template <typename EnumType>
 constexpr auto enumNames() {
     std::array<const char*, enumSize<EnumType>()> names{};
     auto count = 0;
-    auto v = [&names, &count](const EnumType&, const char* name, std::underlying_type_t<EnumType>) constexpr {
+    auto v = [&names, &count ](const EnumType&, const char* name, std::underlying_type_t<EnumType>) constexpr {
         names[count] = name;
         count++;
     };
@@ -60,7 +62,7 @@ template <typename EnumType>
 constexpr auto enumerators() {
     std::array<EnumType, enumSize<EnumType>()> arr{};
     auto count = 0;
-    auto v = [&arr, &count](const EnumType& e, const char*, std::underlying_type_t<EnumType>) constexpr {
+    auto v = [&arr, &count ](const EnumType& e, const char*, std::underlying_type_t<EnumType>) constexpr {
         arr[count] = e;
         count++;
     };
@@ -71,7 +73,7 @@ constexpr auto enumerators() {
 template <typename EnumType>
 constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue) {
     bool contains = false;
-    auto v = [&contains, targetValue](const EnumType&, const char*, std::underlying_type_t<EnumType> value) constexpr {
+    auto v = [&contains, targetValue ](const EnumType&, const char*, std::underlying_type_t<EnumType> value) constexpr {
         if (value == targetValue) {
             contains = true;
         }

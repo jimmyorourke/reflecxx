@@ -5,8 +5,6 @@
 
 #include <proto/attributes.hpp>
 
-
-
 // test types in their own namespace to ensure names get qualified properly
 namespace test_types {
 

@@ -21,7 +21,7 @@ struct Extractor {
     // The !std::is_const_v<S> is not strictly required but helps avoid subtle bugs where the caller uses a const object
     // resulting in this template resolving as S = const T or const T&, resulting in this function being called instead
     // of the specialization on our target type T, without the compiler telling us.
-    template <typename S>//, typename = std::enable_if_t<!std::is_const_v<S>>>
+    template <typename S> //, typename = std::enable_if_t<!std::is_const_v<S>>>
     constexpr void operator()(const char* name, S& member) {
         _count++;
     }
@@ -40,19 +40,17 @@ struct Extractor {
 };
 
 // Tag struct where the const-ness of type T matches that of S.
-template<typename T, typename S, bool=std::is_const_v<S>>
+template <typename T, typename S, bool = std::is_const_v<S>>
 struct ConstMatch;
-template<typename T, typename S>
-struct ConstMatch<T, S, false>
- {
+template <typename T, typename S>
+struct ConstMatch<T, S, false> {
     using type = std::remove_const_t<T>;
 };
-template<typename T, typename S>
-struct ConstMatch<T, S, true>
- {
+template <typename T, typename S>
+struct ConstMatch<T, S, true> {
     using type = const std::remove_const_t<T>;
 };
-template<typename T, typename S>
+template <typename T, typename S>
 using ConstMatchT = typename ConstMatch<T, S>::type;
 
 } // namespace detail
@@ -66,7 +64,7 @@ constexpr auto& get(T& obj) {
 
     // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
     // issues! The compiler doesn't catch this!
-    detail::ConstMatchT<typeAt<i, rawT>, T>*  memberPtr = nullptr;
+    detail::ConstMatchT<typeAt<i, rawT>, T>* memberPtr = nullptr;
     detail::Extractor e{&memberPtr, i};
     visit(obj, std::move(e));
     // this should be impossible
@@ -103,20 +101,20 @@ constexpr const char* getName() {
 }
 
 // The variadic template args need to be last or type deduction doesn't work properly.
-template<size_t I = 0, typename F, typename T, typename... Ts, typename>
-constexpr void applyForEach(F&& f, T&& t1, Ts &&... ts) {
+template <size_t I = 0, typename F, typename T, typename... Ts, typename>
+constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts) {
     using cleanT = std::decay_t<T>;
     f(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
     // if constexpr makes recursive templates so much easier! And no integer sequences.
-    if constexpr(I+1 < fieldCount<cleanT>()) {
-        applyForEach<I+1>(std::forward<F>(f), std::forward<T>(t1), std::forward<T>(ts)...);
+    if constexpr (I + 1 < fieldCount<cleanT>()) {
+        applyForEach<I + 1>(std::forward<F>(f), std::forward<T>(t1), std::forward<T>(ts)...);
     }
 }
 
-template<typename T, typename Visitor>
+template <typename T, typename Visitor>
 constexpr void applyForEach(T&& t1, T&& t2, Visitor&& visitor) {
     applyForEach(std::forward<Visitor>(visitor), std::forward<T>(t1), std::forward<T>(t2));
-    //reflecxx::forEachField()
+    // reflecxx::forEachField()
 }
 
 template <typename T>
@@ -124,7 +122,7 @@ constexpr auto eql1(const T& t1, const T& t2) {
     bool eq = true;
     auto v = [&eq](const char*, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
-        //std::cout << val1 << " " << val2 << "\n";
+        // std::cout << val1 << " " << val2 << "\n";
         eq = (eq && (val1 == val2));
     };
     applyForEach(std::move(v), t1, t2);
