@@ -80,6 +80,9 @@ macro(proto_generate INPUT_FILES TARGET)
         DEPENDS
             ${OUTPUT_DIR}/generated.txt
     )
+
+    set_target_properties(${TARGET} PROPERTIES ADDITIONAL_CLEAN_FILES "${OUTPUT_DIR}")
+
     # Automatically set up a dependency for the target whose flags we used on the generated target. The consumer can
     # just use the generated sources.
     add_dependencies(${TARGET} ${TARGET}_PROTOGEN)

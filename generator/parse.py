@@ -1,6 +1,7 @@
 import argparse
 import sys
 import os
+
 from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -72,6 +73,7 @@ def main(
     index = clang.cindex.Index.create()
 
     flags.append("-DPROTO_GENERATION")
+    # flags = ["-DPROTO_GENERATION", "-IC:/Users/Jim/Desktop/wip/proto/include"]
 
     for file in input_files:
         # Dict of name to Structure. Use a dict so after parsing all annotated structures we can efficiently look up whether
@@ -87,7 +89,7 @@ def main(
         for diag in tu.diagnostics:
             # TODO: log level?
             print("Parse diagostic", diag)
-            print(diag.Warning)  # we can get warnings from unused commandline args
+            # we can get warnings from unused commandline args
             if diag.severity > diag.Warning:
                 print("Code generation failed.")
                 print("Flags:", flags)
@@ -128,12 +130,14 @@ if __name__ == "__main__":
         "--flags",
         "-f",
         type=str,
-        help="Compiler flags (including include paths, compile definitions, c++ standard) to provide to libclang, space separated as would appear on the commandline. Needs to be specified as --flags=",
+        help="Compiler flags (including include paths, compile definitions, c++ standard) to provide to libclang, space"
+        " separated as would appear on the commandline. Needs to be specified as --flags=",
         default="",
     )
     args = parser.parse_args()
     print(args)
     args.input_files = args.input_files or ["test/test_types.hpp"]
-    # since we're going to be specializing some templates, we have to use the same namespace as the original declarations
+    # since we're going to be specializing some templates, we have to use the same namespace as the original
+    # declarations
     namespace = "proto"
     main(args.libclang_directory, args.input_files, args.output_folder, args.flags.split(), namespace)

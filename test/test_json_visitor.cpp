@@ -1,19 +1,17 @@
 #include <gtest/gtest.h>
 
-#include "test_types.hpp"
+#include <test_types.hpp>
 
 #include <proto/json_visitor.hpp>
 
-#include <generated_headers/test_types_proto_generated.hpp>
-
 namespace {
-test_types::Wrapper buildDefaultWrapper() {
-    test_types::Basics b1{true, 1, 2.5};
-    test_types::Basics b2{false, -5, 3.4};
+test_types::NestingStruct buildNestingStruct() {
+    test_types::BasicStruct b1{true, 1, 2.5};
+    test_types::BasicStruct b2{false, -5, 3.4};
     return {9, -2.2, b1, {b1, b2, b1}, {b2, b2}};
 }
 
-nlohmann::json buildDefaultWrapperJson() {
+nlohmann::json buildNestingStructJson() {
     // build json representation by hand
     return {{"i", 9},
             {"d", -2.2},
@@ -27,19 +25,19 @@ nlohmann::json buildDefaultWrapperJson() {
 } // namespace
 
 TEST(json_visitor, toJson) {
-    test_types::Wrapper w = buildDefaultWrapper();
+    test_types::NestingStruct s = buildNestingStruct();
 
     // to json
-    nlohmann::json j = w;
+    nlohmann::json j = s;
 
-    EXPECT_EQ(j.dump(), buildDefaultWrapperJson().dump());
+    EXPECT_EQ(j.dump(), buildNestingStructJson().dump());
 }
 
 TEST(json_visitor, fromJson) {
-    nlohmann::json wJson = buildDefaultWrapperJson();
+    nlohmann::json j = buildNestingStructJson();
 
     // from json
-    test_types::Wrapper wFromJson = wJson;
+    test_types::NestingStruct nsFromJson = j;
 
-    EXPECT_EQ(wFromJson, buildDefaultWrapper());
+    EXPECT_EQ(nsFromJson, buildNestingStruct());
 }

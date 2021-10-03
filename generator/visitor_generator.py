@@ -7,6 +7,7 @@ from parse_types import Structure, Enumeration
 
 class CodeGenerator(object):
     """Base code generator."""
+
     INDENT_SIZE = 4
 
 
@@ -14,6 +15,7 @@ class VisitorGenerator(CodeGenerator):
     """Code generator for the Reflection Visitor annotation.
     Generates enum visitors, struct type visitors, struct instance visitors, and struct type tuples.
     """
+
     ANNOTATION = "PROTO_GEN: Reflection Visitor"
 
     def __init__(self, output_file: os.PathLike = None, namespace="generated"):
@@ -80,16 +82,15 @@ class VisitorGenerator(CodeGenerator):
             self._output(f"using type = std::tuple<{typestr}>;")
         self._output("};")
 
-
     def generate_struct_visitor(self, s: Structure):
-        #self._generate_visitable_trait(s)
+        # self._generate_visitable_trait(s)
         self._generate_tuple_alias(s)
         # instance visitor
         # Use SFINAE template to generate const and non-const ref "overloads"
         self._output(
             f"template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<{s.typename}, std::remove_const_t<T>>, bool> = true>"
         )
-        self._output(f"constexpr void visit([[maybe_unused]] T& toVisit, [[maybe_unused]] Visitor&& visitor) {{")
+        self._output(f"constexpr void visit(T& toVisit, Visitor&& visitor) {{")
         with IndentBlock(self):
             for name, base in s.base_classes.items():
                 # don't force the base class to have been annotated for visitation
@@ -108,7 +109,7 @@ class VisitorGenerator(CodeGenerator):
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor) {")
+            self._output("static constexpr void visitd(Visitor&& visitor) {")
             for name, base in s.base_classes.items():
                 # don't force the base class to have been annotated for visitation
                 if base is not None:
@@ -122,14 +123,13 @@ class VisitorGenerator(CodeGenerator):
         self._output("} // namespace detail")
         self._output("")
 
-
     def generate_enum_visitor(self, e: Enumeration):
         # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
         self._output("namespace detail {")
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{e.name}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visitd([[maybe_unused]] Visitor&& visitor) {")
+            self._output("static constexpr void visitd(Visitor&& visitor) {")
             with IndentBlock(self):
                 for name, val in e.enumerators.items():
                     # scoped names work for accessing unscoped enum elements too

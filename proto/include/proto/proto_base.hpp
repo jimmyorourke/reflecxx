@@ -40,10 +40,12 @@ template <typename T, typename Visitor>
 constexpr void forEachField(Visitor&& visitor) {
     visit<T>(std::forward<Visitor>(visitor));
 }
-template <typename ...Args>
-constexpr void forEachField(Args&&... args) {
-    visit(std::forward<Args>(args)...);
+template <typename T, typename Visitor>
+constexpr void forEachField(T&& toVisit, Visitor&& visitor) {
+    visit(std::forward<T>(toVisit), std::forward<Visitor>(visitor));
 }
+
+// write something about what the visitor needs to look like
 
 // Determined by the existance of a type visitor.
 template <typename T, typename SFINAE=void>

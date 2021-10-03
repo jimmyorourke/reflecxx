@@ -7,7 +7,7 @@ class Structure:
     """Represents a C or C++ Struct or Class."""
 
     def __init__(self, typename: str, annotation: Optional[str] = None):
-        self.typename = typename
+        self.typename: str = typename
         # name to Structure
         self.private_fields: Dict[str, "Structure"] = {}
         self.protected_fields: Dict[str, "Structure"] = {}
