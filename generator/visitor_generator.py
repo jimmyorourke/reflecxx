@@ -81,8 +81,13 @@ class VisitorGenerator(CodeGenerator):
         with IndentBlock(self):
             self._output(f"using type = std::tuple<{typestr}>;")
         self._output("};")
+        self._output("")
 
     def generate_struct_visitor(self, s: Structure):
+        self._output("////////////////////////////////////////////////////////////")
+        self._output(f"// {s.typename}")
+        self._output("////////////////////////////////////////////////////////////")
+        self._output("")
         # self._generate_visitable_trait(s)
         self._generate_tuple_alias(s)
         # instance visitor
@@ -109,27 +114,33 @@ class VisitorGenerator(CodeGenerator):
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visitd(Visitor&& visitor) {")
-            for name, base in s.base_classes.items():
-                # don't force the base class to have been annotated for visitation
-                if base is not None:
-                    self._output(f"visit<{base.typename}>(visitor);")
-                else:
-                    self._output(f"// not visiting unannotated base class {name}")
-            for field_name, field_struct in s.public_fields.items():
-                self._output(f'visitor("{field_name}", TagType<{field_struct.typename}>{{}});')
+            self._output("static constexpr void visitType(Visitor&& visitor) {")
+            with IndentBlock(self):
+                for name, base in s.base_classes.items():
+                    # don't force the base class to have been annotated for visitation
+                    if base is not None:
+                        self._output(f"visit<{base.typename}>(visitor);")
+                    else:
+                        self._output(f"// not visiting unannotated base class {name}")
+                for field_name, field_struct in s.public_fields.items():
+                    self._output(f'visitor("{field_name}", TagType<{field_struct.typename}>{{}});')
             self._output("}")
         self._output("};")
         self._output("} // namespace detail")
         self._output("")
 
     def generate_enum_visitor(self, e: Enumeration):
+        self._output("////////////////////////////////////////////////////////////")
+        self._output(f"// {e.name}")
+        self._output("////////////////////////////////////////////////////////////")
+        self._output("")
+
         # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
         self._output("namespace detail {")
         self._output("template <typename Visitor>")
         self._output(f"struct Acceptor<{e.name}, Visitor> {{")
         with IndentBlock(self):
-            self._output("static constexpr void visitd(Visitor&& visitor) {")
+            self._output("static constexpr void visitType(Visitor&& visitor) {")
             with IndentBlock(self):
                 for name, val in e.enumerators.items():
                     # scoped names work for accessing unscoped enum elements too

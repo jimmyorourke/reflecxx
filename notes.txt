@@ -24,6 +24,9 @@ examples with nlohmann json and rapidjson
 
 filter out msvc compile options?
 
+// write something about what the visitor needs to look like
+
+
 future:
 namespace scope reflection
 add meta data to types at compile time

@@ -5,11 +5,8 @@
 
 #include <proto/attributes.hpp>
 
-// test types in their own namespace to ensure names get qualified properly
+// test types in their own namespace to ensure names get qualified properly!
 namespace test_types {
-
-enum Unscoped { First = 2, Second, Third, Fourth } VISIT;
-enum class Scoped { First, Second, Third } VISIT;
 
 struct BasicStruct {
     bool b;
@@ -36,35 +33,6 @@ struct NestingStruct {
     bool operator==(const NestingStruct& rhs) const { return tied() == rhs.tied(); }
 } VISIT;
 
-class BasicClass {
- public:
-    bool b;
-    int i;
-    double d;
-} VISIT;
-
-class ChildClass : public BasicClass {
- public:
-    int publicField{};
-    int avoidUnreachable() { return privateField; }
-
- protected:
-    int protectedField{};
-
- private:
-    int privateField{};
-} VISIT;
-
-class UnreflectedBaseClass {
- public:
-    int baseField{};
-};
-
-class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
- public:
-    int chieldField{};
-} VISIT;
-
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/test_types_proto_generated.hpp>)
+#include CODEGENENERATED_INCLUDE(<generated_headers/test_structs_proto_generated.hpp>)

@@ -108,9 +108,8 @@ constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts) {
 }
 
 template <typename T, typename Visitor>
-constexpr void applyForEach(T&& t1, T&& t2, Visitor&& visitor) {
+constexpr void forEachApply(T&& t1, T&& t2, Visitor&& visitor) {
     applyForEach(std::forward<Visitor>(visitor), std::forward<T>(t1), std::forward<T>(t2));
-    // reflecxx::forEachField()
 }
 
 template <typename T>

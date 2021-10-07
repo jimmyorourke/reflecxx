@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <test_types.hpp>
-#include <type_traits>
-
 #include <proto/proto_base.hpp>
 #include <proto/struct_visitor.hpp>
+#include <test_classes.hpp>
+#include <test_structs.hpp>
 
 struct InstanceTypeCounterVisitor {
     template <typename T>

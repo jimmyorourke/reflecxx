@@ -14,7 +14,12 @@ target_include_directories(test_types
     ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
 )
 # Generate code based on any annotations in test_types.hpp, using the compilation flags from test_types library.
-proto_generate(test_types.hpp test_types)
+set(PROTOGEN_HEADERS
+  test_classes.hpp
+  test_enums.hpp
+  test_structs.hpp
+)
+proto_generate("${PROTOGEN_HEADERS}" test_types)
 
 set(TESTS
   test_enum_visitor
