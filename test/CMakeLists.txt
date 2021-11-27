@@ -1,4 +1,5 @@
 
+set(CONANFILE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR})
 include(cmake/ConanSetup.cmake)
 include(../ProtoGenerate.cmake)
 

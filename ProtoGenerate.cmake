@@ -62,6 +62,7 @@ macro(get_compilation_flags TARGET FLAGS_OUT)
   if (NOT ${CXX_STD} MATCHES "NOTFOUND")
     SET(FLAGS "${FLAGS};-std=c++${CXX_STD}")
   else()
+    # best guess
     SET(FLAGS "${FLAGS};-std=c++17")
   endif()
 
@@ -91,8 +92,8 @@ macro(proto_generate INPUT_FILES TARGET)
     # so that source files can be provided with relative paths
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running PROTOGEN. Generating into: ${OUTPUT_DIR}"
-    DEPENDS ${INPUT} ${PROTOGEN_SOURCES}
-    # Surprisingly, not using USES_TERMINAL gives better output because error messages show up at then end of the
+    DEPENDS ${INPUT_FILES} ${PROTOGEN_SOURCES}
+    # Surprisingly, not using USES_TERMINAL gives better output because error messages show up at the end of the
     # output when generation fails.
     #USES_TERMINAL
     #VERBATIM

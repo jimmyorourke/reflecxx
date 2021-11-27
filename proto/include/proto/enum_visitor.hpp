@@ -20,11 +20,11 @@ constexpr EnumType fromName(const char* enumeratorName);
 
 // Returns an array containing the names of all enumerators.
 template <typename EnumType>
-constexpr auto enumNames();
+constexpr auto enumNames() -> std::array<const char*, enumSize<EnumType>()>;
 
 // Returns an array of all enumerators.
 template <typename EnumType>
-constexpr auto enumerators();
+constexpr auto enumerators() -> std::array<EnumType, enumSize<EnumType>()>;
 
 // Returns true if there is an enumerator corresponding to the underlying type value provided.
 // Can be used to determine if a static_cast to the enum type is safe.

@@ -43,13 +43,6 @@ struct TypeCounterVisitor {
 };
 
 template <typename T>
-constexpr int countInts() {
-    TypeCounterVisitor t{};
-    proto::forEachField<T>(t);
-    return t.ints;
-}
-
-template <typename T>
 constexpr int countAllTypes() {
     TypeCounterVisitor t{};
     proto::forEachField<T>(t);
@@ -122,9 +115,13 @@ TEST(struct_visitor, tupleCalls) {
     // dref2 += 3;
     std::cout << bs2.d << " " << dref2 << "\n";
     test_types::BasicStruct bs3{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    // EXPECT_TRUE(proto::eql1(bs3, bs2));
-    // bs2.b=false;
-    // EXPECT_FALSE(proto::eql1(bs3, bs2));
+    EXPECT_TRUE(proto::equalTo(bs3, bs2));
+    test_types::BasicStruct bs4{/*b=*/false, /*i=*/1, /*d=*/1.5};
+    EXPECT_FALSE(proto::equalTo(bs3, bs4));
+
+    test_types::NestingStruct ns1{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
+    test_types::NestingStruct ns2{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
+    EXPECT_TRUE(proto::equalTo(ns1, ns2));
 }
 
 TEST(generation, type_traits) {

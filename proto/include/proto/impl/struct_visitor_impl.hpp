@@ -2,6 +2,8 @@
 
 #include <proto/proto_base.hpp>
 
+#include <iostream>
+#include <cassert>
 namespace proto {
 namespace detail {
 
@@ -38,14 +40,17 @@ struct Extractor {
 // Tag struct where the const-ness of type T matches that of S.
 template <typename T, typename S, bool = std::is_const_v<S>>
 struct ConstMatch;
+
 template <typename T, typename S>
 struct ConstMatch<T, S, false> {
     using type = std::remove_const_t<T>;
 };
+
 template <typename T, typename S>
 struct ConstMatch<T, S, true> {
     using type = const std::remove_const_t<T>;
 };
+
 template <typename T, typename S>
 using ConstMatchT = typename ConstMatch<T, S>::type;
 
@@ -112,16 +117,44 @@ constexpr void forEachApply(T&& t1, T&& t2, Visitor&& visitor) {
     applyForEach(std::forward<Visitor>(visitor), std::forward<T>(t1), std::forward<T>(t2));
 }
 
-template <typename T>
-constexpr auto eql1(const T& t1, const T& t2) {
-    bool eq = true;
-    auto v = [&eq](const char*, const auto& val1, const auto& val2) {
+template <typename T, typename O>
+constexpr bool compare(const T& t1, const T& t2, const O& op) {
+    std::cout <<"eql1\n";
+    bool res = true;
+    auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
-        // std::cout << val1 << " " << val2 << "\n";
-        eq = (eq && (val1 == val2));
+        //std::cout << val1 << " " << val2 << "\n";
+        using typet = std::remove_cv_t<std::remove_reference_t<decltype(val1)>>;
+
+        if constexpr(std::is_array_v<typet>) {
+            std::cout << n << " is_array_v, size: " <<  std::extent_v<decltype(val1)> << " " << \
+            std::extent_v<typet> << " " << sizeof(val1)/sizeof(val1[0])<< "\n";
+            const auto size1 = sizeof(val1)/sizeof(val1[0]);
+            const auto size2 = sizeof(val2)/sizeof(val2[0]);
+
+            res = (res && op(size1, size2));
+            if (!res) {
+                // break early
+                return;
+            }
+            for (auto i =0u; i < std::extent_v<typet>; ++i) {
+                // Recurse to handle whatever type the array members are
+                res = (res && compare(val1[i], val2[i], op));
+                std::cout << n << " is_array_v " << i << res << "\n";
+                if (!res) {
+                    // break early
+                    return;
+                }
+            }
+        }
+        else {
+            std::cout << n << " basecase\n";
+            res = (res && op(val1, val2));
+        }
+        std::cout << n << " " << res << "\n";
     };
     applyForEach(std::move(v), t1, t2);
-    return eq;
+    return res;
 }
 
 } // namespace proto

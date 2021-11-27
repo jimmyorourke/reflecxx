@@ -14,7 +14,7 @@ nlohmann::json buildNestingStructJson() {
     // build json representation by hand
     return {{"i", 9},
             {"d", -2.2},
-            {"b", {{"b", true}, {"i", 1}, {"d", 2.5}}},
+            {"bs", {{"b", true}, {"i", 1}, {"d", 2.5}}},
             {"basicsArr",
              {{{"b", true}, {"i", 1}, {"d", 2.5}},
               {{"b", false}, {"i", -5}, {"d", 3.4}},

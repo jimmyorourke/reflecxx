@@ -59,11 +59,6 @@ class VisitorGenerator(CodeGenerator):
     def _generate_postamble(self):
         self._output(f"}} // namespace {self._namespace}")
 
-    def _generate_visitable_trait(self, t: Structure):
-        self._output("template<>")
-        self._output(f"struct is_proto_visitable<{t.typename}> : std::true_type {{}};")
-        self._output("")
-
     @staticmethod
     def _get_all_public_fields(s: Structure):
         """Get all public fields, including inherited ones, recursively."""
@@ -88,7 +83,6 @@ class VisitorGenerator(CodeGenerator):
         self._output(f"// {s.typename}")
         self._output("////////////////////////////////////////////////////////////")
         self._output("")
-        # self._generate_visitable_trait(s)
         self._generate_tuple_alias(s)
         # instance visitor
         # Use SFINAE template to generate const and non-const ref "overloads"

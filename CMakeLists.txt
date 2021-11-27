@@ -1,14 +1,19 @@
 cmake_minimum_required(VERSION 3.12)
 project(proto_test)
 
+set(MAIN_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(MAIN_PROJECT ON)
+endif()
+
+option(BUILD_TESTS "Build the tests" ${MAIN_PROJECT})
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(proto)
 
-set(BUILD_PROTO_TESTS 1)
-
-if(${BUILD_PROTO_TESTS})
+if(BUILD_TESTS)
     # enable CTEST
     enable_testing()
     # requires Conan

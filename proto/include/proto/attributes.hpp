@@ -6,10 +6,50 @@
 
 #define CODEGENENERATED_INCLUDE(include_file) <proto/detail/empty.hpp>
 
+#define PROTO_EQL(rhs) false;
+
 #else
 // Outside of code generation, do nothing.
 #define VISIT
 
 #define CODEGENENERATED_INCLUDE(include_file) include_file
 
+#define PROTO_EQL(rhs) proto::equalTo(*this, rhs);
+
+
+
 #endif
+
+#define PROTO_EQL_OP(type) \
+bool operator==(const type& rhs) const { \
+    return PROTO_EQL(rhs); \
+}
+
+// #define PROTO_EQL1(rhs) \
+//     #ifndef PROTO_GENERATION \
+//         return proto::eql1(*this, rhs); \
+//     #else \
+//         return false; \
+//     #endif
+
+// bool operator==(const BasicStruct& rhs) const;
+//     // {
+//     //     //return tied() == rhs.tied();
+//     //     #ifndef PROTO_GENERATION
+//     //     return proto::eql1(*this, rhs);
+//     //     #else
+//     //     return false;
+//     //     #endif
+
+//     // }
+// } VISIT;
+
+// RCXX_GENERATE
+// RX_REFLECT
+// REFLECXX
+// REFLECXX_T
+
+// is_reflecxx_type
+// namespace reflecxx {
+
+// }

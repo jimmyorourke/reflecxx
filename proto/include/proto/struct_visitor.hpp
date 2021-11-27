@@ -28,8 +28,23 @@ constexpr const char* getName();
 template <size_t, typename F, typename T, typename... Ts, typename = std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
 constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts);
 
+template <typename T, typename O>
+constexpr bool compare(const T& lhs, const T& rhs, const O& op);
+
 template <typename T>
-constexpr auto eql1(const T& t1, const T& t2);
+constexpr bool equalTo(const T& lhs, const T& rhs) {
+    return compare(lhs, rhs, std::equal_to<>{});
+}
+
+template <typename T>
+constexpr bool lessThan(const T& lhs, const T& rhs) {
+    return compare(lhs, rhs, std::less<>{});
+}
+
+template <typename T>
+constexpr bool greaterThan(const T& lhs, const T& rhs) {
+    return compare(lhs, rhs, std::greater<>{});
+}
 
 } // namespace proto
 

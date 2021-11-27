@@ -73,7 +73,6 @@ def main(
     index = clang.cindex.Index.create()
 
     flags.append("-DPROTO_GENERATION")
-    # flags = ["-DPROTO_GENERATION", "-IC:/Users/Jim/Desktop/wip/proto/include"]
 
     for file in input_files:
         # Dict of name to Structure. Use a dict so after parsing all annotated structures we can efficiently look up whether
@@ -136,7 +135,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     print(args)
-    args.input_files = args.input_files or ["test/test_types.hpp"]
     # since we're going to be specializing some templates, we have to use the same namespace as the original
     # declarations
     namespace = "proto"

@@ -47,7 +47,7 @@ constexpr EnumType fromName(const char* targetName) {
 }
 
 template <typename EnumType>
-constexpr auto enumNames() {
+constexpr std::array<const char*, enumSize<EnumType>()> enumNames() {
     std::array<const char*, enumSize<EnumType>()> names{};
     auto count = 0;
     auto v = [&names, &count ](const EnumType&, const char* name, std::underlying_type_t<EnumType>) constexpr {
@@ -59,7 +59,7 @@ constexpr auto enumNames() {
 }
 
 template <typename EnumType>
-constexpr auto enumerators() {
+constexpr std::array<EnumType, enumSize<EnumType>()> enumerators() {
     std::array<EnumType, enumSize<EnumType>()> arr{};
     auto count = 0;
     auto v = [&arr, &count ](const EnumType& e, const char*, std::underlying_type_t<EnumType>) constexpr {

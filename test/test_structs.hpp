@@ -4,6 +4,7 @@
 #include <tuple>
 
 #include <proto/attributes.hpp>
+#include <proto/struct_visitor.hpp>
 
 // test types in their own namespace to ensure names get qualified properly!
 namespace test_types {
@@ -14,13 +15,22 @@ struct BasicStruct {
     double d;
 
     auto tied() const { return std::tie(b, i, d); }
-    bool operator==(const BasicStruct& rhs) const { return tied() == rhs.tied(); }
+    bool operator==(const BasicStruct& rhs) const;
+    // {
+    //     //return tied() == rhs.tied();
+    //     #ifndef PROTO_GENERATION
+    //     return proto::eql1(*this, rhs);
+    //     #else
+    //     return false;
+    //     #endif
+
+    // }
 } VISIT;
 
 struct NestingStruct {
     int i;
     double d;
-    BasicStruct b;
+    BasicStruct bs;
     BasicStruct basicsArr[3];
     std::array<BasicStruct, 2> basicsStdarr;
 
@@ -28,9 +38,10 @@ struct NestingStruct {
         // Nasty laziness hack to be able to compare C-style arrays. This is only used for equality checks in the test.s
         std::array<BasicStruct, 3> arr;
         std::copy(std::begin(basicsArr), std::end(basicsArr), std::begin(arr));
-        return std::tie(i, d, b, arr, basicsStdarr);
+        return std::tie(i, d, bs, arr, basicsStdarr);
     }
-    bool operator==(const NestingStruct& rhs) const { return tied() == rhs.tied(); }
+    PROTO_EQL_OP(NestingStruct);
+    //bool operator==(const NestingStruct& rhs) const { return tied() == rhs.tied(); }
 } VISIT;
 
 } // namespace test_types

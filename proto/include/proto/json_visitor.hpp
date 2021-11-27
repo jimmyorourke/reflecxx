@@ -2,7 +2,7 @@
 
 #include <proto/proto_base.hpp>
 
-// This library does not link against/set include dirs for nlohmann json by default!
+// Note: This library does not link against/set include dirs for nlohmann json by default!
 #include <nlohmann/json.hpp>
 
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that

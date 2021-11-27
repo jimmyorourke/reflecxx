@@ -29,8 +29,19 @@ std::string dumbToString(const T& obj) {
 }
 
 std::string toString(const BasicStruct& b) {
+    // The fact that this compiles shows that we are able to use the generated visitor of BasicStruct.
     return dumbToString(b);
 }
+
+bool BasicStruct::operator==(const BasicStruct& rhs) const {
+        //return tied() == rhs.tied();
+        //#ifndef PROTO_GENERATION
+        return proto::equalTo(*this, rhs);
+        //#else
+        //return false;
+        //#endif
+
+    }
 
 }
 
