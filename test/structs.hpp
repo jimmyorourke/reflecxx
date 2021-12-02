@@ -10,11 +10,14 @@
 namespace test_types {
 
 struct BasicStruct {
+// Demonstrate that the generated code respects compile flags and definitions
+#ifdef BASIC_STRUCT_HAS_B
     bool b;
+#endif
     int i;
     double d;
 
-    auto tied() const { return std::tie(b, i, d); }
+    //auto tied() const { return std::tie(b, i, d); }
     bool operator==(const BasicStruct& rhs) const;
     // {
     //     //return tied() == rhs.tied();
@@ -46,4 +49,4 @@ struct NestingStruct {
 
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/test_structs_proto_generated.hpp>)
+#include CODEGENENERATED_INCLUDE(<generated_headers/structs_proto_generated.hpp>)

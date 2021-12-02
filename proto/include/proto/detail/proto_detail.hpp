@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuple>
+#include <type_traits>
 
 namespace proto {
 namespace detail {
@@ -15,25 +16,26 @@ struct Acceptor;
 
 } // namespace detail
 
-// Tag structs to be able to pass types around as objects.
-struct BaseTag {};
+// Backport from c++20
 template <typename T>
-struct TagType : BaseTag {
-    using type = T;
+struct remove_cvref {
+    using type = std::remove_cv_t<std::remove_reference_t<T>>;
 };
+template<typename T >
+using remove_cvref_t = typename remove_cvref<T>::type;
 
 // Tag struct containing a tuple type composed of the types of all public (ie visitable) members of T.
 template <typename T>
-struct TupleType {
+struct tuple_type {
     using type = std::tuple<>;
 };
 template <typename T>
-using TupleTypeT = typename TupleType<T>::type;
+using tuple_type_t = typename tuple_type<T>::type;
 
 template <typename T, typename SFINAE = void>
-struct IsProtoVisitable : std::false_type {};
+struct is_proto_visitable : std::false_type {};
 template <typename T>
-struct IsProtoVisitable<T, std::void_t<decltype(detail::Acceptor<T, int>::visitType(std::declval<int>()))>>
+struct is_proto_visitable<T, std::void_t<decltype(detail::Acceptor<T, int>::visitType(std::declval<int>()))>>
 : std::true_type {};
 
 } // namespace proto

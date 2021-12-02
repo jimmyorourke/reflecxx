@@ -15,7 +15,7 @@
 // argument namespace will no longer apply).
 namespace nlohmann {
 template <typename T>
-struct adl_serializer<T, std::enable_if_t<proto::IsProtoVisitableV<T>>> {
+struct adl_serializer<T, std::enable_if_t<proto::is_proto_visitable_v<T>>> {
     static void to_json(json& j, const T& t) {
         proto::ToJsonVisitor v{j};
         proto::visit(t, std::move(v));

@@ -36,4 +36,4 @@ class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
 
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/test_classes_proto_generated.hpp>)
+#include CODEGENENERATED_INCLUDE(<generated_headers/classes_proto_generated.hpp>)

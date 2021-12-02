@@ -2,6 +2,9 @@
 
 #include <proto/proto_base.hpp>
 
+#include <functional>
+#include <tuple>
+
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
 #ifndef PROTO_GENERATION
@@ -10,7 +13,7 @@ namespace proto {
 
 // Declares an alias to the type of the i'th visitable field of T.
 template <size_t i, typename T>
-using typeAt = typename std::tuple_element<i, TupleTypeT<T>>::type;
+using typeAt = typename std::tuple_element<i, tuple_type_t<T>>::type;
 
 // Returns a reference to the i'th field in an instance of T.
 template <size_t i, typename T>

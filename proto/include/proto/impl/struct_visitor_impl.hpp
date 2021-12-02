@@ -2,8 +2,8 @@
 
 #include <proto/proto_base.hpp>
 
-#include <iostream>
 #include <cassert>
+
 namespace proto {
 namespace detail {
 
@@ -16,10 +16,7 @@ struct Extractor {
     : _t{t}
     , _target{target} {}
 
-    // The !std::is_const_v<S> is not strictly required but helps avoid subtle bugs where the caller uses a const object
-    // resulting in this template resolving as S = const T or const T&, resulting in this function being called instead
-    // of the specialization on our target type T, without the compiler telling us.
-    template <typename S> //, typename = std::enable_if_t<!std::is_const_v<S>>>
+    template <typename S>
     constexpr void operator()(const char* name, S& member) {
         _count++;
     }
@@ -59,7 +56,7 @@ using ConstMatchT = typename ConstMatch<T, S>::type;
 // Returns a reference to the i'th field in an instance of T.
 template <size_t i, typename T>
 constexpr auto& get(T& obj) {
-    using rawT = std::decay_t<T>;
+    using rawT =  proto::remove_cvref_t<T>;
     // This gives a more obvious error than when typeAt fails to compile
     static_assert(i < fieldCount<rawT>(), "Index out of range!");
 
@@ -104,7 +101,7 @@ constexpr const char* getName() {
 // The variadic template args need to be last or type deduction doesn't work properly.
 template <size_t I = 0, typename F, typename T, typename... Ts, typename>
 constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts) {
-    using cleanT = std::decay_t<T>;
+    using cleanT = proto::remove_cvref_t<T>;//std::remove_reference_t<T>>;//std::decay_t<T>;
     f(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
     // if constexpr makes recursive templates so much easier! And no integer sequences.
     if constexpr (I + 1 < fieldCount<cleanT>()) {
@@ -119,7 +116,7 @@ constexpr void forEachApply(T&& t1, T&& t2, Visitor&& visitor) {
 
 template <typename T, typename O>
 constexpr bool compare(const T& t1, const T& t2, const O& op) {
-    std::cout <<"eql1\n";
+    //std::cout <<"eql1\n";
     bool res = true;
     auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
@@ -127,8 +124,8 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
         using typet = std::remove_cv_t<std::remove_reference_t<decltype(val1)>>;
 
         if constexpr(std::is_array_v<typet>) {
-            std::cout << n << " is_array_v, size: " <<  std::extent_v<decltype(val1)> << " " << \
-            std::extent_v<typet> << " " << sizeof(val1)/sizeof(val1[0])<< "\n";
+            //std::cout << n << " is_array_v, size: " <<  std::extent_v<decltype(val1)> << " " << \
+            //std::extent_v<typet> << " " << sizeof(val1)/sizeof(val1[0])<< "\n";
             const auto size1 = sizeof(val1)/sizeof(val1[0]);
             const auto size2 = sizeof(val2)/sizeof(val2[0]);
 
@@ -140,7 +137,7 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
             for (auto i =0u; i < std::extent_v<typet>; ++i) {
                 // Recurse to handle whatever type the array members are
                 res = (res && compare(val1[i], val2[i], op));
-                std::cout << n << " is_array_v " << i << res << "\n";
+                //std::cout << n << " is_array_v " << i << res << "\n";
                 if (!res) {
                     // break early
                     return;
@@ -148,10 +145,10 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
             }
         }
         else {
-            std::cout << n << " basecase\n";
+            //std::cout << n << " basecase\n";
             res = (res && op(val1, val2));
         }
-        std::cout << n << " " << res << "\n";
+       // std::cout << n << " " << res << "\n";
     };
     applyForEach(std::move(v), t1, t2);
     return res;

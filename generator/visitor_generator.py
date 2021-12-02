@@ -72,7 +72,7 @@ class VisitorGenerator(CodeGenerator):
     def _generate_tuple_alias(self, s: Structure):
         typestr = ", ".join([field_struct.typename for _, field_struct in self._get_all_public_fields(s).items()])
         self._output("template<>")
-        self._output(f"struct TupleType<{s.typename}> {{")
+        self._output(f"struct tuple_type<{s.typename}> {{")
         with IndentBlock(self):
             self._output(f"using type = std::tuple<{typestr}>;")
         self._output("};")
@@ -117,7 +117,7 @@ class VisitorGenerator(CodeGenerator):
                     else:
                         self._output(f"// not visiting unannotated base class {name}")
                 for field_name, field_struct in s.public_fields.items():
-                    self._output(f'visitor("{field_name}", TagType<{field_struct.typename}>{{}});')
+                    self._output(f'visitor("{field_name}", type_tag<{field_struct.typename}>{{}});')
             self._output("}")
         self._output("};")
         self._output("} // namespace detail")
