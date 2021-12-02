@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <proto/proto_base.hpp>
-#include <proto/struct_visitor.hpp>
+#include <reflecxx/reflecxx_base.hpp>
+#include <reflecxx/struct_visitor.hpp>
 #include <classes.hpp>
 #include <structs.hpp>
 
@@ -29,9 +29,9 @@ struct InstanceTypeCounterVisitor {
 };
 
 struct TypeCounterVisitor {
-    constexpr void operator()(const char*, const proto::base_tag&) { otherTypes++; }
+    constexpr void operator()(const char*, const reflecxx::base_tag&) { otherTypes++; }
 
-    constexpr void operator()(const char*, const proto::type_tag<int>& tag) {
+    constexpr void operator()(const char*, const reflecxx::type_tag<int>& tag) {
         // Example extracting type from tag type instance
         static_assert(std::is_same_v<typename std::remove_reference_t<decltype(tag)>::type, int>);
         ints++;
@@ -44,14 +44,14 @@ struct TypeCounterVisitor {
 template <typename T>
 constexpr int countAllTypes() {
     TypeCounterVisitor t{};
-    proto::forEachField<T>(t);
+    reflecxx::forEachField<T>(t);
     return t.ints + t.otherTypes;
 }
 
 TEST(struct_visitor, visitStructMembers) {
     test_types::NestingStruct s{};
     InstanceTypeCounterVisitor v{};
-    proto::forEachField(s, v);
+    reflecxx::forEachField(s, v);
 
     EXPECT_EQ(v.otherTypes, 3);
     EXPECT_EQ(v.ints, 1);
@@ -63,7 +63,7 @@ TEST(struct_visitor, visitStructMembers) {
 TEST(struct_visitor, visitClassMembers) {
     test_types::BasicClass bc{};
     InstanceTypeCounterVisitor v{};
-    proto::forEachField(bc, v);
+    reflecxx::forEachField(bc, v);
 
     EXPECT_EQ(v.otherTypes, 1);
     EXPECT_EQ(v.ints, 1);
@@ -76,7 +76,7 @@ TEST(struct_visitor, visitDerivedClass) {
     test_types::ChildClass c{};
     InstanceTypeCounterVisitor v{};
     // visit parent by default
-    proto::forEachField(c, v);
+    reflecxx::forEachField(c, v);
 
     EXPECT_EQ(v.ints, 2);
     EXPECT_EQ(v.allTypes(), 4);
@@ -87,7 +87,7 @@ TEST(struct_visitor, visitDerivedClass) {
 TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
     test_types::ChildOfUnreflectedBaseClass cub{};
     InstanceTypeCounterVisitor v{};
-    proto::forEachField(cub, v);
+    reflecxx::forEachField(cub, v);
 
     EXPECT_EQ(v.ints, 1);
     EXPECT_EQ(v.allTypes(), 1);
@@ -96,12 +96,12 @@ TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
 }
 
 TEST(struct_visitor, tupleCalls) {
-    static_assert(proto::fieldCount<test_types::BasicStruct>() == 3);
+    static_assert(reflecxx::fieldCount<test_types::BasicStruct>() == 3);
 
-    static_assert(proto::getName<2, test_types::BasicStruct>() == "d");
+    static_assert(reflecxx::getName<2, test_types::BasicStruct>() == "d");
 
     test_types::BasicStruct bs{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    auto& dref = proto::get<2>(bs);
+    auto& dref = reflecxx::get<2>(bs);
 
     static_assert(std::is_same_v<std::remove_reference_t<decltype(dref)>, decltype(bs.d)>);
 
@@ -110,22 +110,22 @@ TEST(struct_visitor, tupleCalls) {
     EXPECT_EQ(bs.d, 4.5);
 
     const test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    auto& dref2 = proto::get<2>(bs2);
+    auto& dref2 = reflecxx::get<2>(bs2);
     // dref2 += 3;
     std::cout << bs2.d << " " << dref2 << "\n";
     test_types::BasicStruct bs3{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    EXPECT_TRUE(proto::equalTo(bs3, bs2));
+    EXPECT_TRUE(reflecxx::equalTo(bs3, bs2));
     test_types::BasicStruct bs4{/*b=*/false, /*i=*/1, /*d=*/1.5};
-    EXPECT_FALSE(proto::equalTo(bs3, bs4));
+    EXPECT_FALSE(reflecxx::equalTo(bs3, bs4));
 
     test_types::NestingStruct ns1{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
     test_types::NestingStruct ns2{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
-    EXPECT_TRUE(proto::equalTo(ns1, ns2));
+    EXPECT_TRUE(reflecxx::equalTo(ns1, ns2));
 }
 
 TEST(generation, type_traits) {
     struct MyType {};
 
-    static_assert(!proto::is_proto_visitable_v<MyType>);
-    static_assert(proto::is_proto_visitable_v<test_types::BasicStruct>);
+    static_assert(!reflecxx::is_reflecxx_visitable_v<MyType>);
+    static_assert(reflecxx::is_reflecxx_visitable_v<test_types::BasicStruct>);
 }

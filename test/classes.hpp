@@ -1,6 +1,6 @@
 #pragma once
 
-#include <proto/attributes.hpp>
+#include <reflecxx/attributes.hpp>
 
 // test types in their own namespace to ensure names get qualified properly!
 namespace test_types {
@@ -36,4 +36,4 @@ class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
 
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/classes_proto_generated.hpp>)
+#include CODEGENENERATED_INCLUDE(<generated_headers/classes_reflecxx_generated.hpp>)

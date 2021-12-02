@@ -4,7 +4,7 @@
 // get compiled by the generator, don't define it during generation.
 #ifndef PROTO_GENERATION
 
-namespace proto {
+namespace reflecxx {
 
 // Returns the number of enumerators in an enum.
 template <typename EnumType>
@@ -31,7 +31,7 @@ constexpr auto enumerators() -> std::array<EnumType, enumSize<EnumType>()>;
 template <typename EnumType>
 constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue);
 
-} // namespace proto
+} // namespace reflecxx
 
 #include "impl/enum_visitor_impl.hpp"
 

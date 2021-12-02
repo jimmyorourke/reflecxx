@@ -1,6 +1,6 @@
 #pragma once
 
-#include <proto/proto_base.hpp>
+#include <reflecxx/reflecxx_base.hpp>
 
 // Note: This library does not link against/set include dirs for nlohmann json by default!
 #include <nlohmann/json.hpp>
@@ -9,28 +9,28 @@
 // get compiled by the generator, don't define it during generation.
 #ifndef PROTO_GENERATION
 
-// Automatically define to/from nlohmann JSON functions for any proto visitable type. Wow!
+// Automatically define to/from nlohmann JSON functions for any reflecxx visitable type. Wow!
 // Note that since this uses the adl_serializer, if specialization for any type is desired it must also be done by
 // specializing this adl_serializer struct rather than defining the to_json/from_json free functions (since ADL into the
 // argument namespace will no longer apply).
 namespace nlohmann {
 template <typename T>
-struct adl_serializer<T, std::enable_if_t<proto::is_proto_visitable_v<T>>> {
+struct adl_serializer<T, std::enable_if_t<reflecxx::is_reflecxx_visitable_v<T>>> {
     static void to_json(json& j, const T& t) {
-        proto::ToJsonVisitor v{j};
-        proto::visit(t, std::move(v));
+        reflecxx::ToJsonVisitor v{j};
+        reflecxx::visit(t, std::move(v));
     }
 
     static void from_json(const json& j, T& t) {
-        proto::FromJsonVisitor v{j};
-        proto::visit(t, std::move(v));
+        reflecxx::FromJsonVisitor v{j};
+        reflecxx::visit(t, std::move(v));
     }
 };
 } // namespace nlohmann
 
 #endif // PROTO_GENERATION
 
-namespace proto {
+namespace reflecxx {
 
 // Visitor functor for converting a named value (such as a class member) to JSON.
 // Requires that T is nlohmann::json serializable (possibly through the use of this visitor on T's fundamental type
@@ -77,4 +77,4 @@ struct FromJsonVisitor {
     }
 };
 
-} // namespace proto
+} // namespace reflecxx

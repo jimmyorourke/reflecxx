@@ -1,8 +1,8 @@
 #pragma once
 
-#include <proto/proto_base.hpp>
+#include <reflecxx/reflecxx_base.hpp>
 
-namespace proto {
+namespace reflecxx {
 
 template <typename EnumType>
 constexpr size_t enumSize() {
@@ -82,4 +82,4 @@ constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue) {
     return contains;
 }
 
-} // namespace proto
+} // namespace reflecxx

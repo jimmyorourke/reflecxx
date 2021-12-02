@@ -106,7 +106,7 @@ def main(
 
         # Generate!
         os.makedirs(output_folder, exist_ok=True)
-        output_file = Path(output_folder) / (Path(file).stem + "_proto_generated.hpp")
+        output_file = Path(output_folder) / (Path(file).stem + "_reflecxx_generated.hpp")
 
         with VisitorGenerator(output_file=output_file, namespace=namespace) as v:
             for s in structures.values():
@@ -137,5 +137,5 @@ if __name__ == "__main__":
     print(args)
     # since we're going to be specializing some templates, we have to use the same namespace as the original
     # declarations
-    namespace = "proto"
+    namespace = "reflecxx"
     main(args.libclang_directory, args.input_files, args.output_folder, args.flags.split(), namespace)

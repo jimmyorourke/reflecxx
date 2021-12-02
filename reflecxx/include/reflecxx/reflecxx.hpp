@@ -3,7 +3,7 @@
 // Monolithic include header
 // Note: does not include json_visitor.hpp as this library doesn't link/include nlohmann::json by default.
 
-#include <proto/attributes.hpp>
-#include <proto/enum_visitor.hpp>
-#include <proto/proto_base.hpp>
-#include <proto/struct_visitor.hpp>
+#include <reflecxx/attributes.hpp>
+#include <reflecxx/enum_visitor.hpp>
+#include <reflecxx/reflecxx_base.hpp>
+#include <reflecxx/struct_visitor.hpp>

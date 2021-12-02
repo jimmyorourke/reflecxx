@@ -23,7 +23,7 @@ std::string dumbToString(const T& obj) {
         first = false;
         out << name << ":" << member;
     };
-    proto::visit(obj, std::move(v));
+    reflecxx::visit(obj, std::move(v));
     return out.str();
 }
 }
@@ -36,7 +36,7 @@ std::string toString(const BasicStruct& b) {
 bool BasicStruct::operator==(const BasicStruct& rhs) const {
         //return tied() == rhs.tied();
         //#ifndef PROTO_GENERATION
-        return proto::equalTo(*this, rhs);
+        return reflecxx::equalTo(*this, rhs);
         //#else
         //return false;
         //#endif

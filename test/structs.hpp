@@ -3,8 +3,8 @@
 #include <array>
 #include <tuple>
 
-#include <proto/attributes.hpp>
-#include <proto/struct_visitor.hpp>
+#include <reflecxx/attributes.hpp>
+#include <reflecxx/struct_visitor.hpp>
 
 // test types in their own namespace to ensure names get qualified properly!
 namespace test_types {
@@ -22,7 +22,7 @@ struct BasicStruct {
     // {
     //     //return tied() == rhs.tied();
     //     #ifndef PROTO_GENERATION
-    //     return proto::eql1(*this, rhs);
+    //     return reflecxx::eql1(*this, rhs);
     //     #else
     //     return false;
     //     #endif
@@ -49,4 +49,4 @@ struct NestingStruct {
 
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/structs_proto_generated.hpp>)
+#include CODEGENENERATED_INCLUDE(<generated_headers/structs_reflecxx_generated.hpp>)

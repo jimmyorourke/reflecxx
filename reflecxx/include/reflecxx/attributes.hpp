@@ -4,7 +4,7 @@
 // Use VISIT after a struct/class or enum declaration to generate a visitor for it.
 #define VISIT __attribute__((annotate("PROTO_GEN: Reflection Visitor")))
 
-#define CODEGENENERATED_INCLUDE(include_file) <proto/detail/empty.hpp>
+#define CODEGENENERATED_INCLUDE(include_file) <reflecxx/detail/empty.hpp>
 
 #define PROTO_EQL(rhs) false;
 
@@ -14,7 +14,7 @@
 
 #define CODEGENENERATED_INCLUDE(include_file) include_file
 
-#define PROTO_EQL(rhs) proto::equalTo(*this, rhs);
+#define PROTO_EQL(rhs) reflecxx::equalTo(*this, rhs);
 
 
 
@@ -27,7 +27,7 @@ bool operator==(const type& rhs) const { \
 
 // #define PROTO_EQL1(rhs) \
 //     #ifndef PROTO_GENERATION \
-//         return proto::eql1(*this, rhs); \
+//         return reflecxx::eql1(*this, rhs); \
 //     #else \
 //         return false; \
 //     #endif
@@ -36,7 +36,7 @@ bool operator==(const type& rhs) const { \
 //     // {
 //     //     //return tied() == rhs.tied();
 //     //     #ifndef PROTO_GENERATION
-//     //     return proto::eql1(*this, rhs);
+//     //     return reflecxx::eql1(*this, rhs);
 //     //     #else
 //     //     return false;
 //     //     #endif

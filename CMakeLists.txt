@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(proto_test)
+project(reflecxx_test)
 
 set(MAIN_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -11,7 +11,7 @@ option(BUILD_TESTS "Build the tests" ${MAIN_PROJECT})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_subdirectory(proto)
+add_subdirectory(reflecxx)
 
 if(BUILD_TESTS)
     # enable CTEST

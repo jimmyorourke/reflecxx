@@ -7,7 +7,7 @@ add_library(libtypes
   types.cpp
 )
 target_link_libraries(libtypes
-  proto
+  reflecxx
 )
 target_include_directories(libtypes
   PUBLIC
@@ -24,7 +24,7 @@ set(PROTOGEN_HEADERS
   enums.hpp
   structs.hpp
 )
-proto_generate("${PROTOGEN_HEADERS}" libtypes)
+reflecxx_generate("${PROTOGEN_HEADERS}" libtypes)
 
 set(TESTS
   test_enum_visitor
@@ -38,7 +38,7 @@ foreach(TEST ${TESTS})
   )
   target_link_libraries(${TEST}
     PRIVATE
-      proto
+      reflecxx
       libtypes
       CONAN_PKG::gtest
   )

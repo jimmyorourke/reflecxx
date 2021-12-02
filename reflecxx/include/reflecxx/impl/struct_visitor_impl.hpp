@@ -1,10 +1,10 @@
 #pragma once
 
-#include <proto/proto_base.hpp>
+#include <reflecxx/reflecxx_base.hpp>
 
 #include <cassert>
 
-namespace proto {
+namespace reflecxx {
 namespace detail {
 
 // Functor that can extract a pointer to the field at a given index in an instance of a struct.
@@ -56,7 +56,7 @@ using ConstMatchT = typename ConstMatch<T, S>::type;
 // Returns a reference to the i'th field in an instance of T.
 template <size_t i, typename T>
 constexpr auto& get(T& obj) {
-    using rawT =  proto::remove_cvref_t<T>;
+    using rawT =  reflecxx::remove_cvref_t<T>;
     // This gives a more obvious error than when typeAt fails to compile
     static_assert(i < fieldCount<rawT>(), "Index out of range!");
 
@@ -101,7 +101,7 @@ constexpr const char* getName() {
 // The variadic template args need to be last or type deduction doesn't work properly.
 template <size_t I = 0, typename F, typename T, typename... Ts, typename>
 constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts) {
-    using cleanT = proto::remove_cvref_t<T>;//std::remove_reference_t<T>>;//std::decay_t<T>;
+    using cleanT = reflecxx::remove_cvref_t<T>;//std::remove_reference_t<T>>;//std::decay_t<T>;
     f(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
     // if constexpr makes recursive templates so much easier! And no integer sequences.
     if constexpr (I + 1 < fieldCount<cleanT>()) {
@@ -154,4 +154,4 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
     return res;
 }
 
-} // namespace proto
+} // namespace reflecxx

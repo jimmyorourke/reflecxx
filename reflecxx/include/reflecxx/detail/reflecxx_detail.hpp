@@ -3,7 +3,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace proto {
+namespace reflecxx {
 namespace detail {
 // Type visitors require partially specialized template structs
 template <typename T, typename Visitor>
@@ -33,9 +33,9 @@ template <typename T>
 using tuple_type_t = typename tuple_type<T>::type;
 
 template <typename T, typename SFINAE = void>
-struct is_proto_visitable : std::false_type {};
+struct is_reflecxx_visitable : std::false_type {};
 template <typename T>
-struct is_proto_visitable<T, std::void_t<decltype(detail::Acceptor<T, int>::visitType(std::declval<int>()))>>
+struct is_reflecxx_visitable<T, std::void_t<decltype(detail::Acceptor<T, int>::visitType(std::declval<int>()))>>
 : std::true_type {};
 
-} // namespace proto
+} // namespace reflecxx

@@ -72,7 +72,7 @@ endmacro()
 
 # TODO: test multiple headers
 # Give directory for output, auto naming scheme
-macro(proto_generate INPUT_FILES TARGET)
+macro(reflecxx_generate INPUT_FILES TARGET)
   set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated_headers)
   # Since the generated output file names will be determined based on the input, we will use a trick to ensure cmake
   # doesn't run the custom_command on every build if it doesn't have to. We'll just touch an indicator file.

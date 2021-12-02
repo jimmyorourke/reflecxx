@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <proto/json_visitor.hpp>
+#include <reflecxx/json_visitor.hpp>
 #include <structs.hpp>
 
 namespace {

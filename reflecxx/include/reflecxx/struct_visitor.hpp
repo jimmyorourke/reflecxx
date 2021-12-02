@@ -1,6 +1,6 @@
 #pragma once
 
-#include <proto/proto_base.hpp>
+#include <reflecxx/reflecxx_base.hpp>
 
 #include <functional>
 #include <tuple>
@@ -9,7 +9,7 @@
 // get compiled by the generator, don't define it during generation.
 #ifndef PROTO_GENERATION
 
-namespace proto {
+namespace reflecxx {
 
 // Declares an alias to the type of the i'th visitable field of T.
 template <size_t i, typename T>
@@ -49,7 +49,7 @@ constexpr bool greaterThan(const T& lhs, const T& rhs) {
     return compare(lhs, rhs, std::greater<>{});
 }
 
-} // namespace proto
+} // namespace reflecxx
 
 #include "impl/struct_visitor_impl.hpp"
 

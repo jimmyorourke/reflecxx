@@ -1,6 +1,6 @@
 #pragma once
 
-#include <proto/attributes.hpp>
+#include <reflecxx/attributes.hpp>
 
 // test types in their own namespace to ensure names get qualified properly!
 namespace test_types {
@@ -10,4 +10,4 @@ enum class Scoped { First, Second, Third } VISIT;
 
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/enums_proto_generated.hpp>)
+#include CODEGENENERATED_INCLUDE(<generated_headers/enums_reflecxx_generated.hpp>)
