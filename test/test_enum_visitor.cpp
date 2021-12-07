@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include<array>
+#include <array>
 
-#include <reflecxx/enum_visitor.hpp>
 #include <enums.hpp>
+#include <reflecxx/enum_visitor.hpp>
 
 TEST(enum_visitor, enumSize) {
     // put static_asserts in a TEST because why not
@@ -20,6 +20,7 @@ TEST(enum_visitor, fromName) {
     static_assert(reflecxx::fromName<test_types::Unscoped>("Fourth") == test_types::Fourth);
     static_assert(reflecxx::fromName<test_types::Scoped>("Third") == test_types::Scoped::Third);
 
+    static_assert((bool)reflecxx::fromName<test_types::Scoped>("fifth"));
     // not expected to compile
     // static_assert(reflecxx::fromName<test_types::Scoped>("fifth") == test_types::Scoped::Third);
 

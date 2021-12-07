@@ -31,6 +31,11 @@ constexpr const char* getName();
 template <size_t, typename F, typename T, typename... Ts, typename = std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
 constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts);
 
+template <typename T, typename Visitor>
+constexpr void forEachApply(T&& t1, T&& t2, Visitor&& visitor) {
+    applyForEach(std::forward<Visitor>(visitor), std::forward<T>(t1), std::forward<T>(t2));
+}
+
 template <typename T, typename O>
 constexpr bool compare(const T& lhs, const T& rhs, const O& op);
 

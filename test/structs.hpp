@@ -17,7 +17,7 @@ struct BasicStruct {
     int i;
     double d;
 
-    //auto tied() const { return std::tie(b, i, d); }
+    // auto tied() const { return std::tie(b, i, d); }
     bool operator==(const BasicStruct& rhs) const;
     // {
     //     //return tied() == rhs.tied();
@@ -44,7 +44,7 @@ struct NestingStruct {
         return std::tie(i, d, bs, arr, basicsStdarr);
     }
     PROTO_EQL_OP(NestingStruct);
-    //bool operator==(const NestingStruct& rhs) const { return tied() == rhs.tied(); }
+    // bool operator==(const NestingStruct& rhs) const { return tied() == rhs.tied(); }
 } VISIT;
 
 } // namespace test_types

@@ -10,7 +10,7 @@ class BasicClass {
     bool b;
     int i;
     double d;
-} VISIT; //REFLECXX_GENERATE;
+} VISIT; // REFLECXX_GENERATE;
 
 class ChildClass : public BasicClass {
  public:

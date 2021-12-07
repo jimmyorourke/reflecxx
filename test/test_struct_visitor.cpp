@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <classes.hpp>
 #include <reflecxx/reflecxx_base.hpp>
 #include <reflecxx/struct_visitor.hpp>
-#include <classes.hpp>
 #include <structs.hpp>
 
 struct InstanceTypeCounterVisitor {

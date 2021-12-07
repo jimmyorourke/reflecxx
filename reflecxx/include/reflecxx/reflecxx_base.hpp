@@ -37,6 +37,6 @@ constexpr void forEachField(T&& toVisit, Visitor&& visitor) {
 template <typename T, typename SFINAE>
 struct is_reflecxx_visitable;
 template <typename T>
-inline constexpr bool is_reflecxx_visitable_v = is_reflecxx_visitable<T>::value;
+constexpr bool is_reflecxx_visitable_v = is_reflecxx_visitable<T>::value;
 
 } // namespace reflecxx

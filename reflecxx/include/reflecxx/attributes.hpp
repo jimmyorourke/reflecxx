@@ -16,14 +16,10 @@
 
 #define PROTO_EQL(rhs) reflecxx::equalTo(*this, rhs);
 
-
-
 #endif
 
 #define PROTO_EQL_OP(type) \
-bool operator==(const type& rhs) const { \
-    return PROTO_EQL(rhs); \
-}
+    bool operator==(const type& rhs) const { return PROTO_EQL(rhs); }
 
 // #define PROTO_EQL1(rhs) \
 //     #ifndef PROTO_GENERATION \
