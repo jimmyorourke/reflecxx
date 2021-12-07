@@ -1,7 +1,7 @@
 
 set(CONANFILE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR})
 include(cmake/ConanSetup.cmake)
-include(../ProtoGenerate.cmake)
+include(../ReflecxxGen.cmake)
 
 add_library(libtest_types
   libtest_types/type_helpers.cpp
@@ -15,16 +15,17 @@ target_include_directories(libtest_types
     ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
 )
 target_compile_definitions(libtest_types
+  # testing that compile definitions are respected in generate code
   PUBLIC
     BASIC_STRUCT_HAS_B
 )
 # Generate code based on any annotations in these headers, using the compilation flags from libtypes target.
-set(PROTOGEN_HEADERS
+set(REFLECXX_HEADERS
   libtest_types/include/libtest_types/classes.hpp
   libtest_types/include/libtest_types/enums.hpp
   libtest_types/include/libtest_types/structs.hpp
 )
-reflecxx_generate("${PROTOGEN_HEADERS}" libtest_types)
+reflecxx_generate("${REFLECXX_HEADERS}" libtest_types)
 
 
 set(TESTS

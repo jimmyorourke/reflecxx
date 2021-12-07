@@ -8,6 +8,9 @@
 
 #define PROTO_EQL(rhs) false;
 
+#define REFLECXX_CMP(lhs, rhs, op) \
+    {}
+
 #else
 // Outside of code generation, do nothing.
 #define REFLECXX_T
@@ -15,6 +18,7 @@
 #define REFLECXX_HEADER(include_file) <generated_headers/include_file>
 
 #define PROTO_EQL(rhs) reflecxx::equalTo(*this, rhs);
+#define REFLECXX_CMP(lhs, rhs, op) reflecxx::compare(lhs, rhs, op)
 
 #endif
 

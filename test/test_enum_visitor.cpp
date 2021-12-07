@@ -35,7 +35,7 @@ TEST(enum_visitor, contains) {
     static_assert(!reflecxx::enumContains<test_types::Scoped>(3));
 }
 
-TEST(enum_visitor, iterators) {
+TEST(enum_visitor, enumerators) {
     std::array<test_types::Scoped, 3> scopedEs{test_types::Scoped::First, test_types::Scoped::Second,
                                                test_types::Scoped::Third};
 
@@ -46,9 +46,11 @@ TEST(enum_visitor, iterators) {
         EXPECT_EQ(e, scopedEs[i]);
         ++i;
     }
+}
 
+TEST(enum_visitor, names) {
     std::array<const char*, 3> names{"First", "Second", "Third"};
-    i = 0;
+    size_t i = 0;
     for (const auto& e : reflecxx::enumNames<test_types::Scoped>()) {
         EXPECT_EQ(e, names[i]);
         ++i;

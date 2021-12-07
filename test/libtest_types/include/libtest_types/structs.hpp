@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include <tuple>
+#include <functional>
 
 #include <reflecxx/attributes.hpp>
 #include <reflecxx/struct_visitor.hpp>
@@ -27,14 +27,7 @@ struct NestingStruct {
     BasicStruct basicsArr[3];
     std::array<BasicStruct, 2> basicsStdarr;
 
-    auto tied() const {
-        // Nasty laziness hack to be able to compare C-style arrays. This is only used for equality checks in the test.s
-        std::array<BasicStruct, 3> arr;
-        std::copy(std::begin(basicsArr), std::end(basicsArr), std::begin(arr));
-        return std::tie(i, d, bs, arr, basicsStdarr);
-    }
-    PROTO_EQL_OP(NestingStruct);
-    // bool operator==(const NestingStruct& rhs) const { return tied() == rhs.tied(); }
+    bool operator==(const NestingStruct& rhs) const { return REFLECXX_CMP(*this, rhs, std::equal_to<>{}); }
 } REFLECXX_T;
 
 } // namespace test_types

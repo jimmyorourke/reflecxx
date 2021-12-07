@@ -5,6 +5,7 @@
 #include <reflecxx/reflecxx_base.hpp>
 #include <reflecxx/struct_visitor.hpp>
 
+namespace {
 struct InstanceTypeCounterVisitor {
     template <typename T>
     void operator()(const char*, const T&) {
@@ -47,6 +48,7 @@ constexpr int countAllTypes() {
     reflecxx::forEachField<T>(t);
     return t.ints + t.otherTypes;
 }
+} // namespace
 
 TEST(struct_visitor, visitStructMembers) {
     test_types::NestingStruct s{};
@@ -58,6 +60,7 @@ TEST(struct_visitor, visitStructMembers) {
     EXPECT_EQ(v.doubles, 1);
 
     static_assert(countAllTypes<test_types::NestingStruct>() == 5);
+    static_assert(reflecxx::fieldCount<test_types::NestingStruct>() == 5);
 }
 
 TEST(struct_visitor, visitClassMembers) {
@@ -70,6 +73,7 @@ TEST(struct_visitor, visitClassMembers) {
     EXPECT_EQ(v.doubles, 1);
 
     static_assert(countAllTypes<test_types::BasicClass>() == 3);
+    static_assert(reflecxx::fieldCount<test_types::BasicClass>() == 3);
 }
 
 TEST(struct_visitor, visitDerivedClass) {
@@ -82,28 +86,29 @@ TEST(struct_visitor, visitDerivedClass) {
     EXPECT_EQ(v.allTypes(), 4);
 
     static_assert(countAllTypes<test_types::ChildClass>() == 4);
+    static_assert(reflecxx::fieldCount<test_types::ChildClass>() == 4);
 }
 
 TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
     test_types::ChildOfUnreflectedBaseClass cub{};
     InstanceTypeCounterVisitor v{};
+
     reflecxx::forEachField(cub, v);
 
     EXPECT_EQ(v.ints, 1);
     EXPECT_EQ(v.allTypes(), 1);
 
     static_assert(countAllTypes<test_types::ChildOfUnreflectedBaseClass>() == 1);
+    static_assert(reflecxx::fieldCount<test_types::ChildOfUnreflectedBaseClass>() == 1);
 }
 
-TEST(struct_visitor, tupleCalls) {
-    static_assert(reflecxx::fieldCount<test_types::BasicStruct>() == 3);
-
+TEST(struct_visitor, get) {
     static_assert(reflecxx::getName<2, test_types::BasicStruct>() == "d");
 
     test_types::BasicStruct bs{/*b=*/true, /*i=*/1, /*d=*/1.5};
     auto& dref = reflecxx::get<2>(bs);
 
-    static_assert(std::is_same_v<std::remove_reference_t<decltype(dref)>, decltype(bs.d)>);
+    static_assert(std::is_same_v<decltype(dref), decltype(bs.d)&>);
 
     dref += 3;
 
@@ -111,16 +116,33 @@ TEST(struct_visitor, tupleCalls) {
 
     const test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
     auto& dref2 = reflecxx::get<2>(bs2);
-    // dref2 += 3;
-    std::cout << bs2.d << " " << dref2 << "\n";
-    test_types::BasicStruct bs3{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    EXPECT_TRUE(reflecxx::equalTo(bs3, bs2));
-    test_types::BasicStruct bs4{/*b=*/false, /*i=*/1, /*d=*/1.5};
-    EXPECT_FALSE(reflecxx::equalTo(bs3, bs4));
+
+    // constness is maintained
+    static_assert(std::is_const_v<std::remove_reference_t<decltype(dref2)>>);
+}
+
+TEST(struct_visitor, equalTo) {
+    test_types::BasicStruct bs1{/*b=*/true, /*i=*/1, /*d=*/1.5};
+    test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
+
+    EXPECT_TRUE(reflecxx::equalTo(bs1, bs2));
+
+    test_types::BasicStruct bs3{/*b=*/false, /*i=*/1, /*d=*/1.5};
+
+    EXPECT_FALSE(reflecxx::equalTo(bs1, bs3));
 
     test_types::NestingStruct ns1{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
     test_types::NestingStruct ns2{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
+
     EXPECT_TRUE(reflecxx::equalTo(ns1, ns2));
+
+    test_types::NestingStruct ns3{1, 1.5, bs2, {bs2, bs3, bs2}, {bs3, bs3}};
+
+    EXPECT_FALSE(reflecxx::equalTo(ns1, ns3));
+
+    test_types::NestingStruct ns4{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs2}};
+
+    EXPECT_FALSE(reflecxx::equalTo(ns1, ns4));
 }
 
 TEST(generation, type_traits) {
