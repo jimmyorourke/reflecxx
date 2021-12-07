@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <libtest_types/structs.hpp>
 #include <reflecxx/json_visitor.hpp>
-#include <structs.hpp>
 
 namespace {
 test_types::NestingStruct buildNestingStruct() {

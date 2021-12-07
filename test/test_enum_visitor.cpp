@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include <enums.hpp>
+#include <libtest_types/enums.hpp>
 #include <reflecxx/enum_visitor.hpp>
 
 TEST(enum_visitor, enumSize) {
@@ -20,7 +20,6 @@ TEST(enum_visitor, fromName) {
     static_assert(reflecxx::fromName<test_types::Unscoped>("Fourth") == test_types::Fourth);
     static_assert(reflecxx::fromName<test_types::Scoped>("Third") == test_types::Scoped::Third);
 
-    static_assert((bool)reflecxx::fromName<test_types::Scoped>("fifth"));
     // not expected to compile
     // static_assert(reflecxx::fromName<test_types::Scoped>("fifth") == test_types::Scoped::Third);
 

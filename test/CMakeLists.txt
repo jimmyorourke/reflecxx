@@ -3,28 +3,28 @@ set(CONANFILE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR})
 include(cmake/ConanSetup.cmake)
 include(../ProtoGenerate.cmake)
 
-add_library(libtypes
-  types.cpp
+add_library(libtest_types
+  libtest_types/type_helpers.cpp
 )
-target_link_libraries(libtypes
+target_link_libraries(libtest_types
   reflecxx
 )
-target_include_directories(libtypes
+target_include_directories(libtest_types
   PUBLIC
-    .
+    libtest_types/include
     ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
 )
-target_compile_definitions(libtypes
+target_compile_definitions(libtest_types
   PUBLIC
     BASIC_STRUCT_HAS_B
 )
 # Generate code based on any annotations in these headers, using the compilation flags from libtypes target.
 set(PROTOGEN_HEADERS
-  classes.hpp
-  enums.hpp
-  structs.hpp
+  libtest_types/include/libtest_types/classes.hpp
+  libtest_types/include/libtest_types/enums.hpp
+  libtest_types/include/libtest_types/structs.hpp
 )
-reflecxx_generate("${PROTOGEN_HEADERS}" libtypes)
+reflecxx_generate("${PROTOGEN_HEADERS}" libtest_types)
 
 set(TESTS
   test_enum_visitor
@@ -39,7 +39,7 @@ foreach(TEST ${TESTS})
   target_link_libraries(${TEST}
     PRIVATE
       reflecxx
-      libtypes
+      libtest_types
       CONAN_PKG::gtest
   )
   add_test(NAME ${TEST}

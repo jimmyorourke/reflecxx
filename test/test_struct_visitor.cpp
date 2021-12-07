@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <classes.hpp>
+#include <libtest_types/classes.hpp>
+#include <libtest_types/structs.hpp>
 #include <reflecxx/reflecxx_base.hpp>
 #include <reflecxx/struct_visitor.hpp>
-#include <structs.hpp>
 
 struct InstanceTypeCounterVisitor {
     template <typename T>

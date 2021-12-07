@@ -1,4 +1,4 @@
-#include "structs.hpp"
+#include <libtest_types/structs.hpp>
 
 #include <sstream>
 #include <string>
