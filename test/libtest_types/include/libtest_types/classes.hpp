@@ -10,7 +10,7 @@ class BasicClass {
     bool b;
     int i;
     double d;
-} VISIT; // REFLECXX_GENERATE;
+} REFLECXX_T;
 
 class ChildClass : public BasicClass {
  public:
@@ -22,7 +22,7 @@ class ChildClass : public BasicClass {
 
  private:
     int privateField{};
-} VISIT;
+} REFLECXX_T;
 
 class UnreflectedBaseClass {
  public:
@@ -32,7 +32,7 @@ class UnreflectedBaseClass {
 class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
  public:
     int childField{};
-} VISIT;
+} REFLECXX_T;
 
 } // namespace test_types
 

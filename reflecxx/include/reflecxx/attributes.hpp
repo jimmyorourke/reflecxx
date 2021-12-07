@@ -2,7 +2,7 @@
 
 #ifdef PROTO_GENERATION
 // Use VISIT after a struct/class or enum declaration to generate a visitor for it.
-#define VISIT __attribute__((annotate("PROTO_GEN: Reflection Visitor")))
+#define REFLECXX_T __attribute__((annotate("PROTO_GEN: Reflection Visitor")))
 
 #define REFLECXX_HEADER(include_file) <reflecxx/detail/empty.hpp>
 
@@ -10,7 +10,7 @@
 
 #else
 // Outside of code generation, do nothing.
-#define VISIT
+#define REFLECXX_T
 
 #define REFLECXX_HEADER(include_file) <generated_headers/include_file>
 

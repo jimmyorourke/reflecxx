@@ -17,18 +17,8 @@ struct BasicStruct {
     int i;
     double d;
 
-    // auto tied() const { return std::tie(b, i, d); }
     bool operator==(const BasicStruct& rhs) const;
-    // {
-    //     //return tied() == rhs.tied();
-    //     #ifndef PROTO_GENERATION
-    //     return reflecxx::eql1(*this, rhs);
-    //     #else
-    //     return false;
-    //     #endif
-
-    // }
-} VISIT;
+} REFLECXX_T;
 
 struct NestingStruct {
     int i;
@@ -45,7 +35,7 @@ struct NestingStruct {
     }
     PROTO_EQL_OP(NestingStruct);
     // bool operator==(const NestingStruct& rhs) const { return tied() == rhs.tied(); }
-} VISIT;
+} REFLECXX_T;
 
 } // namespace test_types
 
