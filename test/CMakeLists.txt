@@ -26,6 +26,7 @@ set(PROTOGEN_HEADERS
 )
 reflecxx_generate("${PROTOGEN_HEADERS}" libtest_types)
 
+
 set(TESTS
   test_enum_visitor
   test_struct_visitor

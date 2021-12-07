@@ -49,4 +49,4 @@ struct NestingStruct {
 
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/structs_reflecxx_generated.hpp>)
+#include REFLECXX_HEADER(structs_reflecxx_generated.hpp)

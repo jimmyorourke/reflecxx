@@ -10,4 +10,4 @@ enum class Scoped { First, Second, Third } VISIT;
 
 } // namespace test_types
 
-#include CODEGENENERATED_INCLUDE(<generated_headers/enums_reflecxx_generated.hpp>)
+#include REFLECXX_HEADER(enums_reflecxx_generated.hpp)

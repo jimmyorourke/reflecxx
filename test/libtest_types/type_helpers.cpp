@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-// This cpp is mainly used for defining a target whose dependencies and the compilation flags will be used by libclang
+// This cpp is mainly used for defining a target whose dependencies and compilation flags will be used by libclang
 // during the code generation.
 // We can also demonstrate that this target can still make use of the generated code here in the cpp, as only the
 // headers are parsed by the generator.
@@ -33,13 +33,7 @@ std::string toString(const BasicStruct& b) {
     return dumbToString(b);
 }
 
-bool BasicStruct::operator==(const BasicStruct& rhs) const {
-    // return tied() == rhs.tied();
-    //#ifndef PROTO_GENERATION
-    return reflecxx::equalTo(*this, rhs);
-    //#else
-    // return false;
-    //#endif
-}
+// Demonstrate that we can make use of generated visitors without requiring any ifdef protection here in the cpp.
+bool BasicStruct::operator==(const BasicStruct& rhs) const { return reflecxx::equalTo(*this, rhs); }
 
 } // namespace test_types

@@ -6,7 +6,7 @@
 #include <reflecxx/enum_visitor.hpp>
 
 TEST(enum_visitor, enumSize) {
-    // put static_asserts in a TEST because why not
+    // put static_asserts in a TEST simply for organization
     static_assert(reflecxx::enumSize<test_types::Unscoped>() == 4);
     static_assert(reflecxx::enumSize<test_types::Scoped>() == 3);
 }
@@ -28,8 +28,9 @@ TEST(enum_visitor, fromName) {
 
 TEST(enum_visitor, contains) {
     // unscoped has an offset of 2 in values
-    static_assert(reflecxx::enumContains<test_types::Unscoped>(4));
     static_assert(!reflecxx::enumContains<test_types::Unscoped>(0));
+    static_assert(reflecxx::enumContains<test_types::Unscoped>(4));
+
     static_assert(reflecxx::enumContains<test_types::Scoped>(0));
     static_assert(!reflecxx::enumContains<test_types::Scoped>(3));
 }
@@ -37,6 +38,7 @@ TEST(enum_visitor, contains) {
 TEST(enum_visitor, iterators) {
     std::array<test_types::Scoped, 3> scopedEs{test_types::Scoped::First, test_types::Scoped::Second,
                                                test_types::Scoped::Third};
+
     EXPECT_EQ(scopedEs, reflecxx::enumerators<test_types::Scoped>());
     // or expected use case:
     size_t i = 0;

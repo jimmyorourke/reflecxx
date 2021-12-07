@@ -106,7 +106,7 @@ def main(
 
         # Generate!
         os.makedirs(output_folder, exist_ok=True)
-        output_file = Path(output_folder) / (Path(file).stem + "_reflecxx_generated.hpp")
+        output_file = Path(output_folder) / (Path(file).stem + "_reflecxx_generated" + Path(file).suffix)
 
         with VisitorGenerator(output_file=output_file, namespace=namespace) as v:
             for s in structures.values():

@@ -4,7 +4,7 @@
 // Use VISIT after a struct/class or enum declaration to generate a visitor for it.
 #define VISIT __attribute__((annotate("PROTO_GEN: Reflection Visitor")))
 
-#define CODEGENENERATED_INCLUDE(include_file) <reflecxx/detail/empty.hpp>
+#define REFLECXX_HEADER(include_file) <reflecxx/detail/empty.hpp>
 
 #define PROTO_EQL(rhs) false;
 
@@ -12,7 +12,7 @@
 // Outside of code generation, do nothing.
 #define VISIT
 
-#define CODEGENENERATED_INCLUDE(include_file) include_file
+#define REFLECXX_HEADER(include_file) <generated_headers/include_file>
 
 #define PROTO_EQL(rhs) reflecxx::equalTo(*this, rhs);
 
