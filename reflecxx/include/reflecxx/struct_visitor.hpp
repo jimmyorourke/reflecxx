@@ -51,12 +51,14 @@ constexpr bool equalTo(const T& lhs, const T& rhs) {
 
 template <typename T>
 constexpr bool lessThan(const T& lhs, const T& rhs) {
-    return compare(lhs, rhs, std::less<>{});
+    // Caution! We can't just use std::less, in case just a single field is less and the rest are equal.
+    return compare(lhs, rhs, std::less_equal<>{}) && !equalTo(lhs, rhs);
 }
 
 template <typename T>
 constexpr bool greaterThan(const T& lhs, const T& rhs) {
-    return compare(lhs, rhs, std::greater<>{});
+    // Caution! We can't just use std::greater in case just a single field is greater and the rest are equal.
+    return compare(lhs, rhs, std::greater_equal<>{}) && !equalTo(lhs, rhs);
 }
 
 } // namespace reflecxx

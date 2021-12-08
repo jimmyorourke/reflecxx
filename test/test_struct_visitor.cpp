@@ -166,18 +166,6 @@ TEST(struct_visitor, greaterThanLessThan) {
 
     EXPECT_FALSE(reflecxx::lessThan(bs4, bs1));
     EXPECT_FALSE(reflecxx::greaterThan(bs4, bs1));
-    // test_types::NestingStruct ns1{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
-    // test_types::NestingStruct ns2{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
-
-    // EXPECT_TRUE(reflecxx::equalTo(ns1, ns2));
-
-    // test_types::NestingStruct ns3{1, 1.5, bs2, {bs2, bs3, bs2}, {bs3, bs3}};
-
-    // EXPECT_FALSE(reflecxx::equalTo(ns1, ns3));
-
-    // test_types::NestingStruct ns4{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs2}};
-
-    // EXPECT_FALSE(reflecxx::equalTo(ns1, ns4));
 }
 
 TEST(generation, type_traits) {
