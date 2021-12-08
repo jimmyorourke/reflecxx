@@ -5,18 +5,13 @@ from datetime import datetime
 from parse_types import Structure, Enumeration
 
 
-class CodeGenerator(object):
-    """Base code generator."""
-
-    INDENT_SIZE = 4
-
-
-class VisitorGenerator(CodeGenerator):
+class VisitorGenerator():
     """Code generator for the Reflection Visitor annotation.
     Generates enum visitors, struct type visitors, struct instance visitors, and struct type tuples.
     """
 
-    ANNOTATION = "PROTO_GEN: Reflection Visitor"
+    ANNOTATION = "REFLECXX_GEN: Reflection Visitor"
+    INDENT_SIZE = 4
 
     def __init__(self, output_file: os.PathLike = None, namespace="generated"):
         self._output_file = output_file
@@ -146,9 +141,9 @@ class VisitorGenerator(CodeGenerator):
 
 
 class IndentBlock:
-    """Generates an indented block when used as a context manager within a CodeGenerator."""
+    """Generates an indented block when used as a context manager within a VisitorGenerator."""
 
-    def __init__(self, generator: CodeGenerator):
+    def __init__(self, generator: VisitorGenerator):
         self._generator = generator
 
     def __enter__(self):

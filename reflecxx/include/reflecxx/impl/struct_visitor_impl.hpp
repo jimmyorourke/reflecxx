@@ -99,28 +99,25 @@ constexpr const char* getName() {
 }
 
 // The variadic template args need to be last or type deduction doesn't work properly.
-template <size_t I = 0, typename F, typename T, typename... Ts, typename>
-constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts) {
-    using cleanT = reflecxx::remove_cvref_t<T>; // std::remove_reference_t<T>>;//std::decay_t<T>;
-    f(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
+template <size_t I, typename Visitor, typename T, typename... Ts, typename>
+constexpr void applyForEach(Visitor&& v, T&& t1, Ts&&... ts) {
+    using cleanT = reflecxx::remove_cvref_t<T>;
+    v(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
     // if constexpr makes recursive templates so much easier! And no integer sequences.
     if constexpr (I + 1 < fieldCount<cleanT>()) {
-        applyForEach<I + 1>(std::forward<F>(f), std::forward<T>(t1), std::forward<T>(ts)...);
+        applyForEach<I + 1>(std::forward<Visitor>(v), std::forward<T>(t1), std::forward<T>(ts)...);
     }
 }
 
 template <typename T, typename O>
 constexpr bool compare(const T& t1, const T& t2, const O& op) {
-    // std::cout <<"eql1\n";
     bool res = true;
     auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
-        // std::cout << val1 << " " << val2 << "\n";
-        using typet = std::remove_cv_t<std::remove_reference_t<decltype(val1)>>;
+        using cleanT = reflecxx::remove_cvref_t<decltype(val1)>;
 
-        if constexpr (std::is_array_v<typet>) {
-            //std::cout << n << " is_array_v, size: " <<  std::extent_v<decltype(val1)> << " " << \
-            //std::extent_v<typet> << " " << sizeof(val1)/sizeof(val1[0])<< "\n";
+        if constexpr (std::is_array_v<cleanT>) {
+            // c-style array
             const auto size1 = sizeof(val1) / sizeof(val1[0]);
             const auto size2 = sizeof(val2) / sizeof(val2[0]);
 
@@ -129,20 +126,17 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
                 // break early
                 return;
             }
-            for (auto i = 0u; i < std::extent_v<typet>; ++i) {
+            for (auto i = 0u; i < size1; ++i) {
                 // Recurse to handle whatever type the array members are
                 res = (res && compare(val1[i], val2[i], op));
-                // std::cout << n << " is_array_v " << i << res << "\n";
                 if (!res) {
                     // break early
                     return;
                 }
             }
         } else {
-            // std::cout << n << " basecase\n";
             res = (res && op(val1, val2));
         }
-        // std::cout << n << " " << res << "\n";
     };
     applyForEach(std::move(v), t1, t2);
     return res;

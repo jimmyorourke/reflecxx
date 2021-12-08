@@ -7,7 +7,7 @@
 
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
-#ifndef PROTO_GENERATION
+#ifndef REFLECXX_GENERATION
 
 namespace reflecxx {
 
@@ -27,18 +27,23 @@ constexpr size_t fieldCount();
 template <size_t i, typename T>
 constexpr const char* getName();
 
+// Apply visitor to each field of each T
 // The variadic template args need to be last or type deduction doesn't work properly.
-template <size_t, typename F, typename T, typename... Ts, typename = std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
-constexpr void applyForEach(F&& f, T&& t1, Ts&&... ts);
+template <size_t I = 0, typename Visitor, typename T, typename... Ts,
+          typename = std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
+constexpr void applyForEach(Visitor&& v, T&& t1, Ts&&... ts);
 
+// Helper to allow the visitor to be the last argument when there are only 2 Ts, such as for binary comparisons.
 template <typename T, typename Visitor>
 constexpr void forEachApply(T&& t1, T&& t2, Visitor&& visitor) {
     applyForEach(std::forward<Visitor>(visitor), std::forward<T>(t1), std::forward<T>(t2));
 }
 
-template <typename T, typename O>
-constexpr bool compare(const T& lhs, const T& rhs, const O& op);
+// Returns the result of applying Operation to each field of lhs and rhs, pairwise, AND'ing the results.
+template <typename T, typename Operation>
+constexpr bool compare(const T& lhs, const T& rhs, const Operation& op);
 
+// Returns true if each field of lhs is equal to each field of rhs.
 template <typename T>
 constexpr bool equalTo(const T& lhs, const T& rhs) {
     return compare(lhs, rhs, std::equal_to<>{});
@@ -58,4 +63,4 @@ constexpr bool greaterThan(const T& lhs, const T& rhs) {
 
 #include "impl/struct_visitor_impl.hpp"
 
-#endif // PROTO_GENERATION
+#endif // REFLECXX_GENERATION

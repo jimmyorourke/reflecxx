@@ -7,7 +7,7 @@
 
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
-#ifndef PROTO_GENERATION
+#ifndef REFLECXX_GENERATION
 
 // Automatically define to/from nlohmann JSON functions for any reflecxx visitable type. Wow!
 // Note that since this uses the adl_serializer, if specialization for any type is desired it must also be done by
@@ -28,7 +28,7 @@ struct adl_serializer<T, std::enable_if_t<reflecxx::is_reflecxx_visitable_v<T>>>
 };
 } // namespace nlohmann
 
-#endif // PROTO_GENERATION
+#endif // REFLECXX_GENERATION
 
 namespace reflecxx {
 

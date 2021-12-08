@@ -2,7 +2,7 @@
 
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
-#ifndef PROTO_GENERATION
+#ifndef REFLECXX_GENERATION
 
 namespace reflecxx {
 
@@ -35,4 +35,4 @@ constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue);
 
 #include "impl/enum_visitor_impl.hpp"
 
-#endif // PROTO_GENERATION
+#endif // REFLECXX_GENERATION

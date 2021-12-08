@@ -18,9 +18,9 @@ from visitor_generator import VisitorGenerator
 
 def find_annotate_attr(cursor: Cursor) -> Optional[Cursor]:
     """Given a cursor, walks its direct children to determine if there is an annotation attribute. If so, and it is a
-    PROTO_GEN annotation, returns the cursor."""
+    REFLECXX_GEN annotation, returns the cursor."""
     for c in cursor.get_children():
-        if c.kind == CursorKind.ANNOTATE_ATTR and "PROTO_GEN" in c.spelling:
+        if c.kind == CursorKind.ANNOTATE_ATTR and "REFLECXX_GEN" in c.spelling:
             return c
     return None
 
@@ -72,7 +72,7 @@ def main(
     clang.cindex.Config.set_library_path(libclang_directory)
     index = clang.cindex.Index.create()
 
-    flags.append("-DPROTO_GENERATION")
+    flags.append("-DREFLECXX_GENERATION")
 
     for file in input_files:
         # Dict of name to Structure. Use a dict so after parsing all annotated structures we can efficiently look up whether
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         default="",
     )
     args = parser.parse_args()
-    print(args)
+
     # since we're going to be specializing some templates, we have to use the same namespace as the original
     # declarations
     namespace = "reflecxx"

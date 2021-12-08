@@ -30,7 +30,7 @@ set(PROTOGEN_SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/generator/parse_types.py
   ${CMAKE_CURRENT_LIST_DIR}/generator/visitor_generator.py
 )
-set(PROTO_GEN_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+set(REFLECXX_GEN_BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 macro(get_compilation_flags TARGET FLAGS_OUT)
   # Use generator expressions to get the target's include directories and compilation options and flags. Using
@@ -46,32 +46,32 @@ macro(get_compilation_flags TARGET FLAGS_OUT)
 
   set(COMPILE_OPTIONS "$<TARGET_PROPERTY:${TARGET},COMPILE_OPTIONS>")
 
-  SET(FF "${INCLUDE_DIRECTORIES};${COMPILE_DEFINITIONS};${COMPILE_OPTIONS}")
+  SET(TARGET_FLAGS "${INCLUDE_DIRECTORIES};${COMPILE_DEFINITIONS};${COMPILE_OPTIONS}")
 
   # Convert cmake_cxx_flags into a list instead of a string
   string (REPLACE " " ";" GLOBAL_FLAGS "${CMAKE_CXX_FLAGS}")
   # Convert global MSVC style definitions such as /DWIN32 /D_WINDOWS to clang compatible form
   string (REPLACE "/D" "-D" GLOBAL_FLAGS "${GLOBAL_FLAGS}")
-  SET(FLAGS "${FF};${GLOBAL_FLAGS}")
+  SET(ALL_FLAGS "${TARGET_FLAGS};${GLOBAL_FLAGS}")
 
   # We've made assumptions that the flags will work on clang. This is definitely not true for MSVC flags. Rather than
   # trying to sort this all out, allow clang to ignore flags without warning.
-  SET(FLAGS "${FLAGS};${GLOBAL_FLAGS};-Qunused-arguments")
+  SET(ALL_FLAGS "${ALL_FLAGS};${GLOBAL_FLAGS};-Qunused-arguments")
 
   get_target_property(CXX_STD ${TARGET} CXX_STANDARD)
   if (NOT ${CXX_STD} MATCHES "NOTFOUND")
-    SET(FLAGS "${FLAGS};-std=c++${CXX_STD}")
+    SET(ALL_FLAGS "${ALL_FLAGS};-std=c++${CXX_STD}")
   else()
     # best guess
-    SET(FLAGS "${FLAGS};-std=c++17")
+    SET(ALL_FLAGS "${ALL_FLAGS};-std=c++17")
   endif()
 
-  list(REMOVE_DUPLICATES FLAGS)
-  set(${FLAGS_OUT} "${FLAGS}" PARENT_SCOPE)
+  list(REMOVE_DUPLICATES ALL_FLAGS)
+  set(${FLAGS_OUT} "${ALL_FLAGS}")
 endmacro()
 
-# TODO: test multiple headers
-# Give directory for output, auto naming scheme
+# Generate Reflecxx headers based on the provided input files, using compilation flags from the provided target. Adds a
+# depencency on the generated headers to the target.
 macro(reflecxx_generate INPUT_FILES TARGET)
   set(OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated_headers)
   # Since the generated output file names will be determined based on the input, we will use a trick to ensure cmake
@@ -83,7 +83,7 @@ macro(reflecxx_generate INPUT_FILES TARGET)
 
   add_custom_command(
     OUTPUT ${OUTPUT}
-    COMMAND ${PYTHON_COMMAND} ${PROTO_GEN_BASE_DIR}/generator/parse.py
+    COMMAND ${PYTHON_COMMAND} ${REFLECXX_GEN_BASE_DIR}/generator/parse.py
     --libclang-directory ${CLANG_SHARED_OBJECT_DIRECTORY}
     --input-files ${INPUT_FILES}
     --output-folder ${OUTPUT_DIR}
@@ -91,7 +91,7 @@ macro(reflecxx_generate INPUT_FILES TARGET)
     COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
     # so that source files can be provided with relative paths
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Running PROTOGEN. Generating into: ${OUTPUT_DIR}"
+    COMMENT "Running ReflecxxGen. Generating into: ${OUTPUT_DIR}"
     DEPENDS ${INPUT_FILES} ${PROTOGEN_SOURCES}
     # Surprisingly, not using USES_TERMINAL gives better output because error messages show up at the end of the
     # output when generation fails.
@@ -99,7 +99,7 @@ macro(reflecxx_generate INPUT_FILES TARGET)
     #VERBATIM
   )
   # Have targets depend on the indicator file.
-  add_custom_target(${TARGET}_PROTOGEN
+  add_custom_target(${TARGET}_REFLECXX_GEN
     DEPENDS
       ${OUTPUT_DIR}/generated.txt
   )
@@ -108,5 +108,5 @@ macro(reflecxx_generate INPUT_FILES TARGET)
 
   # Automatically set up a dependency for the target whose flags we used on the generated target. The consumer can
   # just use the generated sources.
-  add_dependencies(${TARGET} ${TARGET}_PROTOGEN)
+  add_dependencies(${TARGET} ${TARGET}_REFLECXX_GEN)
 endmacro()
