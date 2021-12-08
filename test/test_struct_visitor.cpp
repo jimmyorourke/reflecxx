@@ -148,7 +148,6 @@ TEST(struct_visitor, equalTo) {
 TEST(struct_visitor, greaterThanLessThan) {
     test_types::BasicStruct bs1{/*b=*/true, /*i=*/1, /*d=*/1.5};
 
-
     EXPECT_TRUE(reflecxx::equalTo(bs1, bs1));
     EXPECT_FALSE(reflecxx::lessThan(bs1, bs1));
     EXPECT_FALSE(reflecxx::greaterThan(bs1, bs1));
@@ -160,7 +159,6 @@ TEST(struct_visitor, greaterThanLessThan) {
     EXPECT_FALSE(reflecxx::greaterThan(bs2, bs1));
     EXPECT_FALSE(reflecxx::lessThan(bs3, bs1));
     EXPECT_TRUE(reflecxx::greaterThan(bs3, bs1));
-
 
     test_types::BasicStruct bs4{/*b=*/false, /*i=*/2, /*d=*/0.5};
 

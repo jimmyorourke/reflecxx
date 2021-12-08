@@ -8,7 +8,7 @@ namespace detail {
 // Type visitors require partially specialized template structs
 template <typename T, typename Visitor>
 struct Acceptor;
-// Must specialize Acceptor for each type T
+// The code generator must specialize Acceptor for each type T.
 // Interface to implement in specializations:
 // static constexpr void visitType([[maybe_unused]] Visitor&& visitor);
 // Note: we don't define the above with a static assertion enforcing specialization so that we can test existence to
