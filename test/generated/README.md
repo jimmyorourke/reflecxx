@@ -1,0 +1,1 @@
+The files in this folder are not the ones used by the tests. Building the tests will generate and use files in the build directory. These files are just provided as example references of the `reflecxx` generated headers.
