@@ -1,0 +1,161 @@
+--- a/cindex.py
++++ b/cindex.py
+@@ -647,6 +647,8 @@
+     @classmethod
+     def from_id(cls, id):
+         if id >= len(cls._kinds) or cls._kinds[id] is None:
++            for e, i in enumerate(cls._kinds):
++                print(e,i)
+             raise ValueError('Unknown template argument kind %d' % id)
+         return cls._kinds[id]
+
+@@ -1084,6 +1086,8 @@
+ # Represents an @available(...) check.
+ CursorKind.OBJC_AVAILABILITY_CHECK_EXPR = CursorKind(148)
+
++# Fixed point literal
++CursorKind.FixedPointLiteral = CursorKind(149)
+
+ # A statement whose specific kind is not exposed via this interface.
+ #
+@@ -1305,6 +1309,41 @@
+ # OpenMP teams distribute directive.
+ CursorKind.OMP_TEAMS_DISTRIBUTE_DIRECTIVE = CursorKind(271)
+
++# OpenMP teams distribute simd directive.
++CursorKind._OMPTeamsDistributeSimdDirective = CursorKind(272)
++
++# OpenMP teams distribute parallel for simd directive.
++CursorKind.OMPTeamsDistributeParallelForSimdDirective = CursorKind(273)
++
++# OpenMP teams distribute parallel for directive.
++CursorKind.OMPTeamsDistributeParallelForDirective = CursorKind(274)
++
++# OpenMP target teams directive.
++CursorKind.OMPTargetTeamsDirective = CursorKind(275)
++#* OpenMP target teams distribute directive.
++CursorKind.OMPTargetTeamsDistributeDirective = CursorKind(276)
++
++# OpenMP target teams distribute parallel for directive.
++CursorKind.OMPTargetTeamsDistributeParallelForDirective = CursorKind(277)
++
++# OpenMP target teams distribute parallel for simd directive.
++CursorKind.OMPTargetTeamsDistributeParallelForSimdDirective = CursorKind(278)
++
++# OpenMP target teams distribute simd directive.
++CursorKind.OMPTargetTeamsDistributeSimdDirective = CursorKind(279)
++
++# C++2a std::bit_cast expression.
++CursorKind.Builtin_Bit_Cast_Expr = CursorKind(280)
++
++# OpenMP master taskloop directive.
++CursorKind.OMPMasterTaskLoopDirective = CursorKind(281)
++
++# OpenMP parallel master taskloop directive.
++CursorKind.OMPParallelMasterTaskLoopDirective = CursorKind(282)
++
++# OpenMP master taskloop simd directive.
++CursorKind.OMPMasterTaskLoopSimdDirective = CursorKind(283)
++
+ ###
+ # Other Kinds
+
+@@ -1342,6 +1381,26 @@
+
+ CursorKind.DLLEXPORT_ATTR = CursorKind(418)
+ CursorKind.DLLIMPORT_ATTR = CursorKind(419)
++
++CursorKind.NSReturnsRetained = CursorKind(420)
++CursorKind.NSReturnsNotRetained = CursorKind(421)
++CursorKind.NSReturnsAutoreleased = CursorKind(422)
++CursorKind.NSConsumesSelf = CursorKind(423)
++CursorKind.NSConsumed = CursorKind(424)
++CursorKind.ObjCException = CursorKind(425)
++CursorKind.ObjCNSObject = CursorKind(426)
++CursorKind.ObjCIndependentClass = CursorKind(427)
++CursorKind.ObjCPreciseLifetime = CursorKind(428)
++CursorKind.ObjCReturnsInnerPointer = CursorKind(429)
++CursorKind.ObjCRequiresSuper = CursorKind(430)
++CursorKind.ObjCRootClass = CursorKind(431)
++CursorKind.ObjCSubclassingRestricted = CursorKind(432)
++CursorKind.ObjCExplicitProtocolImpl = CursorKind(433)
++CursorKind.ObjCDesignatedInitializer = CursorKind(434)
++CursorKind.ObjCRuntimeVisible = CursorKind(435)
++CursorKind.ObjCBoxable = CursorKind(436)
++CursorKind.FlagEnum = CursorKind(437)
++
+ CursorKind.CONVERGENT_ATTR = CursorKind(438)
+ CursorKind.WARN_UNUSED_ATTR = CursorKind(439)
+ CursorKind.WARN_UNUSED_RESULT_ATTR = CursorKind(440)
+@@ -1385,6 +1444,12 @@
+ TemplateArgumentKind.DECLARATION = TemplateArgumentKind(2)
+ TemplateArgumentKind.NULLPTR = TemplateArgumentKind(3)
+ TemplateArgumentKind.INTEGRAL = TemplateArgumentKind(4)
++TemplateArgumentKind.Template  = TemplateArgumentKind(5)
++TemplateArgumentKind.TemplateExpansion  = TemplateArgumentKind(6)
++TemplateArgumentKind.Expression  = TemplateArgumentKind(7)
++TemplateArgumentKind.Pack  = TemplateArgumentKind(8)
++# Indicates an error case, preventing the kind from being deduced.
++TemplateArgumentKind.Invalid  = TemplateArgumentKind(9)
+
+ ### Exception Specification Kinds ###
+ class ExceptionSpecificationKind(BaseEnumeration):
+@@ -1409,6 +1474,8 @@
+ ExceptionSpecificationKind.UNEVALUATED = ExceptionSpecificationKind(6)
+ ExceptionSpecificationKind.UNINSTANTIATED = ExceptionSpecificationKind(7)
+ ExceptionSpecificationKind.UNPARSED = ExceptionSpecificationKind(8)
++# The cursor has a __declspec(nothrow) exception specification.
++ExceptionSpecificationKind.NoThrow = ExceptionSpecificationKind(9)
+
+ ### Cursors ###
+
+@@ -2059,6 +2126,13 @@
+ TypeKind.OBJCSEL = TypeKind(29)
+ TypeKind.FLOAT128 = TypeKind(30)
+ TypeKind.HALF = TypeKind(31)
++TypeKind.Float16 = TypeKind(32)
++TypeKind.ShortAccum = TypeKind(33)
++TypeKind.Accum = TypeKind(34)
++TypeKind.LongAccum = TypeKind(35)
++TypeKind.UShortAccum = TypeKind(36)
++TypeKind.UAccum = TypeKind(37)
++TypeKind.ULongAccum = TypeKind(38)
+ TypeKind.COMPLEX = TypeKind(100)
+ TypeKind.POINTER = TypeKind(101)
+ TypeKind.BLOCKPOINTER = TypeKind(102)
+@@ -2121,7 +2195,26 @@
+ TypeKind.OCLQUEUE = TypeKind(159)
+ TypeKind.OCLRESERVEID = TypeKind(160)
+
++TypeKind.ObjCObject = TypeKind(161)
++TypeKind.ObjCTypeParam = TypeKind(162)
++TypeKind.Attributed = TypeKind(163)
++
++TypeKind.OCLIntelSubgroupAVCMcePayload = TypeKind(164)
++TypeKind.OCLIntelSubgroupAVCImePayload = TypeKind(165)
++TypeKind.OCLIntelSubgroupAVCRefPayload = TypeKind(166)
++TypeKind.OCLIntelSubgroupAVCSicPayload = TypeKind(167)
++TypeKind.OCLIntelSubgroupAVCMceResult = TypeKind(168)
++TypeKind.OCLIntelSubgroupAVCImeResult = TypeKind(169)
++TypeKind.OCLIntelSubgroupAVCRefResult = TypeKind(170)
++TypeKind.OCLIntelSubgroupAVCSicResult = TypeKind(171)
++TypeKind.OCLIntelSubgroupAVCImeResultSingleRefStreamout = TypeKind(172)
++TypeKind.OCLIntelSubgroupAVCImeResultDualRefStreamout = TypeKind(173)
++TypeKind.OCLIntelSubgroupAVCImeSingleRefStreamin = TypeKind(174)
++
++TypeKind.OCLIntelSubgroupAVCImeDualRefStreamin = TypeKind(175)
++
+ TypeKind.EXTVECTOR = TypeKind(176)
++
+ TypeKind.ATOMIC = TypeKind(177)
+
+ class RefQualifierKind(BaseEnumeration):
+@@ -4161,7 +4254,7 @@
+         elif name == 'Windows':
+             file = 'libclang.dll'
+         else:
+-            file = 'libclang-11.so'
++            file = 'libclang.so'
+
+         if Config.library_path:
+             file = Config.library_path + '/' + file

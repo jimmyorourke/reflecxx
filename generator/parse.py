@@ -6,11 +6,11 @@ from os import PathLike
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import clang.cindex
-from clang.cindex import Cursor
-from clang.cindex import CursorKind
-from clang.cindex import TranslationUnit
-from clang.cindex import AccessSpecifier
+import clang_reference as clang
+from clang_reference.cindex import Cursor
+from clang_reference.cindex import CursorKind
+from clang_reference.cindex import TranslationUnit
+from clang_reference.cindex import AccessSpecifier
 
 from parse_types import Structure, Enumeration
 from visitor_generator import VisitorGenerator
