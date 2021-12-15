@@ -12,19 +12,19 @@
 namespace reflecxx {
 
 // Declares an alias to the type of the i'th visitable field of T.
-template <size_t i, typename T>
-using typeAt = typename std::tuple_element<i, tuple_type_t<T>>::type;
+template <size_t I, typename T>
+using typeAt = typename std::tuple_element<I, tuple_type_t<T>>::type;
 
-// Returns a reference to the i'th field in an instance of T.
-template <size_t i, typename T>
+// Returns a reference to the I'th field in an instance of T.
+template <size_t I, typename T>
 constexpr auto& get(T& obj);
 
 // Returns the number of fields in T.
 template <typename T>
 constexpr size_t fieldCount();
 
-// Returns the name of the i'th field of T.
-template <size_t i, typename T>
+// Returns the name of the I'th field of T.
+template <size_t I, typename T>
 constexpr const char* getName();
 
 // Apply visitor to each field of each T

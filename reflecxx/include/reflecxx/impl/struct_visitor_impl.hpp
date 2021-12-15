@@ -7,6 +7,22 @@
 namespace reflecxx {
 namespace detail {
 
+// Tag struct where the const-ness of type T matches that of S.
+// An alternative implementation could use std::conditional.
+template <typename T, typename S, bool = std::is_const_v<S>>
+struct match_const;
+
+template <typename T, typename S>
+struct match_const<T, S, false> {
+    using type = std::remove_const_t<T>;
+};
+template <typename T, typename S>
+struct match_const<T, S, true> {
+    using type = const std::remove_const_t<T>;
+};
+template <typename T, typename S>
+using match_const_t = typename match_const<T, S>::type;
+
 // Functor that can extract a pointer to the field at a given index in an instance of a struct.
 // The type of the field, T, can be determined with the typeAt<> helper.
 // Using a generic lambda doesn't work as the compiler won't allow the assignment to the capture arg.
@@ -34,27 +50,10 @@ struct Extractor {
     int _count{};
 };
 
-// Tag struct where the const-ness of type T matches that of S.
-template <typename T, typename S, bool = std::is_const_v<S>>
-struct ConstMatch;
-
-template <typename T, typename S>
-struct ConstMatch<T, S, false> {
-    using type = std::remove_const_t<T>;
-};
-
-template <typename T, typename S>
-struct ConstMatch<T, S, true> {
-    using type = const std::remove_const_t<T>;
-};
-
-template <typename T, typename S>
-using ConstMatchT = typename ConstMatch<T, S>::type;
-
 } // namespace detail
 
 // Returns a reference to the i'th field in an instance of T.
-template <size_t i, typename T>
+template <size_t I, typename T>
 constexpr auto& get(T& obj) {
     using rawT = reflecxx::remove_cvref_t<T>;
     // This gives a more obvious error than when typeAt fails to compile
@@ -62,7 +61,7 @@ constexpr auto& get(T& obj) {
 
     // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
     // issues! The compiler doesn't catch this!
-    detail::ConstMatchT<typeAt<i, rawT>, T>* memberPtr = nullptr;
+    detail::match_const_t<typeAt<I, rawT>, T>* memberPtr = nullptr;
     detail::Extractor e{&memberPtr, i};
     visit(obj, std::move(e));
     // this should be impossible
@@ -79,14 +78,14 @@ constexpr size_t fieldCount() {
     return count;
 }
 
-template <size_t i, typename T>
+template <size_t I, typename T>
 constexpr const char* getName() {
-    static_assert(i < fieldCount<T>(), "Index out of range!");
+    static_assert(I < fieldCount<T>(), "Index out of range!");
 
     size_t count = 0;
     const char* out = nullptr;
     auto v = [&count, &out ](const char* name, const auto&) constexpr {
-        if (count == i) {
+        if (count == I) {
             out = name;
         }
         count++;
