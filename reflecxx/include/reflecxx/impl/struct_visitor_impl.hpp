@@ -57,12 +57,12 @@ template <size_t I, typename T>
 constexpr auto& get(T& obj) {
     using rawT = reflecxx::remove_cvref_t<T>;
     // This gives a more obvious error than when typeAt fails to compile
-    static_assert(i < fieldCount<rawT>(), "Index out of range!");
+    static_assert(I < fieldCount<rawT>(), "Index out of range!");
 
     // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
     // issues! The compiler doesn't catch this!
     detail::match_const_t<typeAt<I, rawT>, T>* memberPtr = nullptr;
-    detail::Extractor e{&memberPtr, i};
+    detail::Extractor e{&memberPtr, I};
     visit(obj, std::move(e));
     // this should be impossible
     assert(memberPtr);
