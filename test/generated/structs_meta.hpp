@@ -29,14 +29,6 @@ struct MetaStruct<test_types::BasicStruct> {
     );
 };
 
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<test_types::BasicStruct, std::remove_const_t<T>>, bool> = true>
-constexpr void visit(T& toVisit, Visitor&& visitor) {
-    // visitor("b", toVisit.b);
-    // visitor("i", toVisit.i);
-    // visitor("d", toVisit.d);
-
-}
-
 template <>
 struct MetaStruct<test_types::NestingStruct> {
     static constexpr auto publicFields = std::make_tuple(
@@ -46,7 +38,139 @@ struct MetaStruct<test_types::NestingStruct> {
         Field<test_types::BasicStruct [3]>{"basicsArr"},
         Field<std::array<test_types::BasicStruct, 2>>{"basicsStdarr"}
     );
+    static constexpr auto baseClasses = std::make_tuple(
+    );
 };
+
+template<typename... Ts, typename V>
+void tupleVisit(const std::tuple<Ts...>& t, V&& visitor)
+{
+    std::apply([visitor](auto&... tupleElems){(visitor(tupleElems), ...);}, t);
+}
+
+template<typename I, typename... Ts, typename... Cs, typename V>
+void tupleVisit(I&& instance, const std::tuple<ClassMember<Ts..., Cs...>>& t, V&& visitor)
+{
+    std::apply([&visitor, &instance](auto&... classMember){
+        (visitor(classMember.name, instance.*classMember.ptr), ...);}, t);
+}
+
+{
+instance, classMember, visitor
+visitor(classMember.name, instance.*classMember.ptr);
+}
+
+// wraps a visitor to provide pointer to member binding with instance
+template<typename T, typename V>
+struct MemberVisitor {
+    template<typename M>
+    constexpr void operator()(ClassMember<T, M>&& member){
+        visitor(member.name, instance.*member.ptr);
+    }
+
+    T& instance;
+    V& visitor;
+};
+
+// wraps a visitor to provide pointer to member binding with instance
+template<typename T, typename V>
+struct BaseClassMemberVisitor {
+    template<typename B>
+    constexpr void operator()(type_tag<B>){
+        // fully recurse to handle multiple levels of inheritance
+        visit(static_cast<B&>(instance), visitor);
+        //tuplevisit(MetaStruct<B>::publicFields, MemberVisitor{static_cast<B&>(instance), visitor});
+    }
+
+    T& instance;
+    V& visitor;
+};
+
+
+visitor = [](const char* name, auto& member){};
+
+template<typename T, typename V>
+constexpr void visit(T&& instance, V&& visitor) {
+    // wrap visitor in something that binds member pointers
+    tuplevisit(MetaStruct<T>::publicFields, MemberVisitor{instance, visitor});
+    tuplevisit(MetaStruct<T>::baseClasses, BaseClassMemberVisitor{instance, visitor});
+}
+
+template<typename V>
+struct MemberTypeVisitor {
+    template<typename T, typename M>
+    constexpr void operator()(ClassMember<T, M>&&){
+        visitor(member.name, tag_type<M>{});
+    }
+    template<typename T, typename M, typename... Ts>
+    constexpr auto operator()(ClassMember<T, M>&&, std::tuple<Ts...> t){
+        return visitor(t, std::make_tuple(tag_type<M>{}));
+    }
+
+    V& visitor;
+};
+
+template<typename V>
+struct BaseClassMemberTypeVisitor {
+    template<typename B>
+    constexpr void operator()(type_tag<B>){
+        // fully recurse to handle multiple levels of inheritance
+        visit<B>(visitor);
+    }
+    template<typename B, typename... Ts>
+    constexpr auto operator()(type_tag<B>, std::tuple<Ts...> t){
+        return chainVisit<B>(visitor, t);
+    }
+
+    V& visitor;
+};
+
+template <typename T, typename Visitor>
+constexpr void visit(Visitor&& visitor) {
+    tuplevisit(MetaStruct<T>::publicFields, MemberVisitor{instance, visitor});
+    tuplevisit(MetaStruct<T>::baseClasses, BaseClassMemberVisitor{instance, visitor});
+}
+
+std::tuple<> t;
+auto out = visit_wrap(visitor, t)
+
+auto visit_wrap(visitor, t) {
+    {
+        auto t = visitor(t);
+    }
+}
+
+template <typename T, typename Visitor, typename... Tp>
+constexpr auto chainVisit(Visitor&& visitor, std::tuple<Tp...> t=std::tuple<>{}) {
+    auto t1 = chainvisit(MetaStruct<T>::publicFields, MemberTypeVisitor{visitor, t});
+    return chainvisit(MetaStruct<T>::baseClasses, BaseClassMemberTypeVisitor{visitor, t});
+}
+
+// prints every element of a tuple
+template<size_t I = 0, typename... Tp, typename V, typename... Ts>
+auto chainvisit(std::tuple<Tp...>& t, V&& visitor, std::tuple<Tp...>& b) {
+    auto bnext = visitor(b, std::get<I>(t));
+    // do things
+    if constexpr(I+1 != sizeof...(Tp)) {
+        return build<I+1>(t, visitor, b2);
+    } else {
+        return bnext;
+    }
+}
+
+template<typename... Ts, typename V>
+auto tuplebuild(const std::tuple<Ts...>& t, V&& visitor)
+{
+    return
+    std::apply([visitor](auto&... tupleElems){(visitor(tupleElems), ...);}, t);
+}
+
+template<typename... Ts, typename V>
+void tupleVisit(const std::tuple<Ts...>& t, V&& visitor)
+{
+    std::apply([visitor](auto&... tupleElems){(visitor(tupleElems), ...);}, t);
+}
+
 
 template <typename T>
 struct type_tag {
@@ -64,5 +188,62 @@ struct MetaStruct<test_types::NestingStruct> {
         type_tag<test_types::BasicClass>{}
     );
 };
+
+// Declares an alias to the type of the i'th visitable field of T.
+template <size_t I, typename T>
+using typeAt = typename std::tuple_element<I, tuple_type_t<T>>::type;
+
+// Returns a reference to the I'th field in an instance of T.
+template <size_t I, typename T>
+constexpr auto& get(T& obj) {
+    // iterate public fields tuple and recursively each of parent tuple
+}
+
+// Returns the number of fields in T.
+template <typename T>
+constexpr size_t fieldCount() {
+    // tuple size of public fields + iterate parent tuple
+    return std::tuple_size_v<MetaStruct<T>>;
+}
+
+// Returns the name of the I'th field of T.
+template <size_t I, typename T>
+constexpr const char* getName(){
+    // iterate public fields tuple and recursively each of parent tuple
+}
+
+// Apply visitor to each field of each T
+// The variadic template args need to be last or type deduction doesn't work properly.
+template <size_t I = 0, typename Visitor, typename T, typename... Ts,
+          typename = std::enable_if_t<(std::is_same_v<T, Ts> && ...)>>
+constexpr void applyForEach(Visitor&& v, T&& t1, Ts&&... ts);
+
+// Helper to allow the visitor to be the last argument when there are only 2 Ts, such as for binary comparisons.
+template <typename T, typename Visitor>
+constexpr void forEachApply(T&& t1, T&& t2, Visitor&& visitor) {
+    applyForEach(std::forward<Visitor>(visitor), std::forward<T>(t1), std::forward<T>(t2));
+}
+
+// Returns the result of applying Operation to each field of lhs and rhs, pairwise, AND'ing the results.
+template <typename T, typename Operation>
+constexpr bool compare(const T& lhs, const T& rhs, const Operation& op);
+
+// Returns true if each field of lhs is equal to each field of rhs.
+template <typename T>
+constexpr bool equalTo(const T& lhs, const T& rhs) {
+    return compare(lhs, rhs, std::equal_to<>{});
+}
+
+template <typename T>
+constexpr bool lessThan(const T& lhs, const T& rhs) {
+    // Caution! We can't just use std::less, in case just a single field is less and the rest are equal.
+    return compare(lhs, rhs, std::less_equal<>{}) && !equalTo(lhs, rhs);
+}
+
+template <typename T>
+constexpr bool greaterThan(const T& lhs, const T& rhs) {
+    // Caution! We can't just use std::greater in case just a single field is greater and the rest are equal.
+    return compare(lhs, rhs, std::greater_equal<>{}) && !equalTo(lhs, rhs);
+}
 
 } // namespace reflecxx
