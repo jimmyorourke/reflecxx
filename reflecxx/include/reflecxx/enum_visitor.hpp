@@ -4,35 +4,35 @@
 // get compiled by the generator, don't define it during generation.
 #ifndef REFLECXX_GENERATION
 
-// namespace reflecxx {
+namespace reflecxx {
 
-// // Returns the number of enumerators in an enum.
-// template <typename EnumType>
-// constexpr size_t enumSize();
+// Returns the number of enumerators in an enum.
+template <typename EnumType>
+constexpr size_t enumSize();
 
-// // Returns the name of the enumerator as string.
-// template <typename EnumType>
-// constexpr const char* enumName(EnumType enumerator);
+// Returns the name of the enumerator as string.
+template <typename EnumType>
+constexpr const char* enumName(EnumType enumerator);
 
-// // Converts a name to a matching enumerator.
-// template <typename EnumType>
-// constexpr EnumType fromName(const char* enumeratorName);
+// Converts a name to a matching enumerator.
+template <typename EnumType>
+constexpr EnumType fromName(const char* enumeratorName);
 
-// // Returns an array containing the names of all enumerators.
-// template <typename EnumType>
-// constexpr auto enumNames() -> std::array<const char*, enumSize<EnumType>()>;
+// Returns an array containing the names of all enumerators.
+template <typename EnumType>
+constexpr auto enumNames() -> std::array<const char*, enumSize<EnumType>()>;
 
-// // Returns an array of all enumerators.
-// template <typename EnumType>
-// constexpr auto enumerators() -> std::array<EnumType, enumSize<EnumType>()>;
+// Returns an array of all enumerators.
+template <typename EnumType>
+constexpr auto enumerators() -> std::array<EnumType, enumSize<EnumType>()>;
 
-// // Returns true if there is an enumerator corresponding to the underlying type value provided.
-// // Can be used to determine if a static_cast to the enum type is safe.
-// template <typename EnumType>
-// constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue);
+// Returns true if there is an enumerator corresponding to the underlying type value provided.
+// Can be used to determine if a static_cast to the enum type is safe.
+template <typename EnumType>
+constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue);
 
-// } // namespace reflecxx
+} // namespace reflecxx
 
-// #include "impl/enum_visitor_impl.hpp"
+#include "impl/enum_visitor_impl.hpp"
 
 #endif // REFLECXX_GENERATION
