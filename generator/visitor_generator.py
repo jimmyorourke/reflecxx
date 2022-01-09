@@ -118,6 +118,42 @@ class VisitorGenerator():
         self._output("} // namespace detail")
         self._output("")
 
+    def generate_meta_struct(self, s: Structure):
+        self._output("////////////////////////////////////////////////////////////")
+        self._output(f"// {s.typename}")
+        self._output("////////////////////////////////////////////////////////////")
+        self._output("")
+
+        self._output("template <>")
+        self._output(f"struct MetaStruct<{s.typename}> {{")
+        with IndentBlock(self):
+            self._output("static constexpr auto publicFields = std::make_tuple(")
+            with IndentBlock(self):
+                # make_tuple doesn't allow trailing commas so we have to keep track
+                size = len(s.public_fields)
+                count = 1
+                for field_name, field_struct in s.public_fields.items():
+                    suffix = "," if count < size else ""
+                    count += 1
+                    self._output(f'ClassMember<{s.typename}, {field_struct.typename}>{{&{s.typename}::{field_name}, "{field_name}"}}{suffix}')
+            self._output(");")
+
+            self._output("static constexpr auto baseClasses = std::make_tuple(")
+            with IndentBlock(self):
+                size = sum(1 for base in s.base_classes.values() if base is not None)
+                count = 1
+                for name, base in s.base_classes.items():
+                    # don't force the base class to have been annotated for visitation
+                    if base is not None:
+                        suffix = "," if count < size else ""
+                        count += 1
+                        self._output(f"type_tag<{base.typename}>{{}}{suffix}")
+                    else:
+                        self._output(f"// skipping unannotated base class {name}")
+            self._output(");")
+        self._output("};")
+        self._output("")
+
     def generate_enum_visitor(self, e: Enumeration):
         self._output("////////////////////////////////////////////////////////////")
         self._output(f"// {e.name}")
@@ -139,6 +175,26 @@ class VisitorGenerator():
         self._output("} // namespace detail")
         self._output("")
 
+
+    def generate_meta_enum(self, e: Enumeration):
+        self._output("////////////////////////////////////////////////////////////")
+        self._output(f"// {e.name}")
+        self._output("////////////////////////////////////////////////////////////")
+        self._output("")
+
+        self._output("template <>")
+        self._output(f"struct MetaEnum<{e.name}> {{")
+        with IndentBlock(self):
+            self._output(f"using Utype = std::underlying_type_t<{e.name}>;")
+            size = len(e.enumerators)
+            self._output(f"static constexpr std::array<Enumerator<{e.name}>, {size}> enumerators = {{{{")
+            with IndentBlock(self):
+                for name, val in e.enumerators.items():
+                    # scoped names work for accessing unscoped enum elements too
+                    self._output(f'{{{e.name}::{name}, "{name}", Utype{{{val}}}}},')
+            self._output("}};")
+        self._output("};")
+        self._output("")
 
 class IndentBlock:
     """Generates an indented block when used as a context manager within a VisitorGenerator."""
