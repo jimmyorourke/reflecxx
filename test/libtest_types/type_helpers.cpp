@@ -34,6 +34,9 @@ std::string toString(const BasicStruct& b) {
 }
 
 // Demonstrate that we can make use of generated visitors without requiring any ifdef protection here in the cpp.
-bool BasicStruct::operator==(const BasicStruct& rhs) const { return reflecxx::equalTo(*this, rhs); }
+bool BasicStruct::operator==(const BasicStruct& rhs) const {
+    return this->b == rhs.b && this-> i == rhs.i && this->d == rhs.d;
+    //return reflecxx::equalTo(*this, rhs);
+}
 
 } // namespace test_types

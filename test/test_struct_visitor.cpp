@@ -121,54 +121,57 @@ TEST(struct_visitor, get) {
     static_assert(std::is_const_v<std::remove_reference_t<decltype(dref2)>>);
 }
 
-TEST(struct_visitor, equalTo) {
-    test_types::BasicStruct bs1{/*b=*/true, /*i=*/1, /*d=*/1.5};
-    test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
+// TEST(struct_visitor, equalTo) {
+//     test_types::BasicStruct bs1{/*b=*/true, /*i=*/1, /*d=*/1.5};
+//     test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
 
-    EXPECT_TRUE(reflecxx::equalTo(bs1, bs2));
+//     EXPECT_TRUE(reflecxx::equalTo(bs1, bs2));
 
-    test_types::BasicStruct bs3{/*b=*/false, /*i=*/1, /*d=*/1.5};
+//     test_types::BasicStruct bs3{/*b=*/false, /*i=*/1, /*d=*/1.5};
 
-    EXPECT_FALSE(reflecxx::equalTo(bs1, bs3));
+//     EXPECT_FALSE(reflecxx::equalTo(bs1, bs3));
 
-    test_types::NestingStruct ns1{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
-    test_types::NestingStruct ns2{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
+//     test_types::NestingStruct ns1{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
+//     test_types::NestingStruct ns2{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs3}};
 
-    EXPECT_TRUE(reflecxx::equalTo(ns1, ns2));
+//     EXPECT_TRUE(reflecxx::equalTo(ns1, ns2));
 
-    test_types::NestingStruct ns3{1, 1.5, bs2, {bs2, bs3, bs2}, {bs3, bs3}};
+//     test_types::NestingStruct ns3{1, 1.5, bs2, {bs2, bs3, bs2}, {bs3, bs3}};
 
-    EXPECT_FALSE(reflecxx::equalTo(ns1, ns3));
+//     EXPECT_FALSE(reflecxx::equalTo(ns1, ns3));
 
-    test_types::NestingStruct ns4{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs2}};
+//     test_types::NestingStruct ns4{1, 1.5, bs2, {bs2, bs2, bs2}, {bs3, bs2}};
 
-    EXPECT_FALSE(reflecxx::equalTo(ns1, ns4));
-}
+//     EXPECT_FALSE(reflecxx::equalTo(ns1, ns4));
+// }
 
-TEST(struct_visitor, greaterThanLessThan) {
-    test_types::BasicStruct bs1{/*b=*/true, /*i=*/1, /*d=*/1.5};
+// TEST(struct_visitor, greaterThanLessThan) {
+//     test_types::BasicStruct bs1{/*b=*/true, /*i=*/1, /*d=*/1.5};
 
-    EXPECT_TRUE(reflecxx::equalTo(bs1, bs1));
-    EXPECT_FALSE(reflecxx::lessThan(bs1, bs1));
-    EXPECT_FALSE(reflecxx::greaterThan(bs1, bs1));
+//     EXPECT_TRUE(reflecxx::equalTo(bs1, bs1));
+//     EXPECT_FALSE(reflecxx::lessThan(bs1, bs1));
+//     EXPECT_FALSE(reflecxx::greaterThan(bs1, bs1));
 
-    test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/0.5};
-    test_types::BasicStruct bs3{/*b=*/true, /*i=*/2, /*d=*/1.5};
+//     test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/0.5};
+//     test_types::BasicStruct bs3{/*b=*/true, /*i=*/2, /*d=*/1.5};
 
-    EXPECT_TRUE(reflecxx::lessThan(bs2, bs1));
-    EXPECT_FALSE(reflecxx::greaterThan(bs2, bs1));
-    EXPECT_FALSE(reflecxx::lessThan(bs3, bs1));
-    EXPECT_TRUE(reflecxx::greaterThan(bs3, bs1));
+//     EXPECT_TRUE(reflecxx::lessThan(bs2, bs1));
+//     EXPECT_FALSE(reflecxx::greaterThan(bs2, bs1));
+//     EXPECT_FALSE(reflecxx::lessThan(bs3, bs1));
+//     EXPECT_TRUE(reflecxx::greaterThan(bs3, bs1));
 
-    test_types::BasicStruct bs4{/*b=*/false, /*i=*/2, /*d=*/0.5};
+//     test_types::BasicStruct bs4{/*b=*/false, /*i=*/2, /*d=*/0.5};
 
-    EXPECT_FALSE(reflecxx::lessThan(bs4, bs1));
-    EXPECT_FALSE(reflecxx::greaterThan(bs4, bs1));
-}
+//     EXPECT_FALSE(reflecxx::lessThan(bs4, bs1));
+//     EXPECT_FALSE(reflecxx::greaterThan(bs4, bs1));
+// }
 
 TEST(generation, type_traits) {
     struct MyType {};
 
     static_assert(!reflecxx::is_reflecxx_visitable_v<MyType>);
+
+
+    //static_assert(std::is_empty_v<reflecxx::MetaStruct<test_types::BasicStruct>>);
     static_assert(reflecxx::is_reflecxx_visitable_v<test_types::BasicStruct>);
 }

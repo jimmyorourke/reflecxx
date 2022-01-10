@@ -52,28 +52,72 @@ struct Extractor {
 
 } // namespace detail
 
+
+// template <size_t I, typename T>
+// constexpr auto getTypeAt() {
+//     auto v = [&count](const char*, const auto&) constexpr { count++; };
+//     visit<T>(std::move(v));
+// };
+
+
 // Returns a reference to the i'th field in an instance of T.
+// template <size_t I, typename T>
+// constexpr auto& get(T& obj) {
+//     using rawT = reflecxx::remove_cvref_t<T>;
+//     // This gives a more obvious error than when typeAt fails to compile
+//     static_assert(I < fieldCount<rawT>(), "Index out of range!");
+
+//     // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
+//     // issues! The compiler doesn't catch this!
+//     detail::match_const_t<typeAt<I, rawT>, T>* memberPtr = nullptr;
+//     detail::Extractor e{&memberPtr, I};
+//     visit(obj, std::move(e));
+//     // this should be impossible
+//     assert(memberPtr);
+//     return *memberPtr;
+// }
+
 template <size_t I, typename T>
 constexpr auto& get(T& obj) {
-    using rawT = reflecxx::remove_cvref_t<T>;
-    // This gives a more obvious error than when typeAt fails to compile
-    static_assert(I < fieldCount<rawT>(), "Index out of range!");
+    // using rawT = reflecxx::remove_cvref_t<T>;
+    // // This gives a more obvious error than when typeAt fails to compile
+    // static_assert(I < fieldCount<rawT>(), "Index out of range!");
 
-    // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
-    // issues! The compiler doesn't catch this!
-    detail::match_const_t<typeAt<I, rawT>, T>* memberPtr = nullptr;
-    detail::Extractor e{&memberPtr, I};
-    visit(obj, std::move(e));
-    // this should be impossible
-    assert(memberPtr);
-    return *memberPtr;
+    // // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
+    // // issues! The compiler doesn't catch this!
+    // detail::match_const_t<typeAt<I, rawT>, T>* memberPtr = nullptr;
+    // detail::Extractor e{&memberPtr, I};
+    // visit(obj, std::move(e));
+    // // this should be impossible
+    // assert(memberPtr);
+    // return *memberPtr;
+    //auto count = 0;
+    auto v = [](const char*, const auto& tag)constexpr {
+        return tag;
+        //if (count == I) {
+            //return std::tuple<reflecxx::remove_cvref_t<decltype(tag)>>{};
+        // } else{
+        //     return std::tuple<>{};
+        // }
+    };
+    constexpr auto types = visitAccum<T>(std::move(v));
+
+    typename remove_cvref_t<decltype(std::get<I>(types))>::type* ptr = nullptr;
+    auto count = 0;
+    auto v2 = [&count, &ptr](const char*, auto& member)constexpr {
+        if (count == I) {
+            ptr = &member;
+        }
+        count++;
+    };
+
+    return *ptr;
 }
 
 template <typename T>
 constexpr size_t fieldCount() {
-    // alternatively could use std::tuple_size, since we also define a tuple for each visitable struct type.
     size_t count = 0;
-    auto v = [&count](const char*, const auto&) constexpr { count++; };
+    constexpr auto v = [&count](const char*, const auto&) constexpr { count++; };
     visit<T>(std::move(v));
     return count;
 }
@@ -97,48 +141,48 @@ constexpr const char* getName() {
     return out;
 }
 
-// The variadic template args need to be last or type deduction doesn't work properly.
-template <size_t I, typename Visitor, typename T, typename... Ts, typename>
-constexpr void applyForEach(Visitor&& v, T&& t1, Ts&&... ts) {
-    using cleanT = reflecxx::remove_cvref_t<T>;
-    v(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
-    // if constexpr makes recursive templates so much easier! And no integer sequences.
-    if constexpr (I + 1 < fieldCount<cleanT>()) {
-        applyForEach<I + 1>(std::forward<Visitor>(v), std::forward<T>(t1), std::forward<T>(ts)...);
-    }
-}
+// // The variadic template args need to be last or type deduction doesn't work properly.
+// template <size_t I, typename Visitor, typename T, typename... Ts, typename>
+// constexpr void applyForEach(Visitor&& v, T&& t1, Ts&&... ts) {
+//     using cleanT = reflecxx::remove_cvref_t<T>;
+//     v(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
+//     // if constexpr makes recursive templates so much easier! And no integer sequences.
+//     if constexpr (I + 1 < fieldCount<cleanT>()) {
+//         applyForEach<I + 1>(std::forward<Visitor>(v), std::forward<T>(t1), std::forward<T>(ts)...);
+//     }
+// }
 
-template <typename T, typename O>
-constexpr bool compare(const T& t1, const T& t2, const O& op) {
-    bool res = true;
-    auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
-        static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
-        using cleanT = reflecxx::remove_cvref_t<decltype(val1)>;
+// template <typename T, typename O>
+// constexpr bool compare(const T& t1, const T& t2, const O& op) {
+//     bool res = true;
+//     auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
+//         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
+//         using cleanT = reflecxx::remove_cvref_t<decltype(val1)>;
 
-        if constexpr (std::is_array_v<cleanT>) {
-            // c-style array
-            const auto size1 = sizeof(val1) / sizeof(val1[0]);
-            const auto size2 = sizeof(val2) / sizeof(val2[0]);
+//         if constexpr (std::is_array_v<cleanT>) {
+//             // c-style array
+//             const auto size1 = sizeof(val1) / sizeof(val1[0]);
+//             const auto size2 = sizeof(val2) / sizeof(val2[0]);
 
-            res = (res && op(size1, size2));
-            if (!res) {
-                // break early
-                return;
-            }
-            for (auto i = 0u; i < size1; ++i) {
-                // Recurse to handle whatever type the array members are
-                res = (res && compare(val1[i], val2[i], op));
-                if (!res) {
-                    // break early
-                    return;
-                }
-            }
-        } else {
-            res = (res && op(val1, val2));
-        }
-    };
-    applyForEach(std::move(v), t1, t2);
-    return res;
-}
+//             res = (res && op(size1, size2));
+//             if (!res) {
+//                 // break early
+//                 return;
+//             }
+//             for (auto i = 0u; i < size1; ++i) {
+//                 // Recurse to handle whatever type the array members are
+//                 res = (res && compare(val1[i], val2[i], op));
+//                 if (!res) {
+//                     // break early
+//                     return;
+//                 }
+//             }
+//         } else {
+//             res = (res && op(val1, val2));
+//         }
+//     };
+//     applyForEach(std::move(v), t1, t2);
+//     return res;
+// }
 
 } // namespace reflecxx

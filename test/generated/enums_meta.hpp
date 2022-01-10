@@ -13,34 +13,34 @@ namespace reflecxx {
 // test_types::Unscoped
 ////////////////////////////////////////////////////////////
 
-template <typename Enum>
-struct Enumerator {
-    Enum enumerator;
-    const char* name;
-    std::underlying_type_t<Enum> value;
-};
+// template <typename Enum>
+// struct Enumerator {
+//     Enum enumerator;
+//     const char* name;
+//     std::underlying_type_t<Enum> value;
+// };
 
-template <typename T>
-struct MetaEnum;
+// template <typename T>
+// struct MetaEnum;
 
-template <>
-struct MetaEnum<test_types::Unscoped> {
-    static constexpr std::array<Enumerator<test_types::Unscoped>, 4> enumerators = {{
-        {test_types::Unscoped::First, "First", std::underlying_type_t<test_types::Unscoped>{2}},
-        {test_types::Unscoped::Second, "Second", std::underlying_type_t<test_types::Unscoped>{3}},
-        {test_types::Unscoped::Third, "Third", std::underlying_type_t<test_types::Unscoped>{4}},
-        {test_types::Unscoped::Fourth, "Fourth", std::underlying_type_t<test_types::Unscoped>{5}}
-    }};
-};
+// template <>
+// struct MetaEnum<test_types::Unscoped> {
+//     static constexpr std::array<Enumerator<test_types::Unscoped>, 4> enumerators = {{
+//         {test_types::Unscoped::First, "First", std::underlying_type_t<test_types::Unscoped>{2}},
+//         {test_types::Unscoped::Second, "Second", std::underlying_type_t<test_types::Unscoped>{3}},
+//         {test_types::Unscoped::Third, "Third", std::underlying_type_t<test_types::Unscoped>{4}},
+//         {test_types::Unscoped::Fourth, "Fourth", std::underlying_type_t<test_types::Unscoped>{5}}
+//     }};
+// };
 
-template <>
-struct MetaEnum<test_types::Scoped> {
-    static constexpr std::array<Enumerator<test_types::Scoped>, 3> enumerators = {{
-        {test_types::Scoped::First, "First", std::underlying_type_t<test_types::Scoped>{0}},
-        {test_types::Scoped::Second, "Second", std::underlying_type_t<test_types::Scoped>{1}},
-        {test_types::Scoped::Third, "Third", std::underlying_type_t<test_types::Scoped>{2}}
-    }};
-};
+// template <>
+// struct MetaEnum<test_types::Scoped> {
+//     static constexpr std::array<Enumerator<test_types::Scoped>, 3> enumerators = {{
+//         {test_types::Scoped::First, "First", std::underlying_type_t<test_types::Scoped>{0}},
+//         {test_types::Scoped::Second, "Second", std::underlying_type_t<test_types::Scoped>{1}},
+//         {test_types::Scoped::Third, "Third", std::underlying_type_t<test_types::Scoped>{2}}
+//     }};
+// };
 
 // Returns the number of enumerators in an enum.
 template <typename EnumType>

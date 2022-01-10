@@ -11,9 +11,11 @@
 
 namespace reflecxx {
 
-// Declares an alias to the type of the i'th visitable field of T.
-template <size_t I, typename T>
-using typeAt = typename std::tuple_element<I, tuple_type_t<T>>::type;
+// template <size_t I, typename T>
+// constexpr auto getTypeAt();
+// // Declares an alias to the type of the i'th visitable field of T.
+// template <size_t I, typename T>
+// using typeAt = typename (getTypeAt()::type);
 
 // Returns a reference to the I'th field in an instance of T.
 template <size_t I, typename T>

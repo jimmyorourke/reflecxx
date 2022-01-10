@@ -4,7 +4,7 @@
 
 #include <libtest_types/enums.hpp>
 #include <reflecxx/enum_visitor.hpp>
-#include "generated/enums_meta.hpp"
+//#include "generated/enums_meta.hpp"
 
 TEST(enum_visitor, enumSize) {
     // put static_asserts in a TEST simply for organization

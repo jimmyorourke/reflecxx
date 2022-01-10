@@ -9,7 +9,7 @@
 
 namespace reflecxx {
 
-template <typename Class, template MemberType>
+template <typename Class, typename MemberType>
 struct ClassMember {
     using type = MemberType;
     MemberType Class::* ptr;
@@ -25,7 +25,7 @@ struct MetaStruct<test_types::BasicStruct> {
     static constexpr auto publicFields = std::make_tuple(
         ClassMember<test_types::BasicStruct, bool>{&test_types::BasicStruct::b,"b"},
         ClassMember<test_types::BasicStruct, int>{&test_types::BasicStruct::i, "i"},
-        ClassMember<test_types::BasicStruct, double>&test_types::BasicStruct::d, {"d"}
+        ClassMember<test_types::BasicStruct, double>{&test_types::BasicStruct::d, "d"}
     );
 };
 
@@ -99,12 +99,12 @@ constexpr void visit(T&& instance, V&& visitor) {
 template<typename V>
 struct MemberTypeVisitor {
     template<typename T, typename M>
-    constexpr void operator()(ClassMember<T, M>&&){
-        visitor(member.name, tag_type<M>{});
+    constexpr void operator()(ClassMember<T, M>&& member){
+        visitor(member.name, type_tag<M>{});
     }
     template<typename T, typename M, typename... Ts>
     constexpr auto operator()(ClassMember<T, M>&&, std::tuple<Ts...> t){
-        return visitor(t, std::make_tuple(tag_type<M>{}));
+        return visitor(t, std::make_tuple(type_tag<M>{}));
     }
 
     V& visitor;
@@ -162,7 +162,9 @@ template<typename... Ts, typename V>
 auto tuplebuild(const std::tuple<Ts...>& t, V&& visitor)
 {
     return
-    std::apply([visitor](auto&... tupleElems){(visitor(tupleElems), ...);}, t);
+    std::apply([visitor](auto&... tupleElems){
+        return std::make_tuple(visitor(tupleElems)...);
+    }, t);
 }
 
 template<typename... Ts, typename V>
