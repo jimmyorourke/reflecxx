@@ -148,11 +148,11 @@ constexpr void tupleVisit(const std::tuple<Ts...>& t, V&& visitor)
 
 template<size_t I = 0,  typename... Tp, typename V, typename... Ts>
 constexpr auto chainvisit(const std::tuple<Tp...>& t, V&& visitor, const std::tuple<Ts...>& b) {
-    if constexpr(sizeof...(Tp) == 0) {
-        return b;
-    }
-    // required else!
-    else {
+    // if constexpr(sizeof...(Tp) == 0) {
+    //     return b;
+    // }
+    // // required else!
+    // else {
         auto bnext = std::tuple_cat(b, std::make_tuple(visitor(std::get<I>(t))));
         // do things
         if constexpr(I+1 != sizeof...(Tp)) {
@@ -160,8 +160,22 @@ constexpr auto chainvisit(const std::tuple<Tp...>& t, V&& visitor, const std::tu
         } else {
             return bnext;
         }
-    }
+    //}
 }
+
+template<typename V, typename... Ts>
+constexpr auto chainvisit(const std::tuple<>&, V&&, const std::tuple<Ts...>& b) {
+    return b;
+}
+
+struct Acceptor
+{
+    template<class T, class V>
+    auto operator()(V&& visitor)
+    {
+        return visitAccum<T>(visitor);
+    }
+};
 
 template<typename T, typename V>
 constexpr auto visitAccum(V&& visitor) {
@@ -171,6 +185,8 @@ constexpr auto visitAccum(V&& visitor) {
     //return r1;
     return chainvisit(MetaStruct<remove_cvref_t<T>>::baseClasses, BaseClassMemberTypeChainVisitor<V>{visitor}, r1);
 }
+
+
 
 template<typename T, typename V>
 constexpr auto visitAccum(T&& instance, V&& visitor) {
