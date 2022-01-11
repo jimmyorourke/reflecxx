@@ -59,8 +59,8 @@ struct Acceptor;
 template<typename T, typename V>
 struct MemberVisitor {
     template<typename M>
-    constexpr void operator()(const ClassMember<remove_cvref_t<T>, M>& member) const {
-        visitor(member.name, instance.*member.ptr);
+    constexpr auto operator()(const ClassMember<remove_cvref_t<T>, M>& member) const {
+        return visitor(member.name, instance.*member.ptr);
     }
 
     T& instance;
@@ -73,6 +73,18 @@ struct BaseClassMemberVisitor {
     constexpr void operator()(type_tag<B>){
         // fully recurse to handle multiple levels of inheritance
         visit(static_cast<B&>(instance), visitor);
+    }
+
+    T& instance;
+    V& visitor;
+};
+
+template<typename T, typename V>
+struct BaseClassMemberChainVisitor {
+    template<typename B>
+    constexpr auto operator()(type_tag<B>){
+        // fully recurse to handle multiple levels of inheritance
+        return visitAccum(static_cast<B&>(instance), visitor);
     }
 
     T& instance;
@@ -154,10 +166,20 @@ constexpr auto chainvisit(const std::tuple<Tp...>& t, V&& visitor, const std::tu
 template<typename T, typename V>
 constexpr auto visitAccum(V&& visitor) {
     using namespace detail;
-    auto r1 = chainvisit(MetaStruct<T>::publicFields, MemberTypeVisitor<V>{visitor}, std::tuple<>{});
+    // clean t in case callers mess up
+    auto r1 = chainvisit(MetaStruct<remove_cvref_t<T>>::publicFields, MemberTypeVisitor<V>{visitor}, std::tuple<>{});
     //return r1;
-    return chainvisit(MetaStruct<T>::baseClasses, BaseClassMemberTypeChainVisitor<V>{visitor}, r1);
+    return chainvisit(MetaStruct<remove_cvref_t<T>>::baseClasses, BaseClassMemberTypeChainVisitor<V>{visitor}, r1);
 }
+
+template<typename T, typename V>
+constexpr auto visitAccum(T&& instance, V&& visitor) {
+    using namespace detail;
+    auto r1 = chainvisit(MetaStruct<remove_cvref_t<T>>::publicFields, MemberVisitor<T, V>{instance, visitor}, std::tuple<>{});
+    return chainvisit(MetaStruct<remove_cvref_t<T>>::baseClasses, BaseClassMemberChainVisitor<T, V>{instance, visitor}, r1);
+}
+
+
 
 // Tag struct containing a tuple type composed of the types of all public (ie visitable) members of T.
 template <typename T>

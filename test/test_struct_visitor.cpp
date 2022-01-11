@@ -109,14 +109,14 @@ TEST(struct_visitor, get) {
     auto& dref = reflecxx::get<2>(bs);
 
     static_assert(std::is_same_v<decltype(dref), decltype(bs.d)&>);
-
+    EXPECT_EQ(dref, bs.d);
     dref += 3;
 
     EXPECT_EQ(bs.d, 4.5);
 
     const test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
     auto& dref2 = reflecxx::get<2>(bs2);
-
+    //dref2+=1;
     // constness is maintained
     static_assert(std::is_const_v<std::remove_reference_t<decltype(dref2)>>);
 }

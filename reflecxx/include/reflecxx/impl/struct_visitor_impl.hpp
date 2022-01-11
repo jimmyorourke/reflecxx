@@ -102,16 +102,23 @@ constexpr auto& get(T& obj) {
     };
     constexpr auto types = visitAccum<T>(std::move(v));
 
-    typename remove_cvref_t<decltype(std::get<I>(types))>::type* ptr = nullptr;
+    // The const-ness of the pointer to member must match the const-ness of T
+    detail::match_const_t<remove_cvref_t<decltype(std::get<I>(types))>::type, T>* ptr = nullptr;
     auto count = 0;
     auto v2 = [&count, &ptr](const char*, auto& member)constexpr {
-        if (count == I) {
-            ptr = &member;
+        std::cout << count << std::endl;
+        if constexpr (std::is_same_v<remove_cvref_t<decltype(*ptr)>, remove_cvref_t<decltype(member)>>) {
+            if (count == I)
+                ptr = &member;
         }
         count++;
     };
-
+    visit(obj, std::move(v2));
+    assert(ptr);
+    std::cout << ptr <<"\n";
     return *ptr;
+    //double a = 5;
+    //return a;
 }
 
 template <typename T>
