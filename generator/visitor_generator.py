@@ -99,23 +99,23 @@ class VisitorGenerator():
 
         # type visitor
         # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
-        self._output("namespace detail {")
-        self._output("template <typename Visitor>")
-        self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
-        with IndentBlock(self):
-            self._output("static constexpr void visitType(Visitor&& visitor) {")
-            with IndentBlock(self):
-                for name, base in s.base_classes.items():
-                    # don't force the base class to have been annotated for visitation
-                    if base is not None:
-                        self._output(f"visit<{base.typename}>(visitor);")
-                    else:
-                        self._output(f"// not visiting unannotated base class {name}")
-                for field_name, field_struct in s.public_fields.items():
-                    self._output(f'visitor("{field_name}", type_tag<{field_struct.typename}>{{}});')
-            self._output("}")
-        self._output("};")
-        self._output("} // namespace detail")
+        # self._output("namespace detail {")
+        # self._output("template <typename Visitor>")
+        # self._output(f"struct Acceptor<{s.typename}, Visitor> {{")
+        # with IndentBlock(self):
+        #     self._output("static constexpr void visitType(Visitor&& visitor) {")
+        #     with IndentBlock(self):
+        #         for name, base in s.base_classes.items():
+        #             # don't force the base class to have been annotated for visitation
+        #             if base is not None:
+        #                 self._output(f"visit<{base.typename}>(visitor);")
+        #             else:
+        #                 self._output(f"// not visiting unannotated base class {name}")
+        #         for field_name, field_struct in s.public_fields.items():
+        #             self._output(f'visitor("{field_name}", type_tag<{field_struct.typename}>{{}});')
+        #     self._output("}")
+        # self._output("};")
+        # self._output("} // namespace detail")
         self._output("")
 
     def generate_meta_struct(self, s: Structure):
@@ -125,7 +125,7 @@ class VisitorGenerator():
         self._output("")
 
         self._output("template <>")
-        self._output(f"struct MetaStruct<{s.typename}> {{")
+        self._output(f"struct MetaStructInternal<{s.typename}> {{")
         with IndentBlock(self):
             self._output("static constexpr auto publicFields = std::make_tuple(")
             with IndentBlock(self):
@@ -161,18 +161,18 @@ class VisitorGenerator():
         self._output("")
 
         # specialization goes in the detail namespace as there is a wrapper function to perform type deduction
-        self._output("namespace detail {")
-        self._output("template <typename Visitor>")
-        self._output(f"struct Acceptor<{e.name}, Visitor> {{")
-        with IndentBlock(self):
-            self._output("static constexpr void visitType(Visitor&& visitor) {")
-            with IndentBlock(self):
-                for name, val in e.enumerators.items():
-                    # scoped names work for accessing unscoped enum elements too
-                    self._output(f'visitor({e.name}::{name}, "{name}", std::underlying_type_t<{e.name}>{{{val}}});')
-            self._output("}")
-        self._output("};")
-        self._output("} // namespace detail")
+        # self._output("namespace detail {")
+        # self._output("template <typename Visitor>")
+        # self._output(f"struct Acceptor<{e.name}, Visitor> {{")
+        # with IndentBlock(self):
+        #     self._output("static constexpr void visitType(Visitor&& visitor) {")
+        #     with IndentBlock(self):
+        #         for name, val in e.enumerators.items():
+        #             # scoped names work for accessing unscoped enum elements too
+        #             self._output(f'visitor({e.name}::{name}, "{name}", std::underlying_type_t<{e.name}>{{{val}}});')
+        #     self._output("}")
+        # self._output("};")
+        # self._output("} // namespace detail")
         self._output("")
 
 
@@ -183,7 +183,7 @@ class VisitorGenerator():
         self._output("")
 
         self._output("template <>")
-        self._output(f"struct MetaEnum<{e.name}> {{")
+        self._output(f"struct MetaEnumInternal<{e.name}> {{")
         with IndentBlock(self):
             self._output(f"using Utype = std::underlying_type_t<{e.name}>;")
             size = len(e.enumerators)
