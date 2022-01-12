@@ -100,7 +100,7 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
     auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
 
-        if constexpr (std::is_array_v < remove_cvref_t<decltype(val1)>) {
+        if constexpr (std::is_array_v<remove_cvref_t<decltype(val1)>>) {
             // c-style array
             const auto size1 = sizeof(val1) / sizeof(val1[0]);
             const auto size2 = sizeof(val2) / sizeof(val2[0]);
