@@ -52,13 +52,11 @@ struct Extractor {
 
 } // namespace detail
 
-
 // template <size_t I, typename T>
 // constexpr auto getTypeAt() {
 //     auto v = [&count](const char*, const auto&) constexpr { count++; };
 //     visit<T>(std::move(v));
 // };
-
 
 // Returns a reference to the i'th field in an instance of T.
 // template <size_t I, typename T>
@@ -91,11 +89,11 @@ constexpr auto& get(T& obj) {
     // // this should be impossible
     // assert(memberPtr);
     // return *memberPtr;
-    //auto count = 0;
-    auto v = [](const char*, const auto& tag)constexpr {
+    // auto count = 0;
+    auto v = [](const char*, const auto& tag) constexpr {
         return tag;
-        //if (count == I) {
-            //return std::tuple<reflecxx::remove_cvref_t<decltype(tag)>>{};
+        // if (count == I) {
+        // return std::tuple<reflecxx::remove_cvref_t<decltype(tag)>>{};
         // } else{
         //     return std::tuple<>{};
         // }
@@ -105,8 +103,8 @@ constexpr auto& get(T& obj) {
     // The const-ness of the pointer to member must match the const-ness of T
     detail::match_const_t<remove_cvref_t<decltype(std::get<I>(types))>::type, T>* ptr = nullptr;
     auto count = 0;
-    auto v2 = [&count, &ptr](const char*, auto& member)constexpr {
-        std::cout << count << std::endl;
+    auto v2 = [&count, &ptr ](const char*, auto& member) constexpr {
+        // std::cout << count << std::endl;
         if constexpr (std::is_same_v<remove_cvref_t<decltype(*ptr)>, remove_cvref_t<decltype(member)>>) {
             if (count == I)
                 ptr = &member;
@@ -115,10 +113,10 @@ constexpr auto& get(T& obj) {
     };
     visit(obj, std::move(v2));
     assert(ptr);
-    std::cout << ptr <<"\n";
+    // std::cout << ptr <<"\n";
     return *ptr;
-    //double a = 5;
-    //return a;
+    // double a = 5;
+    // return a;
 }
 
 template <typename T>

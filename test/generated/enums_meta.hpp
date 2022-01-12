@@ -60,7 +60,7 @@ constexpr const char* enumName(EnumType enumerator) {
     throw std::runtime_error{"Invalid enumerator."};
 }
 
-constexpr bool strings_equal(char const * a, char const * b) {
+constexpr bool strings_equal(char const* a, char const* b) {
     return *a == *b && (*a == '\0' || strings_equal(a + 1, b + 1));
 }
 
@@ -102,9 +102,9 @@ constexpr auto enumerators() -> std::array<EnumType, enumSize<EnumType>()> {
 template <typename EnumType>
 constexpr bool enumContains(std::underlying_type_t<EnumType> targetValue) {
     for (auto i = 0u; i < enumSize<EnumType>(); ++i) {
-       if (MetaEnum<EnumType>::enumerators[i].value == targetValue) {
-        return true;
-       }
+        if (MetaEnum<EnumType>::enumerators[i].value == targetValue) {
+            return true;
+        }
     }
     return false;
 }

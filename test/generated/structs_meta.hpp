@@ -12,59 +12,48 @@ namespace reflecxx {
 template <typename Class, typename MemberType>
 struct ClassMember {
     using type = MemberType;
-    MemberType Class::* ptr;
+    MemberType Class::*ptr;
     const char* name;
 };
-
 
 template <typename T>
 struct MetaStruct;
 
 template <>
 struct MetaStruct<test_types::BasicStruct> {
-    static constexpr auto publicFields = std::make_tuple(
-        ClassMember<test_types::BasicStruct, bool>{&test_types::BasicStruct::b,"b"},
-        ClassMember<test_types::BasicStruct, int>{&test_types::BasicStruct::i, "i"},
-        ClassMember<test_types::BasicStruct, double>{&test_types::BasicStruct::d, "d"}
-    );
+    static constexpr auto publicFields =
+        std::make_tuple(ClassMember<test_types::BasicStruct, bool>{&test_types::BasicStruct::b, "b"},
+                        ClassMember<test_types::BasicStruct, int>{&test_types::BasicStruct::i, "i"},
+                        ClassMember<test_types::BasicStruct, double>{&test_types::BasicStruct::d, "d"});
 };
 
 template <>
 struct MetaStruct<test_types::NestingStruct> {
     static constexpr auto publicFields = std::make_tuple(
-        Field<int>{"i"},
-        Field<double>{"d"},
-        Field<test_types::BasicStruct>{"bs"},
-        Field<test_types::BasicStruct [3]>{"basicsArr"},
-        Field<std::array<test_types::BasicStruct, 2>>{"basicsStdarr"}
-    );
-    static constexpr auto baseClasses = std::make_tuple(
-    );
+        Field<int>{"i"}, Field<double>{"d"}, Field<test_types::BasicStruct>{"bs"},
+        Field<test_types::BasicStruct[3]>{"basicsArr"}, Field<std::array<test_types::BasicStruct, 2>>{"basicsStdarr"});
+    static constexpr auto baseClasses = std::make_tuple();
 };
 
-template<typename... Ts, typename V>
-void tupleVisit(const std::tuple<Ts...>& t, V&& visitor)
-{
-    std::apply([visitor](auto&... tupleElems){(visitor(tupleElems), ...);}, t);
+template <typename... Ts, typename V>
+void tupleVisit(const std::tuple<Ts...>& t, V&& visitor) {
+    std::apply([visitor](auto&... tupleElems) { (visitor(tupleElems), ...); }, t);
 }
 
-template<typename I, typename... Ts, typename... Cs, typename V>
-void tupleVisit(I&& instance, const std::tuple<ClassMember<Ts..., Cs...>>& t, V&& visitor)
-{
-    std::apply([&visitor, &instance](auto&... classMember){
-        (visitor(classMember.name, instance.*classMember.ptr), ...);}, t);
+template <typename I, typename... Ts, typename... Cs, typename V>
+void tupleVisit(I&& instance, const std::tuple<ClassMember<Ts..., Cs...>>& t, V&& visitor) {
+    std::apply(
+        [&visitor, &instance](auto&... classMember) { (visitor(classMember.name, instance.*classMember.ptr), ...); },
+        t);
 }
 
-{
-instance, classMember, visitor
-visitor(classMember.name, instance.*classMember.ptr);
-}
+{ instance, classMember, visitor visitor(classMember.name, instance.*classMember.ptr); }
 
 // wraps a visitor to provide pointer to member binding with instance
-template<typename T, typename V>
+template <typename T, typename V>
 struct MemberVisitor {
-    template<typename M>
-    constexpr void operator()(ClassMember<T, M>&& member){
+    template <typename M>
+    constexpr void operator()(ClassMember<T, M>&& member) {
         visitor(member.name, instance.*member.ptr);
     }
 
@@ -73,52 +62,51 @@ struct MemberVisitor {
 };
 
 // wraps a visitor to provide pointer to member binding with instance
-template<typename T, typename V>
+template <typename T, typename V>
 struct BaseClassMemberVisitor {
-    template<typename B>
-    constexpr void operator()(type_tag<B>){
+    template <typename B>
+    constexpr void operator()(type_tag<B>) {
         // fully recurse to handle multiple levels of inheritance
         visit(static_cast<B&>(instance), visitor);
-        //tuplevisit(MetaStruct<B>::publicFields, MemberVisitor{static_cast<B&>(instance), visitor});
+        // tuplevisit(MetaStruct<B>::publicFields, MemberVisitor{static_cast<B&>(instance), visitor});
     }
 
     T& instance;
     V& visitor;
 };
 
+visitor = [](const char* name, auto& member) {};
 
-visitor = [](const char* name, auto& member){};
-
-template<typename T, typename V>
+template <typename T, typename V>
 constexpr void visit(T&& instance, V&& visitor) {
     // wrap visitor in something that binds member pointers
     tuplevisit(MetaStruct<T>::publicFields, MemberVisitor{instance, visitor});
     tuplevisit(MetaStruct<T>::baseClasses, BaseClassMemberVisitor{instance, visitor});
 }
 
-template<typename V>
+template <typename V>
 struct MemberTypeVisitor {
-    template<typename T, typename M>
-    constexpr void operator()(ClassMember<T, M>&& member){
+    template <typename T, typename M>
+    constexpr void operator()(ClassMember<T, M>&& member) {
         visitor(member.name, type_tag<M>{});
     }
-    template<typename T, typename M, typename... Ts>
-    constexpr auto operator()(ClassMember<T, M>&&, std::tuple<Ts...> t){
+    template <typename T, typename M, typename... Ts>
+    constexpr auto operator()(ClassMember<T, M>&&, std::tuple<Ts...> t) {
         return visitor(t, std::make_tuple(type_tag<M>{}));
     }
 
     V& visitor;
 };
 
-template<typename V>
+template <typename V>
 struct BaseClassMemberTypeVisitor {
-    template<typename B>
-    constexpr void operator()(type_tag<B>){
+    template <typename B>
+    constexpr void operator()(type_tag<B>) {
         // fully recurse to handle multiple levels of inheritance
         visit<B>(visitor);
     }
-    template<typename B, typename... Ts>
-    constexpr auto operator()(type_tag<B>, std::tuple<Ts...> t){
+    template <typename B, typename... Ts>
+    constexpr auto operator()(type_tag<B>, std::tuple<Ts...> t) {
         return chainVisit<B>(visitor, t);
     }
 
@@ -134,45 +122,38 @@ constexpr void visit(Visitor&& visitor) {
 std::tuple<> t;
 auto out = visit_wrap(visitor, t)
 
-auto visit_wrap(visitor, t) {
-    {
-        auto t = visitor(t);
-    }
+    auto
+    visit_wrap(visitor, t) {
+    { auto t = visitor(t); }
 }
 
 template <typename T, typename Visitor, typename... Tp>
-constexpr auto chainVisit(Visitor&& visitor, std::tuple<Tp...> t=std::tuple<>{}) {
+constexpr auto chainVisit(Visitor&& visitor, std::tuple<Tp...> t = std::tuple<>{}) {
     auto t1 = chainvisit(MetaStruct<T>::publicFields, MemberTypeVisitor{visitor, t});
     return chainvisit(MetaStruct<T>::baseClasses, BaseClassMemberTypeVisitor{visitor, t});
 }
 
 // prints every element of a tuple
-template<size_t I = 0, typename... Tp, typename V, typename... Ts>
+template <size_t I = 0, typename... Tp, typename V, typename... Ts>
 auto chainvisit(std::tuple<Tp...>& t, V&& visitor, std::tuple<Tp...>& b) {
     auto bnext = visitor(b, std::get<I>(t));
     // do things
-    if constexpr(I+1 != sizeof...(Tp)) {
-        return build<I+1>(t, visitor, b2);
+    if constexpr (I + 1 != sizeof...(Tp)) {
+        return build<I + 1>(t, visitor, b2);
     } else {
         return bnext;
     }
 }
 
-template<typename... Ts, typename V>
-auto tuplebuild(const std::tuple<Ts...>& t, V&& visitor)
-{
-    return
-    std::apply([visitor](auto&... tupleElems){
-        return std::make_tuple(visitor(tupleElems)...);
-    }, t);
+template <typename... Ts, typename V>
+auto tuplebuild(const std::tuple<Ts...>& t, V&& visitor) {
+    return std::apply([visitor](auto&... tupleElems) { return std::make_tuple(visitor(tupleElems)...); }, t);
 }
 
-template<typename... Ts, typename V>
-void tupleVisit(const std::tuple<Ts...>& t, V&& visitor)
-{
-    std::apply([visitor](auto&... tupleElems){(visitor(tupleElems), ...);}, t);
+template <typename... Ts, typename V>
+void tupleVisit(const std::tuple<Ts...>& t, V&& visitor) {
+    std::apply([visitor](auto&... tupleElems) { (visitor(tupleElems), ...); }, t);
 }
-
 
 template <typename T>
 struct type_tag {
@@ -183,12 +164,8 @@ using type_tag_t = typename type_tag<T>::type;
 
 template <>
 struct MetaStruct<test_types::NestingStruct> {
-    static constexpr auto publicFields = std::make_tuple(
-        Field<int>{"publicField"}
-    );
-    static constexpr auto baseClasses = std::make_tuple(
-        type_tag<test_types::BasicClass>{}
-    );
+    static constexpr auto publicFields = std::make_tuple(Field<int>{"publicField"});
+    static constexpr auto baseClasses = std::make_tuple(type_tag<test_types::BasicClass>{});
 };
 
 // Declares an alias to the type of the i'th visitable field of T.
@@ -210,7 +187,7 @@ constexpr size_t fieldCount() {
 
 // Returns the name of the I'th field of T.
 template <size_t I, typename T>
-constexpr const char* getName(){
+constexpr const char* getName() {
     // iterate public fields tuple and recursively each of parent tuple
 }
 

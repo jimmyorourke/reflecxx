@@ -13,12 +13,13 @@ namespace reflecxx {
 // test_types::BasicClass
 ////////////////////////////////////////////////////////////
 
-template<>
+template <>
 struct tuple_type<test_types::BasicClass> {
     using type = std::tuple<bool, int, double>;
 };
 
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<test_types::BasicClass, std::remove_const_t<T>>, bool> = true>
+template <typename Visitor, typename T,
+          std::enable_if_t<std::is_same_v<test_types::BasicClass, std::remove_const_t<T>>, bool> = true>
 constexpr void visit(T& toVisit, Visitor&& visitor) {
     visitor("b", toVisit.b);
     visitor("i", toVisit.i);
@@ -40,12 +41,13 @@ struct Acceptor<test_types::BasicClass, Visitor> {
 // test_types::ChildClass
 ////////////////////////////////////////////////////////////
 
-template<>
+template <>
 struct tuple_type<test_types::ChildClass> {
     using type = std::tuple<bool, int, double, int>;
 };
 
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<test_types::ChildClass, std::remove_const_t<T>>, bool> = true>
+template <typename Visitor, typename T,
+          std::enable_if_t<std::is_same_v<test_types::ChildClass, std::remove_const_t<T>>, bool> = true>
 constexpr void visit(T& toVisit, Visitor&& visitor) {
     visit(static_cast<test_types::BasicClass&>(toVisit), visitor);
     visitor("publicField", toVisit.publicField);
@@ -65,12 +67,14 @@ struct Acceptor<test_types::ChildClass, Visitor> {
 // test_types::ChildOfUnreflectedBaseClass
 ////////////////////////////////////////////////////////////
 
-template<>
+template <>
 struct tuple_type<test_types::ChildOfUnreflectedBaseClass> {
     using type = std::tuple<int>;
 };
 
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<test_types::ChildOfUnreflectedBaseClass, std::remove_const_t<T>>, bool> = true>
+template <
+    typename Visitor, typename T,
+    std::enable_if_t<std::is_same_v<test_types::ChildOfUnreflectedBaseClass, std::remove_const_t<T>>, bool> = true>
 constexpr void visit(T& toVisit, Visitor&& visitor) {
     // not visiting unannotated base class test_types::UnreflectedBaseClass
     visitor("childField", toVisit.childField);

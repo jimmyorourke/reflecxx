@@ -13,12 +13,13 @@ namespace reflecxx {
 // test_types::BasicStruct
 ////////////////////////////////////////////////////////////
 
-template<>
+template <>
 struct tuple_type<test_types::BasicStruct> {
     using type = std::tuple<bool, int, double>;
 };
 
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<test_types::BasicStruct, std::remove_const_t<T>>, bool> = true>
+template <typename Visitor, typename T,
+          std::enable_if_t<std::is_same_v<test_types::BasicStruct, std::remove_const_t<T>>, bool> = true>
 constexpr void visit(T& toVisit, Visitor&& visitor) {
     visitor("b", toVisit.b);
     visitor("i", toVisit.i);
@@ -40,12 +41,14 @@ struct Acceptor<test_types::BasicStruct, Visitor> {
 // test_types::NestingStruct
 ////////////////////////////////////////////////////////////
 
-template<>
+template <>
 struct tuple_type<test_types::NestingStruct> {
-    using type = std::tuple<int, double, test_types::BasicStruct, test_types::BasicStruct [3], std::array<test_types::BasicStruct, 2>>;
+    using type = std::tuple<int, double, test_types::BasicStruct, test_types::BasicStruct[3],
+                            std::array<test_types::BasicStruct, 2>>;
 };
 
-template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<test_types::NestingStruct, std::remove_const_t<T>>, bool> = true>
+template <typename Visitor, typename T,
+          std::enable_if_t<std::is_same_v<test_types::NestingStruct, std::remove_const_t<T>>, bool> = true>
 constexpr void visit(T& toVisit, Visitor&& visitor) {
     visitor("i", toVisit.i);
     visitor("d", toVisit.d);
@@ -61,7 +64,7 @@ struct Acceptor<test_types::NestingStruct, Visitor> {
         visitor("i", type_tag<int>{});
         visitor("d", type_tag<double>{});
         visitor("bs", type_tag<test_types::BasicStruct>{});
-        visitor("basicsArr", type_tag<test_types::BasicStruct [3]>{});
+        visitor("basicsArr", type_tag<test_types::BasicStruct[3]>{});
         visitor("basicsStdarr", type_tag<std::array<test_types::BasicStruct, 2>>{});
     }
 };

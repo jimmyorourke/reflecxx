@@ -24,6 +24,11 @@ class ChildClass : public BasicClass {
     int privateField{};
 } REFLECXX_T;
 
+class SecondLevelChildClass : public ChildClass {
+ public:
+    double someField{};
+} REFLECXX_T;
+
 class UnreflectedBaseClass {
  public:
     int baseField{};

@@ -87,6 +87,18 @@ TEST(struct_visitor, visitDerivedClass) {
 
     static_assert(countAllTypes<test_types::ChildClass>() == 4);
     static_assert(reflecxx::fieldCount<test_types::ChildClass>() == 4);
+
+    // 2 level inheritance
+    InstanceTypeCounterVisitor sv{};
+    test_types::SecondLevelChildClass sc{};
+
+    reflecxx::forEachField(sc, sv);
+
+    EXPECT_EQ(sv.ints, 2);
+    EXPECT_EQ(sv.allTypes(), 5);
+
+    static_assert(countAllTypes<test_types::SecondLevelChildClass>() == 5);
+    static_assert(reflecxx::fieldCount<test_types::SecondLevelChildClass>() == 5);
 }
 
 TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
@@ -116,7 +128,7 @@ TEST(struct_visitor, get) {
 
     const test_types::BasicStruct bs2{/*b=*/true, /*i=*/1, /*d=*/1.5};
     auto& dref2 = reflecxx::get<2>(bs2);
-    //dref2+=1;
+
     // constness is maintained
     static_assert(std::is_const_v<std::remove_reference_t<decltype(dref2)>>);
 }
@@ -171,7 +183,5 @@ TEST(generation, type_traits) {
 
     static_assert(!reflecxx::is_reflecxx_visitable_v<MyType>);
 
-
-    //static_assert(std::is_empty_v<reflecxx::MetaStruct<test_types::BasicStruct>>);
     static_assert(reflecxx::is_reflecxx_visitable_v<test_types::BasicStruct>);
 }
