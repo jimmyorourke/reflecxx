@@ -23,14 +23,6 @@ struct Enumerator {
     std::underlying_type_t<Enum> value;
 };
 
-template <class... T>
-constexpr bool always_false = false;
-
-template <typename T>
-struct MetaEnum; //{
-                 // static_assert(always_false<T>, "must use correct specialization");
-//};
-
 template <typename Class, typename MemberType>
 struct ClassMember {
     using type = MemberType;
@@ -72,9 +64,7 @@ struct MetaEnum : MetaEnumInternal<T>{
 template <typename T>
 struct is_reflecxx_visitable : std::negation<std::conjunction<std::is_base_of<Unspecialized, MetaStructInternal<T>>, std::is_base_of<Unspecialized, MetaEnumInternal<T>>>>{};
 
-namespace detail {
-
-// Functor that can accept ClassMember
+// Functor that wraps a visitor to perform binding between an instance and a ClassMember.
 template <typename T, typename V>
 struct MemberVisitor {
     template <typename M>
@@ -86,11 +76,12 @@ struct MemberVisitor {
     V& visitor;
 };
 
+// Functor that wraps a visitor to enable visitation of the members of all base classes of the instance.
 template <typename T, typename V>
 struct BaseClassMemberVisitor {
     template <typename B>
     constexpr void operator()(type_tag<B>) {
-        // fully recurse to handle multiple levels of inheritance
+        // Fully recurse to handle multiple levels of inheritance and multiple base classes.
         visit(static_cast<B&>(instance), visitor);
     }
 
@@ -98,11 +89,12 @@ struct BaseClassMemberVisitor {
     V& visitor;
 };
 
+// Wrapper for visitors that return values, such that results can be accumulated.
 template <typename T, typename V>
 struct BaseClassMemberChainVisitor {
     template <typename B>
     constexpr auto operator()(type_tag<B>) {
-        // fully recurse to handle multiple levels of inheritance
+        // Fully recurse to handle multiple levels of inheritance and multiple base classes.
         return visitAccum(static_cast<B&>(instance), visitor);
     }
 
@@ -110,6 +102,7 @@ struct BaseClassMemberChainVisitor {
     V& visitor;
 };
 
+// Functor that wraps a type visitor to perform ClassMember to expected visitor interface.
 template <typename V>
 struct MemberTypeVisitor {
     template <typename T, typename M>
@@ -120,98 +113,56 @@ struct MemberTypeVisitor {
     V& visitor;
 };
 
+// Functor that wraps a type visitor to enable visitation of the members of all base classes of a type.
 template <typename V>
 struct BaseClassMemberTypeVisitor {
     template <typename B>
     constexpr void operator()(type_tag<B>) {
-        // fully recurse to handle multiple levels of inheritance
+        // Fully recurse to handle multiple levels of inheritance and multiple base classes.
         visit<B>(visitor);
     }
 
     V& visitor;
 };
 
+// Wrapper for visitors that return values, such that results can be accumulated.
 template <typename V>
 struct BaseClassMemberTypeChainVisitor {
     template <typename B>
     constexpr auto operator()(type_tag<B>) {
+        // Fully recurse to handle multiple levels of inheritance and multiple base classes.
         return visitAccum<B>(visitor);
     }
 
     V& visitor;
 };
 
+// Apply a visitor to each element of tuple, discarding return values.
 template <typename... Ts, typename V>
-constexpr void tupleVisit(const std::tuple<Ts...>& t, V&& visitor) {
+constexpr void forEach(const std::tuple<Ts...>& t, V&& visitor) {
     std::apply([&visitor](const auto&... tupleElems) { (visitor(tupleElems), ...); }, t);
 }
 
-// template<size_t I = 0, typename... Tp, typename V, typename... Ts>
-// auto chainvisit(std::tuple<Tp...>& t, V&& visitor, std::tuple<Tp...>& b) {
-//     auto bnext = visitor(b, std::get<I>(t));
-//     // do things
-//     if constexpr(I+1 != sizeof...(Tp)) {
-//         return chainvisit<I+1>(t, visitor, bnext);
-//     } else {
-//         return bnext;
-//     }
-// }
-
-} // namespace detail
-
+// Apply a visitor to each element of tuple, accumulating return values in a tuple.
+// It would have been really nice to implement this as
+//     return std::apply([&visitor](const auto&... tupleElems) { return std::make_tuple(visitor(tupleElems)...); }, t);
+// however that doesn't guarantee the order of evaluation of the args to std::make_tuple, i.e. that the visitor will
+// execute in order of the tuple elements.
+// Instead, use a recursive call, chaining the tuple of previous results into the next call.
 template <size_t I = 0, typename... Tp, typename V, typename... Ts>
-constexpr auto chainvisit(const std::tuple<Tp...>& t, V&& visitor, const std::tuple<Ts...>& b) {
-    // if constexpr(sizeof...(Tp) == 0) {
-    //     return b;
-    // }
-    // // required else!
-    // else {
-    auto bnext = std::tuple_cat(b, std::make_tuple(visitor(std::get<I>(t))));
-    // do things
+constexpr auto forEach(const std::tuple<Tp...>& t, V&& visitor, std::tuple<Ts...> prevResults) {
+    const auto results = std::tuple_cat(std::move(prevResults), std::make_tuple(visitor(std::get<I>(t))));
+
     if constexpr (I + 1 != sizeof...(Tp)) {
-        return chainvisit<I + 1>(t, visitor, bnext);
+        return forEach<I + 1>(t, visitor, std::move(results));
     } else {
-        return bnext;
+        return results;
     }
-    //}
 }
-
+// Handle the empty tuple case separately for organization.
 template <typename V, typename... Ts>
-constexpr auto chainvisit(const std::tuple<>&, V&&, const std::tuple<Ts...>& b) {
-    return b;
+constexpr auto forEach(const std::tuple<>&, V&&, std::tuple<Ts...> prevResults) {
+    return prevResults;
 }
-
-struct Acceptor {
-    template <class T, class V>
-    auto operator()(V&& visitor) {
-        return visitAccum<T>(visitor);
-    }
-};
-
-template <typename T, typename V>
-constexpr auto visitAccum(V&& visitor) {
-    using namespace detail;
-    // clean t in case callers mess up
-    auto r1 = chainvisit(MetaStruct<remove_cvref_t<T>>::publicFields, MemberTypeVisitor<V>{visitor}, std::tuple<>{});
-    // return r1;
-    return chainvisit(MetaStruct<remove_cvref_t<T>>::baseClasses, BaseClassMemberTypeChainVisitor<V>{visitor}, r1);
-}
-
-template <typename T, typename V>
-constexpr auto visitAccum(T&& instance, V&& visitor) {
-    using namespace detail;
-    auto r1 =
-        chainvisit(MetaStruct<remove_cvref_t<T>>::publicFields, MemberVisitor<T, V>{instance, visitor}, std::tuple<>{});
-    return chainvisit(MetaStruct<remove_cvref_t<T>>::baseClasses, BaseClassMemberChainVisitor<T, V>{instance, visitor},
-                      r1);
-}
-
-// Tag struct containing a tuple type composed of the types of all public (ie visitable) members of T.
-template <typename T>
-struct tuple_type {
-    using type = std::tuple<>;
-};
-template <typename T>
-using tuple_type_t = typename tuple_type<T>::type;
 
 } // namespace reflecxx

@@ -66,35 +66,35 @@ class VisitorGenerator():
 
     def _generate_tuple_alias(self, s: Structure):
         typestr = ", ".join([field_struct.typename for _, field_struct in self._get_all_public_fields(s).items()])
-        self._output("template<>")
-        self._output(f"struct tuple_type<{s.typename}> {{")
-        with IndentBlock(self):
-            self._output(f"using type = std::tuple<{typestr}>;")
-        self._output("};")
-        self._output("")
+        # self._output("template<>")
+        # self._output(f"struct tuple_type<{s.typename}> {{")
+        # with IndentBlock(self):
+        #     self._output(f"using type = std::tuple<{typestr}>;")
+        # self._output("};")
+        # self._output("")
 
     def generate_struct_visitor(self, s: Structure):
-        self._output("////////////////////////////////////////////////////////////")
-        self._output(f"// {s.typename}")
-        self._output("////////////////////////////////////////////////////////////")
-        self._output("")
-        self._generate_tuple_alias(s)
-        # instance visitor
-        # Use SFINAE template to generate const and non-const ref "overloads"
-        self._output(
-            f"template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<{s.typename}, std::remove_const_t<T>>, bool> = true>"
-        )
-        self._output(f"constexpr void visit(T& toVisit, Visitor&& visitor) {{")
-        with IndentBlock(self):
-            for name, base in s.base_classes.items():
-                # don't force the base class to have been annotated for visitation
-                if base is not None:
-                    self._output(f"visit(static_cast<{base.typename}&>(toVisit), visitor);")
-                else:
-                    self._output(f"// not visiting unannotated base class {name}")
-            for field_name in s.public_fields:
-                self._output(f'visitor("{field_name}", toVisit.{field_name});')
-        self._output("}")
+        # self._output("////////////////////////////////////////////////////////////")
+        # self._output(f"// {s.typename}")
+        # self._output("////////////////////////////////////////////////////////////")
+        # self._output("")
+        # self._generate_tuple_alias(s)
+        # # instance visitor
+        # # Use SFINAE template to generate const and non-const ref "overloads"
+        # self._output(
+        #     f"template <typename Visitor, typename T, std::enable_if_t<std::is_same_v<{s.typename}, std::remove_const_t<T>>, bool> = true>"
+        # )
+        # self._output(f"constexpr void visit(T& toVisit, Visitor&& visitor) {{")
+        # with IndentBlock(self):
+        #     for name, base in s.base_classes.items():
+        #         # don't force the base class to have been annotated for visitation
+        #         if base is not None:
+        #             self._output(f"visit(static_cast<{base.typename}&>(toVisit), visitor);")
+        #         else:
+        #             self._output(f"// not visiting unannotated base class {name}")
+        #     for field_name in s.public_fields:
+        #         self._output(f'visitor("{field_name}", toVisit.{field_name});')
+        # self._output("}")
         self._output("")
 
         # type visitor
@@ -127,6 +127,7 @@ class VisitorGenerator():
         self._output("template <>")
         self._output(f"struct MetaStructInternal<{s.typename}> {{")
         with IndentBlock(self):
+            self._output(f"using Type = {s.typename};")
             self._output("static constexpr auto publicFields = std::make_tuple(")
             with IndentBlock(self):
                 # make_tuple doesn't allow trailing commas so we have to keep track
@@ -135,7 +136,7 @@ class VisitorGenerator():
                 for field_name, field_struct in s.public_fields.items():
                     suffix = "," if count < size else ""
                     count += 1
-                    self._output(f'ClassMember<{s.typename}, {field_struct.typename}>{{&{s.typename}::{field_name}, "{field_name}"}}{suffix}')
+                    self._output(f'ClassMember<Type, {field_struct.typename}>{{&Type::{field_name}, "{field_name}"}}{suffix}')
             self._output(");")
 
             self._output("static constexpr auto baseClasses = std::make_tuple(")

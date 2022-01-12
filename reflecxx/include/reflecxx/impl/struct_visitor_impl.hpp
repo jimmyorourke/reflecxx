@@ -75,6 +75,14 @@ struct Extractor {
 //     return *memberPtr;
 // }
 
+// Tag struct containing a tuple type composed of the types of all public (ie visitable) members of T.
+template <typename T>
+struct tuple_type {
+    using type = std::tuple<>;
+};
+template <typename T>
+using tuple_type_t = typename tuple_type<T>::type;
+
 template <size_t I, typename T>
 constexpr auto& get(T& obj) {
     // using rawT = reflecxx::remove_cvref_t<T>;
@@ -98,7 +106,7 @@ constexpr auto& get(T& obj) {
         //     return std::tuple<>{};
         // }
     };
-    constexpr auto types = visitAccum<T>(std::move(v));
+    constexpr auto types = visitAccummulate<T>(std::move(v));
 
     // The const-ness of the pointer to member must match the const-ness of T
     detail::match_const_t<remove_cvref_t<decltype(std::get<I>(types))>::type, T>* ptr = nullptr;
