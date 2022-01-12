@@ -111,11 +111,9 @@ def main(
         with VisitorGenerator(output_file=output_file, namespace=namespace) as v:
             for s in structures.values():
                 if s.annotation == v.ANNOTATION:
-                    v.generate_struct_visitor(s)
                     v.generate_meta_struct(s)
             for e in enums:
                 if e.annotation == v.ANNOTATION:
-                    v.generate_enum_visitor(e)
                     v.generate_meta_enum(e)
 
 

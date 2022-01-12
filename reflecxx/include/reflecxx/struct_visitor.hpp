@@ -11,11 +11,16 @@
 
 namespace reflecxx {
 
-// template <size_t I, typename T>
-// constexpr auto getTypeAt();
-// // Declares an alias to the type of the i'th visitable field of T.
-// template <size_t I, typename T>
-// using typeAt = typename (getTypeAt()::type);
+// Returns a tuple of type_tags representing the types of the visitable fields of T.
+template <typename T>
+constexpr auto getVisitableTypes();
+
+// Returns a type_tag representing the type of the I'th visitable fields of T.
+template <size_t I, typename T>
+constexpr auto getType();
+// Declares a type alias to the type of the i'th visitable field of T.
+template <size_t I, typename T>
+using typeAt = typename decltype(getType<I, T>())::type;
 
 // Returns a reference to the I'th field in an instance of T.
 template <size_t I, typename T>

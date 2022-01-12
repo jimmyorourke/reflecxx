@@ -37,8 +37,6 @@ constexpr auto getType() {
     auto t = getVisitableTypes<T>();
     return std::get<I>(t);
 }
-template <size_t I, typename T>
-using typeAt = typename decltype(getType<I, T>())::type;
 
 template <size_t I, typename T>
 constexpr auto& get(T& obj) {
