@@ -23,108 +23,41 @@ struct match_const<T, S, true> {
 template <typename T, typename S>
 using match_const_t = typename match_const<T, S>::type;
 
-// Functor that can extract a pointer to the field at a given index in an instance of a struct.
-// The type of the field, T, can be determined with the typeAt<> helper.
-// Using a generic lambda doesn't work as the compiler won't allow the assignment to the capture arg.
-template <typename T>
-struct Extractor {
-    constexpr Extractor(T** t, int target)
-    : _t{t}
-    , _target{target} {}
-
-    template <typename S>
-    constexpr void operator()(const char* name, S& member) {
-        _count++;
-    }
-
-    template <>
-    constexpr void operator()<T>(const char* name, T& member) {
-        if (_count == _target) {
-            *_t = &member;
-        }
-        _count++;
-    }
-
-    T** _t;
-    int _target{};
-    int _count{};
-};
-
 } // namespace detail
 
-// template <size_t I, typename T>
-// constexpr auto getTypeAt() {
-//     auto v = [&count](const char*, const auto&) constexpr { count++; };
-//     visit<T>(std::move(v));
-// };
-
-// Returns a reference to the i'th field in an instance of T.
-// template <size_t I, typename T>
-// constexpr auto& get(T& obj) {
-//     using rawT = reflecxx::remove_cvref_t<T>;
-//     // This gives a more obvious error than when typeAt fails to compile
-//     static_assert(I < fieldCount<rawT>(), "Index out of range!");
-
-//     // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
-//     // issues! The compiler doesn't catch this!
-//     detail::match_const_t<typeAt<I, rawT>, T>* memberPtr = nullptr;
-//     detail::Extractor e{&memberPtr, I};
-//     visit(obj, std::move(e));
-//     // this should be impossible
-//     assert(memberPtr);
-//     return *memberPtr;
-// }
-
-// Tag struct containing a tuple type composed of the types of all public (ie visitable) members of T.
 template <typename T>
-struct tuple_type {
-    using type = std::tuple<>;
-};
-template <typename T>
-using tuple_type_t = typename tuple_type<T>::type;
+constexpr auto getVisitableTypes() {
+    // build a tuple of type tags representing the visitable types
+    constexpr auto v = [](const char*, const auto& tag) constexpr { return tag; };
+    return visitAccummulate<T>(std::move(v));
+}
+
+template <size_t I, typename T>
+constexpr auto getType() {
+    auto t = getVisitableTypes<T>();
+    return std::get<I>(t);
+}
+template <size_t I, typename T>
+using typeAt = typename decltype(getType<I, T>())::type;
 
 template <size_t I, typename T>
 constexpr auto& get(T& obj) {
-    // using rawT = reflecxx::remove_cvref_t<T>;
-    // // This gives a more obvious error than when typeAt fails to compile
-    // static_assert(I < fieldCount<rawT>(), "Index out of range!");
-
-    // // The const-ness of the pointer to member must match the const-ness of T to avoid segfaults and other runtime
-    // // issues! The compiler doesn't catch this!
-    // detail::match_const_t<typeAt<I, rawT>, T>* memberPtr = nullptr;
-    // detail::Extractor e{&memberPtr, I};
-    // visit(obj, std::move(e));
-    // // this should be impossible
-    // assert(memberPtr);
-    // return *memberPtr;
-    // auto count = 0;
-    auto v = [](const char*, const auto& tag) constexpr {
-        return tag;
-        // if (count == I) {
-        // return std::tuple<reflecxx::remove_cvref_t<decltype(tag)>>{};
-        // } else{
-        //     return std::tuple<>{};
-        // }
-    };
-    constexpr auto types = visitAccummulate<T>(std::move(v));
+    // This gives a more obvious error than when typeAt fails to compile
+    static_assert(I < fieldCount<T>(), "Index out of range!");
 
     // The const-ness of the pointer to member must match the const-ness of T
-    detail::match_const_t<remove_cvref_t<decltype(std::get<I>(types))>::type, T>* ptr = nullptr;
+    detail::match_const_t<typeAt<I, remove_cvref_t<T>>, T>* ptr = nullptr;
     auto count = 0;
-    auto v2 = [&count, &ptr ](const char*, auto& member) constexpr {
-        // std::cout << count << std::endl;
+    auto v = [&count, &ptr ](const char*, auto& member) constexpr {
         if constexpr (std::is_same_v<remove_cvref_t<decltype(*ptr)>, remove_cvref_t<decltype(member)>>) {
             if (count == I)
                 ptr = &member;
         }
         count++;
     };
-    visit(obj, std::move(v2));
+    visit(obj, std::move(v));
     assert(ptr);
-    // std::cout << ptr <<"\n";
     return *ptr;
-    // double a = 5;
-    // return a;
 }
 
 template <typename T>
@@ -148,8 +81,6 @@ constexpr const char* getName() {
         count++;
     };
     visit<T>(std::move(v));
-
-    // should not be possible
     assert(out != nullptr);
     return out;
 }
@@ -157,10 +88,8 @@ constexpr const char* getName() {
 // The variadic template args need to be last or type deduction doesn't work properly.
 template <size_t I, typename Visitor, typename T, typename... Ts, typename>
 constexpr void applyForEach(Visitor&& v, T&& t1, Ts&&... ts) {
-    using cleanT = reflecxx::remove_cvref_t<T>;
-    v(getName<I, cleanT>(), get<I>(t1), get<I>(ts)...);
-    // if constexpr makes recursive templates so much easier! And no integer sequences.
-    if constexpr (I + 1 < fieldCount<cleanT>()) {
+    v(getName<I, T>(), get<I>(t1), get<I>(ts)...);
+    if constexpr (I + 1 < fieldCount<T>()) {
         applyForEach<I + 1>(std::forward<Visitor>(v), std::forward<T>(t1), std::forward<T>(ts)...);
     }
 }
@@ -170,9 +99,8 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
     bool res = true;
     auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
-        using cleanT = reflecxx::remove_cvref_t<decltype(val1)>;
 
-        if constexpr (std::is_array_v<cleanT>) {
+        if constexpr (std::is_array_v < remove_cvref_t<decltype(val1)>) {
             // c-style array
             const auto size1 = sizeof(val1) / sizeof(val1[0]);
             const auto size2 = sizeof(val2) / sizeof(val2[0]);
@@ -194,6 +122,7 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
             res = (res && op(val1, val2));
         }
     };
+
     applyForEach(std::move(v), t1, t2);
     return res;
 }

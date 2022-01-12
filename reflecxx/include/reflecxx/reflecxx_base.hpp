@@ -25,7 +25,7 @@ constexpr auto visitAccummulate(T&& instance, V&& visitor) {
     const auto results =
         forEach(MetaStruct<CleanT>::publicFields, MemberVisitor<T, V>{instance, visitor}, std::tuple<>{});
     return forEach(MetaStruct<CleanT>::baseClasses, BaseClassMemberChainVisitor<T, V>{instance, visitor},
-                      std::move(results));
+                   std::move(results));
 }
 
 template <typename T, typename V>
