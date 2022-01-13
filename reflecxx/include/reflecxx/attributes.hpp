@@ -22,4 +22,4 @@
 // Helper wrapper for defining comparison operators in header files that go through code generation.
 #define REFLECXX_CMP(lhs, rhs, op) reflecxx::compare(lhs, rhs, op)
 
-#endif
+#endif // REFLECXX_GENERATION

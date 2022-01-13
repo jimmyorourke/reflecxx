@@ -4,6 +4,10 @@
 // get compiled by the generator, don't define it during generation.
 #ifndef REFLECXX_GENERATION
 
+#include <array>
+#include <cstddef>
+#include <type_traits>
+
 namespace reflecxx {
 
 // Returns the number of enumerators in an enum.

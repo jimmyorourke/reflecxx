@@ -1,13 +1,13 @@
 #pragma once
 
-#include <reflecxx/visit.hpp>
-
-#include <functional>
-#include <tuple>
-
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
 #ifndef REFLECXX_GENERATION
+
+#include <cstddef>
+#include <functional>
+#include <tuple>
+#include <type_traits>
 
 namespace reflecxx {
 

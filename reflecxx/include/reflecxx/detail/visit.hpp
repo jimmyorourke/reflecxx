@@ -1,29 +1,58 @@
 #pragma once
 
-#include <array>
-#include <tuple>
-#include <type_traits>
-
-#include "../types.hpp"
-
-namespace reflecxx {
-
-// Backport from c++20
-template <typename T>
-struct remove_cvref {
-    using type = std::remove_cv_t<std::remove_reference_t<T>>;
-};
-template <typename T>
-using remove_cvref_t = typename remove_cvref<T>::type;
-
-template <typename T, typename V>
-constexpr void visit(V&& visitor);
-
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
 #ifndef REFLECXX_GENERATION
 
+#include <reflecxx/types.hpp>
+
+#include <array>
+#include <tuple>
+#include <type_traits>
+
+namespace reflecxx {
+
+template <typename T, typename V>
+constexpr void visit(V&& visitor);
+template <typename T, typename V>
+constexpr auto visitAccummulate(V&& visitor);
+
 namespace detail {
+
+// Backport from c++20
+// template <typename T>
+// struct remove_cvref {
+//     using type = std::remove_cv_t<std::remove_reference_t<T>>;
+// };
+// template <typename T>
+// using remove_cvref_t = typename remove_cvref<T>::type;
+
+// Apply a visitor to each element of tuple, discarding return values.
+template <typename... Ts, typename V>
+constexpr void forEach(const std::tuple<Ts...>& t, V&& visitor) {
+    std::apply([&visitor](const auto&... tupleElems) { (visitor(tupleElems), ...); }, t);
+}
+
+// Apply a visitor to each element of tuple, accumulating return values in a tuple.
+// It would have been really nice to implement this as
+//     return std::apply([&visitor](const auto&... tupleElems) { return std::make_tuple(visitor(tupleElems)...); }, t);
+// however that doesn't guarantee the order of evaluation of the args to std::make_tuple, i.e. that the visitor will
+// execute in order of the tuple elements.
+// Instead, use a recursive call, chaining the tuple of previous results into the next call.
+template <size_t I = 0, typename... Tp, typename V, typename... Ts>
+constexpr auto forEach(const std::tuple<Tp...>& t, V&& visitor, std::tuple<Ts...> prevResults) {
+    const auto results = std::tuple_cat(std::move(prevResults), std::make_tuple(visitor(std::get<I>(t))));
+    if constexpr (I + 1 != sizeof...(Tp)) {
+        return forEach<I + 1>(t, visitor, std::move(results));
+    } else {
+        return results;
+    }
+}
+// Handle the empty tuple case separately for organization.
+template <typename V, typename... Ts>
+constexpr auto forEach(const std::tuple<>&, V&&, std::tuple<Ts...> prevResults) {
+    return prevResults;
+}
 
 // Functor that wraps a visitor to perform binding between an instance and a ClassMember.
 template <typename T, typename V>
@@ -86,9 +115,6 @@ struct BaseClassMemberTypeVisitor {
     V& visitor;
 };
 
-template <typename T, typename V>
-constexpr auto visitAccummulate(V&& visitor);
-
 // Wrapper for visitors that return values, such that results can be accumulated.
 template <typename V>
 struct BaseClassMemberTypeChainVisitor {
@@ -101,35 +127,7 @@ struct BaseClassMemberTypeChainVisitor {
     V& visitor;
 };
 
-// Apply a visitor to each element of tuple, discarding return values.
-template <typename... Ts, typename V>
-constexpr void forEach(const std::tuple<Ts...>& t, V&& visitor) {
-    std::apply([&visitor](const auto&... tupleElems) { (visitor(tupleElems), ...); }, t);
-}
-
-// Apply a visitor to each element of tuple, accumulating return values in a tuple.
-// It would have been really nice to implement this as
-//     return std::apply([&visitor](const auto&... tupleElems) { return std::make_tuple(visitor(tupleElems)...); }, t);
-// however that doesn't guarantee the order of evaluation of the args to std::make_tuple, i.e. that the visitor will
-// execute in order of the tuple elements.
-// Instead, use a recursive call, chaining the tuple of previous results into the next call.
-template <size_t I = 0, typename... Tp, typename V, typename... Ts>
-constexpr auto forEach(const std::tuple<Tp...>& t, V&& visitor, std::tuple<Ts...> prevResults) {
-    const auto results = std::tuple_cat(std::move(prevResults), std::make_tuple(visitor(std::get<I>(t))));
-    if constexpr (I + 1 != sizeof...(Tp)) {
-        return forEach<I + 1>(t, visitor, std::move(results));
-    } else {
-        return results;
-    }
-}
-// Handle the empty tuple case separately for organization.
-template <typename V, typename... Ts>
-constexpr auto forEach(const std::tuple<>&, V&&, std::tuple<Ts...> prevResults) {
-    return prevResults;
-}
-
-}
+} // namespace detail
+} // namespace reflecxx
 
 #endif // REFLECXX_GENERATION
-
-} // namespace reflecxx

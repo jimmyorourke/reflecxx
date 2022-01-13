@@ -16,13 +16,10 @@ namespace reflecxx {
 template <>
 struct MetaStructInternal<test_types::BasicStruct> {
     using Type = test_types::BasicStruct;
-    static constexpr auto publicFields = std::make_tuple(
-        ClassMember<Type, bool>{&Type::b, "b"},
-        ClassMember<Type, int>{&Type::i, "i"},
-        ClassMember<Type, double>{&Type::d, "d"}
-    );
-    static constexpr auto baseClasses = std::make_tuple(
-    );
+    static constexpr auto publicFields =
+        std::make_tuple(ClassMember<Type, bool>{&Type::b, "b"}, ClassMember<Type, int>{&Type::i, "i"},
+                        ClassMember<Type, double>{&Type::d, "d"});
+    static constexpr auto baseClasses = std::make_tuple();
 };
 
 ////////////////////////////////////////////////////////////
@@ -32,15 +29,12 @@ struct MetaStructInternal<test_types::BasicStruct> {
 template <>
 struct MetaStructInternal<test_types::NestingStruct> {
     using Type = test_types::NestingStruct;
-    static constexpr auto publicFields = std::make_tuple(
-        ClassMember<Type, int>{&Type::i, "i"},
-        ClassMember<Type, double>{&Type::d, "d"},
-        ClassMember<Type, test_types::BasicStruct>{&Type::bs, "bs"},
-        ClassMember<Type, test_types::BasicStruct [3]>{&Type::basicsArr, "basicsArr"},
-        ClassMember<Type, std::array<test_types::BasicStruct, 2>>{&Type::basicsStdarr, "basicsStdarr"}
-    );
-    static constexpr auto baseClasses = std::make_tuple(
-    );
+    static constexpr auto publicFields =
+        std::make_tuple(ClassMember<Type, int>{&Type::i, "i"}, ClassMember<Type, double>{&Type::d, "d"},
+                        ClassMember<Type, test_types::BasicStruct>{&Type::bs, "bs"},
+                        ClassMember<Type, test_types::BasicStruct[3]>{&Type::basicsArr, "basicsArr"},
+                        ClassMember<Type, std::array<test_types::BasicStruct, 2>>{&Type::basicsStdarr, "basicsStdarr"});
+    static constexpr auto baseClasses = std::make_tuple();
 };
 
 } // namespace reflecxx

@@ -1,43 +1,45 @@
 #pragma once
 
-#include "types.hpp"
-#include "detail/visit.hpp"
-
-namespace reflecxx {
-
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
 // get compiled by the generator, don't define it during generation.
 #ifndef REFLECXX_GENERATION
 
+#include <reflecxx/detail/visit.hpp>
+#include <reflecxx/types.hpp>
+
+namespace reflecxx {
+
 template <typename T, typename V>
 constexpr void visit(T&& instance, V&& visitor) {
     // wrap visitor in something that binds member pointers
-    using CleanT = remove_cvref_t<T>;
+    using CleanT = detail::remove_cvref_t<T>;
     detail::forEach(MetaStruct<CleanT>::publicFields, detail::MemberVisitor<T, V>{instance, visitor});
     detail::forEach(MetaStruct<CleanT>::baseClasses, detail::BaseClassMemberVisitor<T, V>{instance, visitor});
 }
 
 template <typename T, typename V>
 constexpr void visit(V&& visitor) {
-    using CleanT = remove_cvref_t<T>;
+    using CleanT = detail::remove_cvref_t<T>;
     detail::forEach(MetaStruct<CleanT>::publicFields, detail::MemberTypeVisitor<V>{visitor});
     detail::forEach(MetaStruct<CleanT>::baseClasses, detail::BaseClassMemberTypeVisitor<V>{visitor});
 }
 
 template <typename T, typename V>
 constexpr auto visitAccummulate(T&& instance, V&& visitor) {
-    using CleanT = remove_cvref_t<T>;
-    const auto results =
-        detail::forEach(MetaStruct<CleanT>::publicFields, detail::MemberVisitor<T, V>{instance, visitor}, std::tuple<>{});
-    return detail::forEach(MetaStruct<CleanT>::baseClasses, detail::BaseClassMemberChainVisitor<T, V>{instance, visitor},
-                   std::move(results));
+    using CleanT = detail::remove_cvref_t<T>;
+    const auto results = detail::forEach(MetaStruct<CleanT>::publicFields,
+                                         detail::MemberVisitor<T, V>{instance, visitor}, std::tuple<>{});
+    return detail::forEach(MetaStruct<CleanT>::baseClasses,
+                           detail::BaseClassMemberChainVisitor<T, V>{instance, visitor}, std::move(results));
 }
 
 template <typename T, typename V>
 constexpr auto visitAccummulate(V&& visitor) {
-    using CleanT = remove_cvref_t<T>;
-    const auto results = detail::forEach(MetaStruct<CleanT>::publicFields, detail::MemberTypeVisitor<V>{visitor}, std::tuple<>{});
-    return forEach(MetaStruct<CleanT>::baseClasses, detail::BaseClassMemberTypeChainVisitor<V>{visitor}, std::move(results));
+    using CleanT = detail::remove_cvref_t<T>;
+    const auto results =
+        detail::forEach(MetaStruct<CleanT>::publicFields, detail::MemberTypeVisitor<V>{visitor}, std::tuple<>{});
+    return forEach(MetaStruct<CleanT>::baseClasses, detail::BaseClassMemberTypeChainVisitor<V>{visitor},
+                   std::move(results));
 }
 
 // Aliases for the visit functions.
@@ -64,6 +66,6 @@ struct is_reflecxx_visitable;
 template <typename T>
 inline constexpr bool is_reflecxx_visitable_v = is_reflecxx_visitable<T>::value;
 
-#endif // REFLECXX_GENERATION
-
 } // namespace reflecxx
+
+#endif // REFLECXX_GENERATION

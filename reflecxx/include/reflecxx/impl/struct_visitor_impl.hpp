@@ -44,10 +44,11 @@ constexpr auto& get(T& obj) {
     static_assert(I < fieldCount<T>(), "Index out of range!");
 
     // The const-ness of the pointer to member must match the const-ness of T
-    detail::match_const_t<typeAt<I, remove_cvref_t<T>>, T>* ptr = nullptr;
+    detail::match_const_t<typeAt<I, detail::remove_cvref_t<T>>, T>* ptr = nullptr;
     auto count = 0;
     auto v = [&count, &ptr ](const char*, auto& member) constexpr {
-        if constexpr (std::is_same_v<remove_cvref_t<decltype(*ptr)>, remove_cvref_t<decltype(member)>>) {
+        if constexpr (std::is_same_v<detail::remove_cvref_t<decltype(*ptr)>,
+                                     detail::remove_cvref_t<decltype(member)>>) {
             if (count == I)
                 ptr = &member;
         }
@@ -98,7 +99,7 @@ constexpr bool compare(const T& t1, const T& t2, const O& op) {
     auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
 
-        if constexpr (std::is_array_v<remove_cvref_t<decltype(val1)>>) {
+        if constexpr (std::is_array_v<detail::remove_cvref_t<decltype(val1)>>) {
             // c-style array
             const auto size1 = sizeof(val1) / sizeof(val1[0]);
             const auto size2 = sizeof(val2) / sizeof(val2[0]);

@@ -1,13 +1,13 @@
 #pragma once
 
+// The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
+// get compiled by the generator, don't define it during generation.
+#ifndef REFLECXX_GENERATION
+
 #include <reflecxx/visit.hpp>
 
 // Note: This library does not link against/set include dirs for nlohmann json by default!
 #include <nlohmann/json.hpp>
-
-// The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that
-// get compiled by the generator, don't define it during generation.
-#ifndef REFLECXX_GENERATION
 
 // Automatically define to/from nlohmann JSON functions for any reflecxx visitable type. Wow!
 // Note that since this uses the adl_serializer, if specialization for any type is desired it must also be done by
@@ -27,8 +27,6 @@ struct adl_serializer<T, std::enable_if_t<reflecxx::is_reflecxx_visitable_v<T>>>
     }
 };
 } // namespace nlohmann
-
-#endif // REFLECXX_GENERATION
 
 namespace reflecxx {
 
@@ -78,3 +76,5 @@ struct FromJsonVisitor {
 };
 
 } // namespace reflecxx
+
+#endif // REFLECXX_GENERATION

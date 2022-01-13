@@ -27,9 +27,7 @@ struct NestingStruct {
     BasicStruct basicsArr[3];
     std::array<BasicStruct, 2> basicsStdarr;
 
-    bool operator==(const NestingStruct& rhs) const {
-        return REFLECXX_CMP(*this, rhs, std::equal_to<>{});
-    }
+    bool operator==(const NestingStruct& rhs) const { return REFLECXX_CMP(*this, rhs, std::equal_to<>{}); }
 } REFLECXX_T;
 
 } // namespace test_types
