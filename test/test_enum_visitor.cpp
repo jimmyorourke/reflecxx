@@ -24,6 +24,7 @@ TEST(enum_visitor, fromName) {
     // not expected to compile
     // static_assert(reflecxx::fromName<test_types::Scoped>("fifth") == test_types::Scoped::Third);
 
+    // Ensure we don't have to use string literals.
     std::string s = "Third";
     EXPECT_EQ(reflecxx::fromName<test_types::Scoped>(s.data()), test_types::Scoped::Third);
 

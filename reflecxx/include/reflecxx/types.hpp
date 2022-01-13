@@ -40,7 +40,7 @@ struct MetaEnum : detail::MetaEnumInternal<T> {
 template <typename Enum>
 struct Enumerator {
     Enum enumerator;
-    const char* name;
+    std::string_view name;
     std::underlying_type_t<Enum> value;
 };
 

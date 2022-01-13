@@ -12,7 +12,7 @@ constexpr size_t enumSize() {
 
 // Returns the name of the enumerator as string.
 template <typename EnumType>
-constexpr const char* enumName(EnumType enumerator) {
+constexpr std::string_view enumName(EnumType enumerator) {
     for (const auto& e : MetaEnum<EnumType>::enumerators) {
         if (e.enumerator == enumerator) {
             return e.name;
@@ -22,16 +22,12 @@ constexpr const char* enumName(EnumType enumerator) {
     throw std::runtime_error{"Invalid enumerator."};
 }
 
-constexpr bool strings_equal(char const* a, char const* b) {
-    return *a == *b && (*a == '\0' || strings_equal(a + 1, b + 1));
-}
-
 // Converts a name to a matching enumerator.
 template <typename EnumType>
-constexpr EnumType fromName(const char* enumeratorName) {
+constexpr EnumType fromName(std::string_view enumeratorName) {
     for (const auto& e : MetaEnum<EnumType>::enumerators) {
-        // check this cmp
-        if (strings_equal(e.name, enumeratorName)) {
+        // Can compare string_view with ==, unlike const char*.
+        if (e.name == enumeratorName) {
             return e.enumerator;
         }
     }
@@ -41,8 +37,8 @@ constexpr EnumType fromName(const char* enumeratorName) {
 
 // Returns an array containing the names of all enumerators.
 template <typename EnumType>
-constexpr auto enumNames() -> std::array<const char*, enumSize<EnumType>()> {
-    std::array<const char*, enumSize<EnumType>()> names{};
+constexpr auto enumNames() -> std::array<std::string_view, enumSize<EnumType>()> {
+    std::array<std::string_view, enumSize<EnumType>()> names{};
     for (auto i = 0u; i < enumSize<EnumType>(); ++i) {
         names[i] = MetaEnum<EnumType>::enumerators[i].name;
     }

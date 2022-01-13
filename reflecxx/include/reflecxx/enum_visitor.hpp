@@ -16,15 +16,15 @@ constexpr size_t enumSize();
 
 // Returns the name of the enumerator as string.
 template <typename EnumType>
-constexpr const char* enumName(EnumType enumerator);
+constexpr std::string_view enumName(EnumType enumerator);
 
 // Converts a name to a matching enumerator.
 template <typename EnumType>
-constexpr EnumType fromName(const char* enumeratorName);
+constexpr EnumType fromName(std::string_view enumeratorName);
 
 // Returns an array containing the names of all enumerators.
 template <typename EnumType>
-constexpr auto enumNames() -> std::array<const char*, enumSize<EnumType>()>;
+constexpr auto enumNames() -> std::array<std::string_view, enumSize<EnumType>()>;
 
 // Returns an array of all enumerators.
 template <typename EnumType>
