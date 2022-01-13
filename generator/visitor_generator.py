@@ -46,7 +46,7 @@ class VisitorGenerator():
         self._output("// Do not edit, changes will be overwritten!\n")
         self._output("#include <type_traits>")
         self._output("")
-        self._output("#include <reflecxx/reflecxx_base.hpp>")
+        self._output("#include <reflecxx/types.hpp>")
         self._output("")
         self._output(f"namespace {self._namespace} {{")
         self._output("")

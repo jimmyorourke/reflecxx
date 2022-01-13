@@ -1,6 +1,6 @@
 #pragma once
 
-#include <reflecxx/reflecxx_base.hpp>
+#include <reflecxx/visit.hpp>
 
 // Note: This library does not link against/set include dirs for nlohmann json by default!
 #include <nlohmann/json.hpp>

@@ -137,5 +137,5 @@ if __name__ == "__main__":
 
     # since we're going to be specializing some templates, we have to use the same namespace as the original
     # declarations
-    namespace = "reflecxx"
+    namespace = "reflecxx::detail"
     main(args.libclang_directory, args.input_files, args.output_folder, args.flags.split(), namespace)

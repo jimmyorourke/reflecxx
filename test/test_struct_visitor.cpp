@@ -2,7 +2,7 @@
 
 #include <libtest_types/classes.hpp>
 #include <libtest_types/structs.hpp>
-#include <reflecxx/reflecxx_base.hpp>
+#include <reflecxx/visit.hpp>
 #include <reflecxx/struct_visitor.hpp>
 
 namespace {
