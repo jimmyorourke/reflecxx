@@ -60,14 +60,15 @@ class VisitorGenerator():
 
     def generate_meta_struct(self, s: Structure):
         self._output("////////////////////////////////////////////////////////////")
-        self._output(f"// {s.typename}")
+        self._output(f"// {s.qualified_typename}")
         self._output("////////////////////////////////////////////////////////////")
         self._output("")
 
         self._output("template <>")
-        self._output(f"struct MetaStructInternal<{s.typename}> {{")
+        self._output(f"struct MetaStructInternal<{s.qualified_typename}> {{")
         with IndentBlock(self):
-            self._output(f"using Type = {s.typename};")
+            self._output(f"using Type = {s.qualified_typename};")
+            self._output(f'static constexpr std::string_view name{{"{s.name}"}};')
             self._output("static constexpr auto publicFields = std::make_tuple(")
             with IndentBlock(self):
                 # make_tuple doesn't allow trailing commas so we have to keep track
@@ -76,7 +77,7 @@ class VisitorGenerator():
                 for field_name, field_struct in s.public_fields.items():
                     suffix = "," if count < size else ""
                     count += 1
-                    self._output(f'ClassMember<Type, {field_struct.typename}>{{&Type::{field_name}, "{field_name}"}}{suffix}')
+                    self._output(f'ClassMember<Type, {field_struct.qualified_typename}>{{&Type::{field_name}, "{field_name}"}}{suffix}')
             self._output(");")
 
             self._output("static constexpr auto baseClasses = std::make_tuple(")
@@ -88,7 +89,7 @@ class VisitorGenerator():
                     if base is not None:
                         suffix = "," if count < size else ""
                         count += 1
-                        self._output(f"type_tag<{base.typename}>{{}}{suffix}")
+                        self._output(f"type_tag<{base.qualified_typename}>{{}}{suffix}")
                     else:
                         self._output(f"// skipping unannotated base class {name}")
             self._output(");")
@@ -97,20 +98,21 @@ class VisitorGenerator():
 
     def generate_meta_enum(self, e: Enumeration):
         self._output("////////////////////////////////////////////////////////////")
-        self._output(f"// {e.name}")
+        self._output(f"// {e.qualified_name}")
         self._output("////////////////////////////////////////////////////////////")
         self._output("")
 
         self._output("template <>")
-        self._output(f"struct MetaEnumInternal<{e.name}> {{")
+        self._output(f"struct MetaEnumInternal<{e.qualified_name}> {{")
         with IndentBlock(self):
-            self._output(f"using Utype = std::underlying_type_t<{e.name}>;")
+            self._output(f"using Utype = std::underlying_type_t<{e.qualified_name}>;")
+            self._output(f'static constexpr std::string_view name{{"{e.name}"}};')
             size = len(e.enumerators)
-            self._output(f"static constexpr std::array<Enumerator<{e.name}>, {size}> enumerators = {{{{")
+            self._output(f"static constexpr std::array<Enumerator<{e.qualified_name}>, {size}> enumerators = {{{{")
             with IndentBlock(self):
                 for name, val in e.enumerators.items():
                     # scoped names work for accessing unscoped enum elements too
-                    self._output(f'{{{e.name}::{name}, "{name}", Utype{{{val}}}}},')
+                    self._output(f'{{{e.qualified_name}::{name}, "{name}", Utype{{{val}}}}},')
             self._output("}};")
         self._output("};")
         self._output("")

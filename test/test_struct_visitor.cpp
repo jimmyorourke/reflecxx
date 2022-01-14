@@ -118,6 +118,12 @@ TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
     static_assert(reflecxx::fieldCount<test_types::ChildOfUnreflectedBaseClass>() == 1);
 }
 
+TEST(struct_visitor, getName) {
+    // put static_asserts in a TEST simply for organization
+    static_assert(reflecxx::getName<test_types::BasicStruct>() == "BasicStruct");
+    static_assert(reflecxx::getName<test_types::SecondLevelChildClass>() == "SecondLevelChildClass");
+}
+
 TEST(struct_visitor, get) {
     static_assert(reflecxx::getName<2, test_types::BasicStruct>() == "d");
 

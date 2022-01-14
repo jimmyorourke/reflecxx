@@ -14,6 +14,10 @@
 
 namespace reflecxx {
 
+// Returns the name of the enum type EnumType. The returned view never expires.
+template <typename EnumType>
+constexpr std::string_view getName();
+
 // Returns the number of enumerators in an enum.
 template <typename EnumType>
 constexpr size_t enumSize();
@@ -26,7 +30,7 @@ constexpr std::string_view enumName(EnumType enumerator);
 template <typename EnumType>
 constexpr EnumType fromName(std::string_view enumeratorName);
 
-// Returns an array containing the names of all enumerators.
+// Returns an array containing the names of all enumerators. The views never expire.
 template <typename EnumType>
 constexpr auto enumNames() -> std::array<std::string_view, enumSize<EnumType>()>;
 

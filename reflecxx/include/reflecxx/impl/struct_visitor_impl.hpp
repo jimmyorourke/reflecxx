@@ -71,6 +71,11 @@ constexpr size_t fieldCount() {
     return count;
 }
 
+template <typename T>
+constexpr std::string_view getName() {
+    return MetaStruct<detail::remove_cvref_t<T>>::name;
+}
+
 template <size_t I, typename T>
 constexpr std::string_view getName() {
     static_assert(I < fieldCount<T>(), "Index out of range!");

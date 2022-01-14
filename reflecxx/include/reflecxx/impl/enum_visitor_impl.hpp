@@ -8,6 +8,11 @@
 
 namespace reflecxx {
 
+template <typename T>
+constexpr std::string_view getName() {
+    return MetaEnum<detail::remove_cvref_t<T>>::name;
+}
+
 // Returns the number of enumerators in an enum.
 template <typename EnumType>
 constexpr size_t enumSize() {

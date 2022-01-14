@@ -34,6 +34,10 @@ constexpr auto& get(T& obj);
 template <typename T>
 constexpr size_t fieldCount();
 
+// Returns the name of the type T. The returned view never expires.
+template <typename T>
+constexpr std::string_view getName();
+
 // Returns the name of the I'th field of T. The returned view never expires.
 template <size_t I, typename T>
 constexpr std::string_view getName();

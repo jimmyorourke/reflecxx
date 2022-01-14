@@ -9,8 +9,13 @@
 #include <libtest_types/enums.hpp>
 #include <reflecxx/enum_visitor.hpp>
 
-TEST(enum_visitor, enumSize) {
+TEST(enum_visitor, getName) {
     // put static_asserts in a TEST simply for organization
+    static_assert(reflecxx::getName<test_types::Unscoped>() == "Unscoped");
+    static_assert(reflecxx::getName<test_types::Scoped>() == "Scoped");
+}
+
+TEST(enum_visitor, enumSize) {
     static_assert(reflecxx::enumSize<test_types::Unscoped>() == 4);
     static_assert(reflecxx::enumSize<test_types::Scoped>() == 3);
 }

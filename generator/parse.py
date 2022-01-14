@@ -35,7 +35,8 @@ def check_annotated_struct(cursor: Cursor, structures: Dict[str, Structure]) -> 
     if cursor.kind == CursorKind.STRUCT_DECL or cursor.kind == CursorKind.CLASS_DECL:
         attr = find_annotate_attr(cursor)
         if attr is not None:
-            structure = Structure(cursor.type.spelling, attr.spelling)
+            # cursor.type.spelling is namespace qualified, whereas curosor.spelling and cursor.displayname are not.
+            structure = Structure(cursor.type.spelling, cursor.spelling, attr.spelling)
             structures[cursor.type.spelling] = structure
             for c in cursor.get_children():
                 if c.kind == CursorKind.FIELD_DECL:
@@ -63,7 +64,7 @@ def check_annotated_enum(cursor: Cursor, enums: List[Enumeration]) -> None:
     if cursor.kind == CursorKind.ENUM_DECL:
         attr = find_annotate_attr(cursor)
         if attr is not None:
-            enum = Enumeration(cursor.type.spelling, attr.spelling)
+            enum = Enumeration(cursor.type.spelling, cursor.spelling, attr.spelling)
             enums.append(enum)
             for c in cursor.get_children():
                 if c.kind == CursorKind.ENUM_CONSTANT_DECL:
