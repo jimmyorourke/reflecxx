@@ -16,7 +16,7 @@ template <typename T>
 std::string dumbToString(const T& obj) {
     std::ostringstream out;
     bool first = true;
-    auto v = [&out, &first](const char* name, const auto& member) {
+    auto v = [&out, &first](std::string_view name, const auto& member) {
         if (!first) {
             out << "\n";
         }

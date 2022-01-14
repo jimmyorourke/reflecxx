@@ -28,7 +28,7 @@ using match_const_t = typename match_const<T, S>::type;
 template <typename T>
 constexpr auto getVisitableTypes() {
     // build a tuple of type tags representing the visitable types
-    constexpr auto v = [](const char*, const auto& tag) constexpr { return tag; };
+    constexpr auto v = [](std::string_view, const auto& tag) constexpr { return tag; };
     return visitAccummulate<T>(std::move(v));
 }
 
@@ -46,7 +46,7 @@ constexpr auto& get(T& obj) {
     // The const-ness of the pointer to member must match the const-ness of T
     detail::match_const_t<typeAt<I, detail::remove_cvref_t<T>>, T>* ptr = nullptr;
     auto count = 0;
-    auto v = [&count, &ptr ](const char*, auto& member) constexpr {
+    auto v = [&count, &ptr ](std::string_view, auto& member) constexpr {
         if constexpr (std::is_same_v<detail::remove_cvref_t<decltype(*ptr)>,
                                      detail::remove_cvref_t<decltype(member)>>) {
             if (count == I)
@@ -62,25 +62,25 @@ constexpr auto& get(T& obj) {
 template <typename T>
 constexpr size_t fieldCount() {
     size_t count = 0;
-    constexpr auto v = [&count](const char*, const auto&) constexpr { count++; };
+    constexpr auto v = [&count](std::string_view, const auto&) constexpr { count++; };
     visit<T>(std::move(v));
     return count;
 }
 
 template <size_t I, typename T>
-constexpr const char* getName() {
+constexpr std::string_view getName() {
     static_assert(I < fieldCount<T>(), "Index out of range!");
 
     size_t count = 0;
-    const char* out = nullptr;
-    auto v = [&count, &out ](const char* name, const auto&) constexpr {
+    std::string_view out;
+    auto v = [&count, &out ](std::string_view name, const auto&) constexpr {
         if (count == I) {
             out = name;
         }
         count++;
     };
     visit<T>(std::move(v));
-    assert(out != nullptr);
+    assert(!out.empty());
     return out;
 }
 
@@ -96,7 +96,7 @@ constexpr void applyForEach(Visitor&& v, T&& t1, Ts&&... ts) {
 template <typename T, typename O>
 constexpr bool compare(const T& t1, const T& t2, const O& op) {
     bool res = true;
-    auto v = [&res, &op](const char* n, const auto& val1, const auto& val2) {
+    auto v = [&res, &op](std::string_view n, const auto& val1, const auto& val2) {
         static_assert(std::is_same_v<decltype(val1), decltype(val2)>);
 
         if constexpr (std::is_array_v<detail::remove_cvref_t<decltype(val1)>>) {

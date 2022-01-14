@@ -8,17 +8,17 @@
 namespace {
 struct InstanceTypeCounterVisitor {
     template <typename T>
-    void operator()(const char*, const T&) {
+    void operator()(std::string_view, const T&) {
         otherTypes++;
     }
 
     template <>
-    void operator()<int>(const char*, const int&) {
+    void operator()<int>(std::string_view, const int&) {
         ints++;
     }
 
     template <>
-    void operator()<double>(const char*, const double&) {
+    void operator()<double>(std::string_view, const double&) {
         doubles++;
     }
 
@@ -30,9 +30,9 @@ struct InstanceTypeCounterVisitor {
 };
 
 struct TypeCounterVisitor {
-    constexpr void operator()(const char*, const reflecxx::base_tag&) { otherTypes++; }
+    constexpr void operator()(std::string_view, const reflecxx::base_tag&) { otherTypes++; }
 
-    constexpr void operator()(const char*, const reflecxx::type_tag<int>& tag) {
+    constexpr void operator()(std::string_view, const reflecxx::type_tag<int>& tag) {
         // Example extracting type from tag type instance
         static_assert(std::is_same_v<typename std::remove_reference_t<decltype(tag)>::type, int>);
         ints++;

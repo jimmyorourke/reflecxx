@@ -2,6 +2,8 @@
 
 #include <reflecxx/detail/types.hpp>
 
+#include <string_view>
+
 namespace reflecxx {
 
 // Tag structs for passing types as objects.
@@ -48,7 +50,7 @@ template <typename Class, typename MemberType>
 struct ClassMember {
     using type = MemberType;
     MemberType Class::*ptr;
-    const char* name;
+    std::string_view name;
 };
 
 } // namespace reflecxx

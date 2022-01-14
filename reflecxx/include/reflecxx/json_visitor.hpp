@@ -9,6 +9,8 @@
 // Note: This library does not link against/set include dirs for nlohmann json by default!
 #include <nlohmann/json.hpp>
 
+#include <string>
+
 // Automatically define to/from nlohmann JSON functions for any reflecxx visitable type. Wow!
 // Note that since this uses the adl_serializer, if specialization for any type is desired it must also be done by
 // specializing this adl_serializer struct rather than defining the to_json/from_json free functions (since ADL into the
@@ -38,8 +40,9 @@ struct ToJsonVisitor {
     : jsonValue(value) {}
 
     template <typename T>
-    void operator()(const char* name, const T& member) {
-        jsonValue[name] = member;
+    void operator()(std::string_view name, const T& member) {
+        // std::string required, https://github.com/nlohmann/json/issues/1529
+        jsonValue[std::string{name}] = member;
     }
 
     nlohmann::json& jsonValue;
@@ -51,8 +54,9 @@ struct FromJsonVisitor {
     : jsonValue(value) {}
 
     template <typename T>
-    void operator()(const char* name, T& member) const {
-        fromJson(member, jsonValue.at(name));
+    void operator()(std::string_view name, T& member) const {
+        // std::string required, https://github.com/nlohmann/json/issues/1529
+        fromJson(member, jsonValue.at(std::string{name}));
     }
 
     const nlohmann::json& jsonValue;

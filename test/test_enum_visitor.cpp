@@ -54,7 +54,7 @@ TEST(enum_visitor, enumerators) {
 }
 
 TEST(enum_visitor, names) {
-    std::array<const char*, 3> names{"First", "Second", "Third"};
+    std::array<std::string_view, 3> names{"First", "Second", "Third"};
     size_t i = 0;
     for (const auto& e : reflecxx::enumNames<test_types::Scoped>()) {
         EXPECT_EQ(e, names[i]);

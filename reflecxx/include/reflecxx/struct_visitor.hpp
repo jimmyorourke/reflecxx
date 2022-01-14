@@ -30,9 +30,9 @@ constexpr auto& get(T& obj);
 template <typename T>
 constexpr size_t fieldCount();
 
-// Returns the name of the I'th field of T.
+// Returns the name of the I'th field of T. The returned view never expires.
 template <size_t I, typename T>
-constexpr const char* getName();
+constexpr std::string_view getName();
 
 // Apply visitor to each field of each T
 // The variadic template args need to be last or type deduction doesn't work properly.
