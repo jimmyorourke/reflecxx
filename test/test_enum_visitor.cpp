@@ -1,10 +1,13 @@
+// Copyright (c) 2021-2022 Jimmy O'Rourke
+// Licensed under and subject to the terms of the LICENSE file accompanying this distribution.
+// Official repository: https://github.com/jimmyorourke/reflecxx
+
 #include <gtest/gtest.h>
 
 #include <array>
 
 #include <libtest_types/enums.hpp>
 #include <reflecxx/enum_visitor.hpp>
-//#include "generated/enums_meta.hpp"
 
 TEST(enum_visitor, enumSize) {
     // put static_asserts in a TEST simply for organization

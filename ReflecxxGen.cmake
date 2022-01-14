@@ -1,3 +1,7 @@
+# Copyright (c) 2021-2022 Jimmy O'Rourke
+# Licensed under and subject to the terms of the LICENSE file accompanying this distribution.
+# Official repository: https://github.com/jimmyorourke/reflecxx
+
 
 # ${PYTHON_COMMAND} can be set to an appropriate invocation of the python interpreter.
 # E.g. if using CMake's FindPython, then ${Python_EXECUTABLE}, if using pipenv then "pipenv run python" or similar, etc.

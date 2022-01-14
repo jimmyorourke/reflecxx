@@ -1,3 +1,7 @@
+// Copyright (c) 2021-2022 Jimmy O'Rourke
+// Licensed under and subject to the terms of the LICENSE file accompanying this distribution.
+// Official repository: https://github.com/jimmyorourke/reflecxx
+
 #pragma once
 
 // The code below uses the generated visitor acceptors. To avoid problems if this header is included into headers that

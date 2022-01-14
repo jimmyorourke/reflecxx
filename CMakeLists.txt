@@ -1,3 +1,7 @@
+# Copyright (c) 2021-2022 Jimmy O'Rourke
+# Licensed under and subject to the terms of the LICENSE file accompanying this distribution.
+# Official repository: https://github.com/jimmyorourke/reflecxx
+
 cmake_minimum_required(VERSION 3.12)
 project(reflecxx)
 
