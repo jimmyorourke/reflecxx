@@ -37,10 +37,17 @@ struct is_reflecxx_visitable
 template <typename T>
 struct MetaStruct : detail::MetaStructInternal<T> {
     static_assert(is_reflecxx_visitable<T>::value, "MetaStructInternal must be specialized!");
+    // Expected interface:
+    // static constexpr std::string_view name{"T"};
+    // static constexpr auto publicFields = std::make_tuple(/*std::tuple of ClassMembers*/);
+    // static constexpr auto baseClasses = std::make_tuple(/*std::tuple of type_tag*/);
 };
 template <typename T>
 struct MetaEnum : detail::MetaEnumInternal<T> {
     static_assert(is_reflecxx_visitable<T>::value, "MetaEnumInternal must be specialized!");
+    // Expected interface:
+    // static constexpr std::string_view name{"T"};
+    // static constexpr std::array<Enumerator<test_types::Unscoped>, Size> enumerators;
 };
 
 template <typename Enum>

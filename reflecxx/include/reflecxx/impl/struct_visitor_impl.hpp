@@ -27,6 +27,22 @@ struct match_const<T, S, true> {
 template <typename T, typename S>
 using match_const_t = typename match_const<T, S>::type;
 
+// existing forEach builds a tuple for each level of recursion (each time it is called)
+template <typename... Ts>
+constexpr auto getBasesHelper(std::tuple<Ts...> bases) {
+    auto v = [](auto baseClassTag) {
+        auto nextLevelBases = MetaStruct<decltype(baseClassTag)::type>::baseClasses;
+        //getBasesHelper(MetaStruct<decltype(baseClassTag)::type>::baseClasses;
+        if constexpr(std::tuple_size_v<decltype(nextLevelBases)> != 0) {
+            return std::tuple_cat(std::make_tuple(baseClassTag), getBasesHelper(nextLevelBases));
+        }
+        else {
+            return baseClassTag;
+        }
+    };
+    return forEach(bases, v, std::tuple<>{});
+}
+
 } // namespace detail
 
 template <typename T>
@@ -91,6 +107,11 @@ constexpr std::string_view getName() {
     visit<T>(std::move(v));
     assert(!out.empty());
     return out;
+}
+
+template <typename T>
+constexpr auto getBases() {
+    return detail::getBasesHelper(MetaStruct<T>::baseClasses);
 }
 
 // The variadic template args need to be last or type deduction doesn't work properly.

@@ -103,6 +103,9 @@ TEST(struct_visitor, visitDerivedClass) {
 
     static_assert(countAllTypes<test_types::SecondLevelChildClass>() == 5);
     static_assert(reflecxx::fieldCount<test_types::SecondLevelChildClass>() == 5);
+    // wtf!!
+    static_assert(std::tuple_size_v<decltype(reflecxx::getVisitableTypes<test_types::SecondLevelChildClass>())> == 2);
+    //static_assert(reflecxx::getBases<test_types::SecondLevelChildClass>() == std::make_tuple(reflecxx::type_tag<test_types::ChildClass>{}, reflecxx::type_tag<test_types::BasicClass>{}));
 }
 
 TEST(struct_visitor, visitDerivedClassUnreflectedBase) {

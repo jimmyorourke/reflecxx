@@ -15,9 +15,17 @@
 
 namespace reflecxx {
 
-// Returns a tuple of type_tags representing the types of the visitable fields of T.
+// Returns the number of fields in T.
 template <typename T>
-constexpr auto getVisitableTypes();
+constexpr size_t fieldCount();
+
+// Returns the name of the type T. The returned view never expires.
+template <typename T>
+constexpr std::string_view getName();
+
+// Returns the name of the I'th field of T. The returned view never expires.
+template <size_t I, typename T>
+constexpr std::string_view getName();
 
 // Returns a type_tag representing the type of the I'th visitable fields of T.
 template <size_t I, typename T>
@@ -30,17 +38,13 @@ using typeAt = typename decltype(getType<I, T>())::type;
 template <size_t I, typename T>
 constexpr auto& get(T& obj);
 
-// Returns the number of fields in T.
+// Returns a tuple of type_tags representing the types of the visitable fields of T.
 template <typename T>
-constexpr size_t fieldCount();
+constexpr auto getVisitableTypes();
 
-// Returns the name of the type T. The returned view never expires.
+// Returns a tuple of type_tags representing the types of the base classes of T, recursive.
 template <typename T>
-constexpr std::string_view getName();
-
-// Returns the name of the I'th field of T. The returned view never expires.
-template <size_t I, typename T>
-constexpr std::string_view getName();
+constexpr auto getBases();
 
 // Apply visitor to each field of each T
 // The variadic template args need to be last or type deduction doesn't work properly.
