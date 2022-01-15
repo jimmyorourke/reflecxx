@@ -31,20 +31,22 @@ constexpr void visit(V&& visitor) {
 template <typename T, typename V>
 constexpr auto visitAccummulate(T&& instance, V&& visitor) {
     using CleanT = detail::remove_cvref_t<T>;
-    const auto results = detail::forEach(MetaStruct<CleanT>::publicFields,
-                                         detail::MemberVisitor<T, V>{instance, visitor}, std::tuple<>{});
-    return detail::forEach(MetaStruct<CleanT>::baseClasses,
-                           detail::BaseClassMemberChainVisitor<T, V>{instance, visitor}, std::move(results));
+    const auto thisLevelResults =
+        detail::forEachAccum(MetaStruct<CleanT>::publicFields, detail::MemberVisitor<T, V>{instance, visitor});
+    return return std::tuple_cat(
+        std::move(thisLevelResults),
+        detail::forEachAccum<true>(MetaStruct<CleanT>::baseClasses,
+                                   detail::BaseClassMemberChainVisitor<T, V>{instance, visitor}));
 }
 
 template <typename T, typename V>
 constexpr auto visitAccummulate(V&& visitor) {
     using CleanT = detail::remove_cvref_t<T>;
     const auto thisLevelResults =
-        detail::forEach(MetaStruct<CleanT>::publicFields, detail::MemberTypeVisitor<V>{visitor}, std::tuple<>{});
+        detail::forEachAccum(MetaStruct<CleanT>::publicFields, detail::MemberTypeVisitor<V>{visitor});
     return std::tuple_cat(std::move(thisLevelResults),
-                          detail::forEach(MetaStruct<CleanT>::baseClasses,
-                                          detail::BaseClassMemberTypeChainVisitor<V>{visitor}, std::tuple<>{}));
+                          detail::forEachAccum<true>(MetaStruct<CleanT>::baseClasses,
+                                                     detail::BaseClassMemberTypeChainVisitor<V>{visitor}));
 }
 
 // Aliases for the visit functions.

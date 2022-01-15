@@ -23,11 +23,15 @@ constexpr auto visitAccummulate(V&& visitor);
 
 namespace detail {
 
-template <typename... Ts, typename T>
-constexpr auto tupleAppend(std::tuple<Ts...> t, T&& m) {
+// When appending to a tuple, if the item being appended is itself a tuple, to match the semantics of the non-tuple case
+// most of the time the desired result is a nested tuple, e.g. appending tuple<int, double> to tuple<char, bool> would
+// give tuple<char, bool, tuple<int, double>>, similar to how appending a plain int would result in
+// tuple<char, bool, int>. However sometimes unnesting is desired, e.g. resulting in tuple<char, bool, int, double>.
+template <bool Unnest = false, typename... Ts, typename T>
+constexpr auto tupleAppend(std::tuple<Ts...> t, T m) {
     return std::tuple_cat(std::move(t), std::make_tuple(std::move(m)));
 }
-template <typename... Ts, typename... Tp>
+template <bool Unnest, typename... Ts, typename... Tp, typename = std::enable_if_t<Unnest>>
 constexpr auto tupleAppend(std::tuple<Ts...> t1, std::tuple<Tp...> t2) {
     return std::tuple_cat(std::move(t1), std::move(t2));
 }
@@ -44,19 +48,24 @@ constexpr void forEach(const std::tuple<Ts...>& t, V&& visitor) {
 // however that doesn't guarantee the order of evaluation of the args to std::make_tuple, i.e. that the visitor will
 // execute in order of the tuple elements.
 // Instead, use a recursive call, chaining the tuple of previous results into the next call.
-template <size_t I = 0, typename... Tp, typename V, typename... Ts>
+template <bool Unnest = false, size_t I = 0, typename... Tp, typename V, typename... Ts>
 constexpr auto forEach(const std::tuple<Tp...>& t, V&& visitor, std::tuple<Ts...> prevResults) {
-    const auto results = tupleAppend(std::move(prevResults), visitor(std::get<I>(t)));
+    const auto results = tupleAppend<Unnest>(std::move(prevResults), visitor(std::get<I>(t)));
     if constexpr (I + 1 != sizeof...(Tp)) {
-        return forEach<I + 1>(t, visitor, std::move(results));
+        return forEach<Unnest, I + 1>(t, visitor, std::move(results));
     } else {
         return results;
     }
 }
-// Handle the empty tuple case separately for organization.
-template <typename V, typename... Ts>
+// Handle the empty tuple case.
+template <bool = false, size_t = 0, typename V, typename... Ts>
 constexpr auto forEach(const std::tuple<>&, V&&, std::tuple<Ts...> prevResults) {
     return prevResults;
+}
+// Wrapper so that empty tuples don't have to be provided for the starting case.
+template <bool Unnest = false, typename... Ts, typename V>
+constexpr auto forEachAccum(const std::tuple<Ts...>& t, V&& visitor) {
+    return forEach<Unnest>(t, std::forward<V>(visitor), std::tuple<>{});
 }
 
 // Functor that wraps a visitor to perform binding between an instance and a ClassMember.

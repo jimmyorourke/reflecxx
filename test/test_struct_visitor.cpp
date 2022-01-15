@@ -103,13 +103,6 @@ TEST(struct_visitor, visitDerivedClass) {
 
     static_assert(countAllTypes<test_types::SecondLevelChildClass>() == 6);
     static_assert(reflecxx::fieldCount<test_types::SecondLevelChildClass>() == 6);
-    // wtf!!
-    static_assert(std::tuple_size_v<decltype(reflecxx::getVisitableTypes<test_types::SecondLevelChildClass>())> == 6);
-    static_assert(reflecxx::getVisitableTypes<test_types::SecondLevelChildClass>() ==
-                  std::make_tuple(reflecxx::type_tag<double>{}, reflecxx::type_tag<int>{}, reflecxx::type_tag<bool>{},
-                                  reflecxx::type_tag<int>{}, reflecxx::type_tag<double>{}, reflecxx::type_tag<char>{}));
-    // static_assert(reflecxx::getBases<test_types::SecondLevelChildClass>() ==
-    // std::make_tuple(reflecxx::type_tag<test_types::ChildClass>{}, reflecxx::type_tag<test_types::BasicClass>{}));
 }
 
 TEST(struct_visitor, visitDerivedClassUnreflectedBase) {
@@ -132,6 +125,16 @@ TEST(struct_visitor, getName) {
 }
 
 TEST(struct_visitor, get) {
+    // check that we handle unnesting properly when accumulating member types of base classes
+    static_assert(reflecxx::getVisitableTypes<test_types::SecondLevelChildClass>() ==
+                  std::make_tuple(reflecxx::type_tag<double>{}, reflecxx::type_tag<int>{}, reflecxx::type_tag<bool>{},
+                                  reflecxx::type_tag<int>{}, reflecxx::type_tag<double>{}, reflecxx::type_tag<char>{}));
+
+    static_assert(reflecxx::getBases<test_types::SecondLevelChildClass>() ==
+                  std::make_tuple(reflecxx::type_tag<test_types::ChildClass>{},
+                                  reflecxx::type_tag<test_types::OtherBaseClass>{},
+                                  reflecxx::type_tag<test_types::BasicClass>{}));
+
     static_assert(reflecxx::getName<2, test_types::BasicStruct>() == "d");
 
     test_types::BasicStruct bs{/*b=*/true, /*i=*/1, /*d=*/1.5};
