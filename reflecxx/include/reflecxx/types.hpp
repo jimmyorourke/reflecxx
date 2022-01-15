@@ -22,6 +22,10 @@ struct type_tag : base_tag {
 template <typename T>
 using type_tag_t = typename type_tag<T>::type;
 
+// Useful for comparison of tuples of type_tags.
+template <typename T>
+constexpr bool operator==(const type_tag<T>&, const type_tag<T>&) { return true; }
+
 // Type trait in dicating whether a type has reflecxx metadata and is reflecxx visitable.
 // Visitable if there is a specialization defined for the type T. We checkd the Internal types to avoid getting tripped
 // up by the static_assert in the base template. This actually allows this type trait to be used as the check in the

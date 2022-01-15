@@ -40,10 +40,11 @@ constexpr auto visitAccummulate(T&& instance, V&& visitor) {
 template <typename T, typename V>
 constexpr auto visitAccummulate(V&& visitor) {
     using CleanT = detail::remove_cvref_t<T>;
-    const auto results =
+    const auto thisLevelResults =
         detail::forEach(MetaStruct<CleanT>::publicFields, detail::MemberTypeVisitor<V>{visitor}, std::tuple<>{});
-    return forEach(MetaStruct<CleanT>::baseClasses, detail::BaseClassMemberTypeChainVisitor<V>{visitor},
-                   std::move(results));
+    return std::tuple_cat(std::move(thisLevelResults),
+                          detail::forEach(MetaStruct<CleanT>::baseClasses,
+                                          detail::BaseClassMemberTypeChainVisitor<V>{visitor}, std::tuple<>{}));
 }
 
 // Aliases for the visit functions.

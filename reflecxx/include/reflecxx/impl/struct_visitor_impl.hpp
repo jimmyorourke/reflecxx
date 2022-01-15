@@ -32,11 +32,10 @@ template <typename... Ts>
 constexpr auto getBasesHelper(std::tuple<Ts...> bases) {
     auto v = [](auto baseClassTag) {
         auto nextLevelBases = MetaStruct<decltype(baseClassTag)::type>::baseClasses;
-        //getBasesHelper(MetaStruct<decltype(baseClassTag)::type>::baseClasses;
-        if constexpr(std::tuple_size_v<decltype(nextLevelBases)> != 0) {
+        // getBasesHelper(MetaStruct<decltype(baseClassTag)::type>::baseClasses;
+        if constexpr (std::tuple_size_v<decltype(nextLevelBases)> != 0) {
             return std::tuple_cat(std::make_tuple(baseClassTag), getBasesHelper(nextLevelBases));
-        }
-        else {
+        } else {
             return baseClassTag;
         }
     };

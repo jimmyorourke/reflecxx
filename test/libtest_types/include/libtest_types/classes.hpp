@@ -28,7 +28,12 @@ class ChildClass : public BasicClass {
     int privateField{};
 } REFLECXX_T;
 
-class SecondLevelChildClass : public ChildClass {
+class OtherBaseClass {
+ public:
+    char charField{};
+} REFLECXX_T;
+
+class SecondLevelChildClass : public ChildClass, public OtherBaseClass {
  public:
     double someField{};
 } REFLECXX_T;

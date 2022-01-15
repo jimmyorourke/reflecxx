@@ -23,6 +23,15 @@ constexpr auto visitAccummulate(V&& visitor);
 
 namespace detail {
 
+template <typename... Ts, typename T>
+constexpr auto tupleAppend(std::tuple<Ts...> t, T&& m) {
+    return std::tuple_cat(std::move(t), std::make_tuple(std::move(m)));
+}
+template <typename... Ts, typename... Tp>
+constexpr auto tupleAppend(std::tuple<Ts...> t1, std::tuple<Tp...> t2) {
+    return std::tuple_cat(std::move(t1), std::move(t2));
+}
+
 // Apply a visitor to each element of tuple, discarding return values.
 template <typename... Ts, typename V>
 constexpr void forEach(const std::tuple<Ts...>& t, V&& visitor) {
@@ -37,7 +46,7 @@ constexpr void forEach(const std::tuple<Ts...>& t, V&& visitor) {
 // Instead, use a recursive call, chaining the tuple of previous results into the next call.
 template <size_t I = 0, typename... Tp, typename V, typename... Ts>
 constexpr auto forEach(const std::tuple<Tp...>& t, V&& visitor, std::tuple<Ts...> prevResults) {
-    const auto results = std::tuple_cat(std::move(prevResults), std::make_tuple(visitor(std::get<I>(t))));
+    const auto results = tupleAppend(std::move(prevResults), visitor(std::get<I>(t)));
     if constexpr (I + 1 != sizeof...(Tp)) {
         return forEach<I + 1>(t, visitor, std::move(results));
     } else {
