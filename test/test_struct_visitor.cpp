@@ -99,7 +99,7 @@ TEST(struct_visitor, visitDerivedClass) {
     reflecxx::forEachField(sc, sv);
 
     EXPECT_EQ(sv.ints, 2);
-    EXPECT_EQ(sv.allTypes(), 5);
+    EXPECT_EQ(sv.allTypes(), 6);
 
     static_assert(countAllTypes<test_types::SecondLevelChildClass>() == 6);
     static_assert(reflecxx::fieldCount<test_types::SecondLevelChildClass>() == 6);
