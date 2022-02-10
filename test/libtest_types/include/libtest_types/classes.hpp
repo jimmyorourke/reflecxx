@@ -50,4 +50,4 @@ class ChildOfUnreflectedBaseClass : public UnreflectedBaseClass {
 
 } // namespace test_types
 
-#include REFLECXX_HEADER(classes_reflecxx_generated.hpp)
+#include REFLECXX_HEADER(classes.hpp)

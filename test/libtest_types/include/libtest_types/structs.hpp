@@ -36,4 +36,4 @@ struct NestingStruct {
 
 } // namespace test_types
 
-#include REFLECXX_HEADER(structs_reflecxx_generated.hpp)
+#include REFLECXX_HEADER(structs.hpp)

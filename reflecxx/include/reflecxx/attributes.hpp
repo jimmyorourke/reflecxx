@@ -22,7 +22,7 @@
 // Do nothing.
 #define REFLECXX_T
 // Include the generated file containing the Reflecxx acceptors.
-#define REFLECXX_HEADER(include_file) <generated_headers/include_file>
+#define REFLECXX_HEADER(include_file) <generated_headers/include_file.reflecxx_generated.hpp>
 // Helper wrapper for defining comparison operators in header files that go through code generation.
 #define REFLECXX_CMP(lhs, rhs, op) reflecxx::compare(lhs, rhs, op)
 

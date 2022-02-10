@@ -14,4 +14,4 @@ enum class Scoped { First, Second, Third } REFLECXX_T;
 
 } // namespace test_types
 
-#include REFLECXX_HEADER(enums_reflecxx_generated.hpp)
+#include REFLECXX_HEADER(enums.hpp)

@@ -61,7 +61,7 @@ set(REFLECXX_HEADERS
 )
 reflecxx_generate("${REFLECXX_HEADERS}" my_target)
 
-#include REFLECXX_HEADER(reflect_me_reflecxx_generated.hpp)
+#include REFLECXX_HEADER(reflect_me.hpp)
 
 
 ReflecxxGen.cmake needs to know the location of libclang.<so|dyld|dll>. It tries some reasonable guesses, but if they don't match your system configuration, you can specify the location by setting CMake variable `REFLECXX_LIBCLANG_DIR`.
