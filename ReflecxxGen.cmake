@@ -3,29 +3,29 @@
 # Official repository: https://github.com/jimmyorourke/reflecxx
 
 
-# ${PYTHON_COMMAND} can be set to an appropriate invocation of the python interpreter.
+# ${REFLECXX_PYTHON_CMD} can be set to an appropriate invocation of the python interpreter.
 # E.g. if using CMake's FindPython, then ${Python_EXECUTABLE}, if using pipenv then "pipenv run python" or similar, etc.
-if (NOT DEFINED PYTHON_COMMAND)
+if (NOT DEFINED REFLECXX_PYTHON_CMD)
   # Reasonable guesses
   if (WIN32)
-    set(PYTHON_COMMAND python)
+    set(REFLECXX_PYTHON_CMD python)
   else()
-    set(PYTHON_COMMAND python3)
+    set(REFLECXX_PYTHON_CMD python3)
   endif()
 endif()
 
-# ${CLANG_SHARED_OBJECT_DIRECTORY} should be set to the location of libclang.<so|dyld|dll>.
+# ${REFLECXX_LIBCLANG_DIR} should be set to the location of libclang.<so|dyld|dll>.
 # We try to supply a reasonable default but it may need to be overridden, e.g. if clang is installed through conan.
-if (NOT DEFINED CLANG_SHARED_OBJECT_DIRECTORY)
+if (NOT DEFINED REFLECXX_LIBCLANG_DIR)
   # Reasonable guesses
   if (WIN32)
-    set(CLANG_SHARED_OBJECT_DIRECTORY "C:\\Program Files\\LLVM\\bin")
+    set(REFLECXX_LIBCLANG_DIR "C:\\Program Files\\LLVM\\bin")
   elseif (APPLE)
     # This is the command line tools path. For full xcode it might be
     # /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib.
-    set(CLANG_SHARED_OBJECT_DIRECTORY "/Library/Developer/CommandLineTools/usr/lib/")
+    set(REFLECXX_LIBCLANG_DIR "/Library/Developer/CommandLineTools/usr/lib/")
   else()
-    set(CLANG_SHARED_OBJECT_DIRECTORY "/usr/lib/x86_64-linux-gnu/")
+    set(REFLECXX_LIBCLANG_DIR "/usr/lib/x86_64-linux-gnu/")
   endif()
 endif()
 
@@ -87,8 +87,8 @@ macro(reflecxx_generate INPUT_FILES TARGET)
 
   add_custom_command(
     OUTPUT ${OUTPUT}
-    COMMAND ${PYTHON_COMMAND} ${REFLECXX_GEN_BASE_DIR}/generator/parse.py
-    --libclang-directory ${CLANG_SHARED_OBJECT_DIRECTORY}
+    COMMAND ${REFLECXX_PYTHON_CMD} ${REFLECXX_GEN_BASE_DIR}/generator/parse.py
+    --libclang-directory ${REFLECXX_LIBCLANG_DIR}
     --input-files ${INPUT_FILES}
     --output-folder ${OUTPUT_DIR}
     --flags="${FLAGS}"
@@ -107,10 +107,17 @@ macro(reflecxx_generate INPUT_FILES TARGET)
     DEPENDS
       ${OUTPUT_DIR}/generated.txt
   )
-
+  # Make sure running a clean removes the generated files
   set_target_properties(${TARGET} PROPERTIES ADDITIONAL_CLEAN_FILES ${OUTPUT_DIR})
 
   # Automatically set up a dependency for the target whose flags we used on the generated target. The consumer can
   # just use the generated sources.
   add_dependencies(${TARGET} ${TARGET}_REFLECXX_GEN)
+
+  # In most cases, the target whose flags we used will be the consumer of the generated sources. Automatically adjust
+  # its include directories accordingly to find the generated files.
+  target_include_directories(${TARGET}
+  PUBLIC
+    ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
+)
 endmacro()

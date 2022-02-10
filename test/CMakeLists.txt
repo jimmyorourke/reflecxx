@@ -4,18 +4,17 @@
 
 set(CONANFILE_LOCATION ${CMAKE_CURRENT_SOURCE_DIR})
 include(cmake/ConanSetup.cmake)
-include(../ReflecxxGen.cmake)
 
 add_library(libtest_types
   libtest_types/type_helpers.cpp
 )
 target_link_libraries(libtest_types
-  reflecxx
+  PUBLIC
+    reflecxx
 )
 target_include_directories(libtest_types
   PUBLIC
     libtest_types/include
-    ${CMAKE_CURRENT_BINARY_DIR} # to find the generated headers
 )
 target_compile_definitions(libtest_types
   # testing that compile definitions are respected in generate code

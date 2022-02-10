@@ -10,14 +10,16 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(MAIN_PROJECT ON)
 endif()
 
-option(BUILD_TESTS "Build the tests" ${MAIN_PROJECT})
+option(REFLECXX_BUILD_TESTS "Build the tests" ${MAIN_PROJECT})
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(reflecxx)
 
-if(BUILD_TESTS)
+include(ReflecxxGen.cmake)
+
+if(REFLECXX_BUILD_TESTS)
     # enable CTEST
     enable_testing()
     # requires Conan
