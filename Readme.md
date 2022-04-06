@@ -14,7 +14,10 @@ A static reflection framework for C++.
     * Class memory layout is maintained
     * No intrusive macros or repeated declarations of class members
 * Support for inheritance, including multiple and multi-level
-* Enum support
+* Enum support, including
+    * To/from string and to/from index
+    * Enum size
+    * Enumerator list and name list generation
 * Selective reflection, using `REFLECXX_T` annotation to denote which types should be reflected
 * Namespace scoping handled
 * Compiler flags respected during code generation
@@ -22,7 +25,7 @@ A static reflection framework for C++.
     * Foreach-style iteration over class/enum members
     * Tuple-style access to class/enum members
     * Iteration over object instances or types
-    * Simultaneous iteration overmultiple instances
+    * Simultaneous iteration over multiple instances
     * Automatically implemented comparison operators
     * Automatic [nlohmann JSON](https://github.com/nlohmann/json) serializaton/deserialization (opt-in dependency)
     * Largely constexpr for compile-time meta programming
@@ -31,6 +34,57 @@ A static reflection framework for C++.
 * CMake integration
 
 For examples see the [tests](test/).
+
+## Architecture
+
+The `reflecxx` library's reflection utilities are centered around the [visitor pattern](https://en.wikipedia.org/wiki/Visitor_pattern).
+
+The libclang driven code generation tooling generates meta-object definitions for each structure being reflected, including aspects such as the name of the structure, tuples of struct members, tuples of base classes, etc. Examples of the generated definitions from the tests can be found [here](/test/generated).
+
+The `reflecxx` library utilities are largely built upon the core foreach-style iteration over struct members implemented by the `forEachField` acceptor function (also aliased with the name `visit`) which accepts a visitor to apply.
+
+```cpp
+template <typename T, typename Visitor>
+constexpr void forEachField(T&& toVisit, Visitor&& visitor);
+```
+
+or fields of a type without an instance:
+
+```cpp
+template <typename T, typename Visitor>
+constexpr void forEachField(Visitor&& visitor);
+```
+
+The visitor is a functor or lambda with the following call operator signature:
+
+```cpp
+template <typename T>
+void operator()(std::string_view field_name, T& value);
+
+```
+
+or
+
+```cpp
+template <typename T>
+void operator()(std::string_view field_name, const T& value);
+
+```
+
+For type visitors without an instance,
+
+```cpp
+template <typename T>
+void operator()(std::string_view field_name, const reflecxx::type_tag<T>& tag)
+```
+
+where `reflecxx::type_tag<T>` is a [simple tag struct](reflecxx/include/reflecxx/types.hpp#L13).
+
+The `applyForEach` variants take this a step further, taking multiple instances as input and performing simultaneous iteration. This is used to implement such functionality as automatic comparison operators.
+
+Multi-level and multiple inheritance are supported where members of base classes will also be visited.
+
+See the [API headers](reflecxx/include/reflecxx) for more.
 
 ## Dependencies
 
