@@ -39,15 +39,15 @@ A static reflection framework for C++.
 //** MyTypes.hpp
 #include <reflecxx/attributes.hpp>
 
-enum class MyEnum {Item1 = 1, Item2 = 2, Item3 = 3} REFLECXX_T;
+enum class MyEnum { Item1 = 1, Item2 = 2, Item3 = 3 } REFLECXX_T;
 
 struct Parent {
-    int a;
-    double b;
+  int a;
+  double b;
 } REFLECXX_T;
 
 struct Child : Parent {
-    bool c;
+  bool c;
 } REFLECXX_T;
 
 #include REFLECXX_HEADER(MyTypes.hpp)
@@ -61,64 +61,71 @@ struct Child : Parent {
 #include <MyTypes.hpp>
 
 int main() {
-    static_assert(reflecxx::getName<MyEnum>() == "MyEnum");
-    static_assert(reflecxx::enumSize<MyEnum>() == 3);
-    static_assert(reflecxx::enumName(MyEnum::Item2) == "Item2");
-    static_assert(reflecxx::fromName<MyEnum>("Item2") == MyEnum::Item2);
-    static_assert(reflecxx::enumContains<MyEnum>(1));
-    static_assert(!reflecxx::enumContains<MyEnum>(0));
+  static_assert(reflecxx::getName<MyEnum>() == "MyEnum");
+  static_assert(reflecxx::enumSize<MyEnum>() == 3);
+  static_assert(reflecxx::enumName(MyEnum::Item2) == "Item2");
+  static_assert(reflecxx::fromName<MyEnum>("Item2") == MyEnum::Item2);
+  static_assert(reflecxx::enumContains<MyEnum>(1));
+  static_assert(!reflecxx::enumContains<MyEnum>(0));
 
-    for (const auto& e : reflecxx::enumerators<MyEnum>()) {
-        std::cout << reflecxx::enumName(e) << ": " << static_cast<int>(e) << "\n";
+  for (const auto& e : reflecxx::enumerators<MyEnum>()) {
+    std::cout << reflecxx::enumName(e) << ": " << static_cast<int>(e) << "\n";
+  }
+  for (const auto& name : reflecxx::enumNames<MyEnum>()) {
+    std::cout << name << ": "
+              << static_cast<int>(reflecxx::fromName<MyEnum>(name)) << "\n";
+  }
+
+  static_assert(reflecxx::is_reflecxx_visitable_v<Child>);
+  static_assert(reflecxx::getName<Child>() == "Child");
+  static_assert(reflecxx::getName<0, Child>() == "c");
+  static_assert(reflecxx::fieldCount<Child>() == 3);
+  static_assert(reflecxx::getVisitableTypes<Child>() ==
+                std::make_tuple(reflecxx::type_tag<bool>{},
+                                reflecxx::type_tag<int>{},
+                                reflecxx::type_tag<double>{}));
+  static_assert(reflecxx::getBases<Child>() ==
+                std::make_tuple(reflecxx::type_tag<Parent>{}));
+  static_assert(std::is_same_v<reflecxx::typeAt<0, Child>, bool>);
+
+  Parent p_inst = {1, 1.5};
+  Parent p_inst2 = {1, 2.6};
+
+  double& b_ref = reflecxx::get<1>(p_inst);
+  b_ref += 1.1;
+  assert(p_inst.b == 2.6);
+  assert(reflecxx::equalTo(p_inst, p_inst2));
+
+  // to/from json just work
+  nlohmann::json j = p_inst;
+  p_inst2 = j;
+
+  // Custom visitors
+
+  auto naive_print = [](std::string_view member_name, const auto& value) {
+    std::cout << member_name << ": " << value << "\n";
+  };
+  reflecxx::forEachField(p_inst, std::move(naive_print));
+
+  struct TypeCounter {
+    constexpr void operator()(std::string_view, const reflecxx::base_tag&) {
+      otherTypes++;
     }
-    for (const auto& name : reflecxx::enumNames<MyEnum>()) {
-        std::cout << name << ": " << static_cast<int>(reflecxx::fromName<MyEnum>(name)) << "\n";
+    constexpr void operator()(std::string_view,
+                              const reflecxx::type_tag<int>& tag) {
+      static_assert(
+          std::is_same_v<typename std::remove_reference_t<decltype(tag)>::type,
+                         int>);
+      ints++;
     }
 
-
-    static_assert(reflecxx::is_reflecxx_visitable_v<Child>);
-    static_assert(reflecxx::getName<Child>() == "Child");
-    static_assert(reflecxx::getName<0, Child>() == "c");
-    static_assert(reflecxx::fieldCount<Child>() == 3);
-    static_assert(reflecxx::getVisitableTypes<Child>() ==
-                  std::make_tuple(reflecxx::type_tag<bool>{}, reflecxx::type_tag<int>{}, reflecxx::type_tag<double>{}));
-    static_assert(reflecxx::getBases<Child>() == std::make_tuple(reflecxx::type_tag<Parent>{}));
-    static_assert(std::is_same_v<reflecxx::typeAt<0, Child>, bool>)
-
-    Parent p_inst = {1, 1.5};
-    Parent p_inst2 = {1, 2.6};
-
-    double& b_ref = reflecxx::get<1>(p_inst);
-    b_ref += 1.1;
-    assert(p_inst.b == 2.6);
-    assert(reflecxx::equalTo(p_inst, p_inst2));
-
-    // to/from json just work
-    nlohmann::json j = p_inst;
-    p_inst2 = j;
-
-    // Custom visitors
-
-    auto naive_print = [](std::string_view member_name, const auto& value) {
-        std::cout << member_name << ": " << value << "\n";
-    };
-    reflecxx::forEachField(p_inst, std::move(naive_print));
-
-    struct TypeCounter {
-        constexpr void operator()(std::string_view, const reflecxx::base_tag&) { otherTypes++; }
-        constexpr void operator()(std::string_view, const reflecxx::type_tag<int>& tag) {
-            static_assert(std::is_same_v<typename std::remove_reference_t<decltype(tag)>::type, int>);
-            ints++;
-        }
-
-        int otherTypes{};
-        int ints{};
-    };
-    TypeCounter counter;
-    reflecxx::forEachField<Parent>(counter);
-    assert(counter.ints == 1 && counter.otherTypes == 1);
+    int otherTypes{};
+    int ints{};
+  };
+  TypeCounter counter;
+  reflecxx::forEachField<Parent>(counter);
+  assert(counter.ints == 1 && counter.otherTypes == 1);
 }
-
 ```
 
 For more examples see the [tests](test/).
